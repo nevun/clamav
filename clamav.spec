@@ -23,7 +23,6 @@ Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.83
 Release:	%release_func 1
-Epoch:		0
 License:	GPL
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -40,7 +39,7 @@ Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
-Requires:	clamav-lib = %{epoch}:%{version}-%{release}
+Requires:	clamav-lib = %{version}-%{release}
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel tcp_wrappers curl-devel
 BuildRequires:	bc
@@ -51,44 +50,44 @@ Group:		System Environment/Libraries
 Requires:	data(clamav)
 
 %package devel
-Summary:	Headerfiles and libraries for the Clam Antivirus scanner
+Summary:	Header files and libraries for the Clam Antivirus scanner
 Group:		Development/Libraries
 Source100:	clamd-gen
-Requires:	clamav-lib = %{epoch}:%{version}-%{release}
+Requires:	clamav-lib = %{version}-%{release}
 Requires(pre):	%_libdir/pkgconfig
 
 %package data
-Summary:	The virus-signatures for clamav
+Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
 Provides:	data(clamav)
 Requires(pre):		fedora-usermgmt >= 0:0.7
 Requires(postun):	fedora-usermgmt >= 0:0.7
 
 %package update
-Summary:	Auto-updater for clamav data-files
+Summary:	Auto-updater for the Clam Antivirus scanner data-files
 Group:		Applications/File
-Requires:	clamav-data = %epoch:%version-%release
+Requires:	clamav-data = %{version}-%{release}
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
 Requires(post):		%{__chown} %{__chmod}
 
 %package server
-Summary:	The clamav server
+Summary:	Clam Antivirus scanner server
 Group:		System Environment/Daemons
-Provides:	clamav-daemon = %epoch:%version-%release
-Obsoletes:	clamav-daemon < %epoch:%version-%release
-Conflicts:	clamav-daemon > %epoch:%version-%release
+Provides:	clamav-daemon = %{version}-%{release}
+Obsoletes:	clamav-daemon < %{version}-%{release}
+Conflicts:	clamav-daemon > %{version}-%{release}
 ## For now, use this as a placeholder. Later, generate separate -sysv
 ## and -minit subpackages
 Requires:	init(clamav-server)
 Provides:	init(clamav-server)
 Requires:	data(clamav)
-Requires:	clamav-lib = %{epoch}:%{version}-%{release}
+Requires:	clamav-lib = %{version}-%{release}
 Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir
 
 %package milter
-Summary:	A sendmail-milter for clamav
+Summary:	Sendmail-milter for the Clam Antivirus scanner
 Group:		System Environment/Daemons
 ## For now, use this as a placeholder. Later, generate separate -sysv
 ## and -minit subpackages
@@ -626,5 +625,5 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 * Tue Oct 29 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0.52-1
 - updated to 0.52
 
-* Tue Sep 17 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 
+* Tue Sep 17 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - Initial build.
