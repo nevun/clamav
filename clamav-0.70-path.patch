@@ -1,0 +1,19 @@
+--- clamav-0.70-rc/contrib/init/RedHat/clamav-milter.path	2003-06-26 15:38:06.000000000 +0200
++++ clamav-0.70-rc/contrib/init/RedHat/clamav-milter	2003-06-26 15:39:01.000000000 +0200
+@@ -22,7 +22,6 @@
+ # Check that networking is up.
+ [ ${NETWORKING} = "no" ] && exit 0
+ 
+-[ -x /usr/local/sbin/clamav-milter ] || exit 0
+ PATH=$PATH:/usr/bin:/usr/local/sbin:/usr/local/bin
+ 
+ RETVAL=0
+@@ -63,7 +62,7 @@
+ 	restart
+         ;;
+   condrestart)
+-	test -f /var/lock/subsys/clamav-milter && $0 restart || :
++	test -f /var/lock/subsys/clamav-milter && restart || :
+         ;;
+   status)
+         status clamav-milter
