@@ -21,7 +21,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.82
+Version:	0.83
 Release:	%release_func 1
 Epoch:		0
 License:	GPL
@@ -406,6 +406,9 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Tue Feb 15 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.83-1
+- updated to 0.83
+
 * Tue Feb  8 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.82-1
 - updated to 0.82
 - minor spec cleanups
