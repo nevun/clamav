@@ -8,16 +8,16 @@
 ##
 
 
-%define username	clamav
-%define homedir		%_var/lib/clamav
-%define freshclamlog	%_var/log/freshclam.log
-%define milterlog	%_var/log/clamd.milter
-%define milteruser	clamilt
-%define milterstatedir	%_var/run/clamav-milter
-%define pkgdatadir	%_datadir/%name
+%global username	clamav
+%global homedir		%_var/lib/clamav
+%global freshclamlog	%_var/log/freshclam.log
+%global milterlog	%_var/log/clamd.milter
+%global milteruser	clamilt
+%global milterstatedir	%_var/run/clamav-milter
+%global pkgdatadir	%_datadir/%name
 
 
-%{!?release_func:%define release_func() %1}
+%{!?release_func:%global release_func() %1}
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
