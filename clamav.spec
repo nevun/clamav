@@ -9,7 +9,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.71
-Release:	0.fdr.2.2
+Release:	2
 Epoch:		0
 License:	GPL
 Group:		Applications/File
