@@ -1,9 +1,10 @@
+## $Id$
+
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
 
 
 ## Fedora Extras specific customization below...
-%{!?release_func:%define release_func() %1}
 ##
 
 
@@ -15,10 +16,13 @@
 %define milterstatedir	%_var/run/clamav-milter
 %define pkgdatadir	%_datadir/%name
 
+
+%{!?release_func:%define release_func() %1}
+
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.81
-Release:	%release_func 2
+Version:	0.82
+Release:	%release_func 1
 Epoch:		0
 License:	GPL
 Group:		Applications/File
@@ -113,15 +117,6 @@ the virus database from OpenAntiVirus, but contains additional signatures
 (including signatures for popular polymorphic viruses, too) and is KEPT UP
 TO DATE.
 
-WARNING: this package was built with '--disable-zlib-vcheck' because Red Hat
-         is unable to apply a simple security fix within 5 months. On
-         failures or successful DOS attacks on your mailserver, please
-         blame RH but not fedora.us.
-
-         See https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385 and
-         http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0797
-         for references
-
 
 %description lib
 This package contains dynamic libraries shared between applications
@@ -182,23 +177,13 @@ perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
 ## ------------------------------------------------------------
 
 %build
-cat <<EOF
-*********************
-**
-** WARNING: building with '--disable-zlib-vcheck' because Red Hat is unable
-**          to apply a simple security fix within 5 months. On failures or
-**          successful DOS attacks on your mailserver, please blame RH
-**          but not fedora.us.
-**
-**          See https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385
-**          and http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0797
-**          for references
-**
-*********************
-EOF
-
-sleep 10
-
+## '--disable-zlib-vcheck' is used because every FC<=3 ships zlib-1.2.1*
+## but clamav checks for zlib >= 1.2.2.  This option can be removed for
+## FC4 builds.
+##
+## See https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385 and
+## http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0797
+## also
 %configure --disable-clamav --with-dbdir=/var/lib/clamav \
            --disable-zlib-vcheck \
 	   %{!?_without_milter:--enable-milter}
@@ -421,6 +406,10 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Tue Feb  8 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.82-1
+- updated to 0.82
+- minor spec cleanups
+
 * Fri Jan 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.81-0.fdr.2
 - build the package with '--disable-zlib-vcheck' because RH is unable to
   apply a fix for a 5 month old and solved security issue.  Please fill
