@@ -60,8 +60,8 @@ Requires(pre):	%_libdir/pkgconfig
 Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
 Provides:	data(clamav)
-Requires(pre):		fedora-usermgmt >= 0:0.7
-Requires(postun):	fedora-usermgmt >= 0:0.7
+Requires(pre):		fedora-usermgmt >= 0.7
+Requires(postun):	fedora-usermgmt >= 0.7
 
 %package update
 Summary:	Auto-updater for the Clam Antivirus scanner data-files
@@ -101,8 +101,8 @@ Requires(post):		chkconfig
 Requires(preun):	chkconfig
 Requires(preun):	initscripts
 Requires(postun):	initscripts
-Requires(pre):		fedora-usermgmt >= 0:0.7
-Requires(postun):	fedora-usermgmt >= 0:0.7
+Requires(pre):		fedora-usermgmt >= 0.7
+Requires(postun):	fedora-usermgmt >= 0.7
 
 
 %description
