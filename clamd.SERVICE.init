@@ -4,4 +4,4 @@
 # description: The clamd server running for <SERVICE>
 
 CLAMD_SERVICE=<SERVICE>
-. /etc/init.d/clamd-wrapper
+. /usr/share/clamav/clamd-wrapper

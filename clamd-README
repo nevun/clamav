@@ -1,7 +1,7 @@
 To create individual clamd-instance take the following files and
 modify/copy them in the suggested way:
 
-clamav.conf:
+clamd.conf:
   * set LogFile, PidFile, LocalSocket and User to suitable values
   * place this file into /etc/clamd.d with a unique service-name;
     e.g. as /etc/clamd.d/<SERVICE>.conf
@@ -42,7 +42,7 @@ clamd.init:
 Additionally, a symlink must be set to clamd in a way like
   | # ln -s clamd /usr/sbin/clamd.<SERVICE>
 and the directory for the socket file must be created (see 'LocalSocket'
-in clamav.conf)
+in clamd.conf)
   | # mkdir -p /var/run/clamd.<SERVICE>
 
 
