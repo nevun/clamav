@@ -21,14 +21,14 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.83
-Release:	%release_func 2
+Version:	0.84
+Release:	%release_func 0
 
 License:	GPL
 Group:		Applications/File
 URL:		http://www.clamav.net
 Source0:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz.sig
+#Source999:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -406,6 +406,9 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Sun May  1 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.84
+- updated to 0.84
+
 * Fri Apr  7 2005 Michael Schwendt <mschwendt[AT]users.sf.net>
 - rebuilt
 
