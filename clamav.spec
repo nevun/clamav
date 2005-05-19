@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.14 2005/05/14 08:56:12 ensc Exp $
+## $Id: clamav.spec,v 1.15 2005/05/17 06:41:27 oliver Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -406,6 +406,9 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Tue May 17 2005 Oliver Falk <oliver@linux-kernel.at>					  - 0.85.1-2
+- Rebuild
+
 * Tue May 17 2005 Oliver Falk <oliver@linux-kernel.at>					  - 0.85.1-1
 - Update
 
