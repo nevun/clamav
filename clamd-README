@@ -3,7 +3,7 @@ modify/copy them in the suggested way:
 
 clamd.conf:
   * set LogFile, PidFile, LocalSocket and User to suitable values
-  * place this file into /etc/clamd.d with a unique service-name;
+  * place this file into /etc/clamd.d with an unique service-name;
     e.g. as /etc/clamd.d/<SERVICE>.conf
 
   To make logfile rotation work properly, the LogFile should be
