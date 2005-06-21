@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.18 2005/05/19 07:41:38 wtogami Exp $
+## $Id: clamav.spec,v 1.19 2005/05/19 07:45:09 wtogami Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -21,8 +21,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.85.1
-Release:	%release_func 4
+Version:	0.86
+Release:	%release_func 1
 
 License:	GPL
 Group:		Applications/File
@@ -70,7 +70,7 @@ Group:		Applications/File
 Requires:	clamav-data = %{version}-%{release}
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
-Requires(post):		%{__chown} %{__chmod}
+Requires(post):		%__chown %__chmod %__sed diffutils
 
 %package server
 Summary:	Clam Antivirus scanner server
@@ -247,8 +247,7 @@ MAILTO=root,postmaster,webmaster,%username
 
 ## It is ok to execute it as root; freshclam drops privileges and becomes
 ## user 'clamav' as soon as possible
-## Note: replace 'MIN' and 'HOUR' with random values
-# MIN  HOUR/3 * * * root %{_bindir}/freshclam --quiet && { test -x %{_sbindir}/clamav-notify-servers && exec %{_sbindir}/clamav-notify-servers || :; }
+# @MIN@  @HOUR@/3 * * * root %{_bindir}/freshclam --quiet && { test -x %{_sbindir}/clamav-notify-servers && exec %{_sbindir}/clamav-notify-servers || :; }
 
 ## Comment out or remove this line...
 1 8 * * * %username /bin/sh -c 'echo "Please activate the clamav update in %_sysconfdir/cron.d/clamav-update" >&2'
@@ -295,6 +294,15 @@ test -e %{freshclamlog} || {
 	%{__chmod} 0664 %{freshclamlog}
 	%{__chown} root:%{username} %{freshclamlog}
 }
+
+min=$[ RANDOM % 60 ]
+hour=$[ RANDOM % 24 ]
+tmp=$(mktemp /tmp/freshclam-cron.XXXXXX)
+src=%_sysconfdir/cron.d/clamav-update
+%__sed -e "s!@MIN@!$min!g;s!@HOUR@!$hour!g" "$src" >$tmp
+cmp -s $tmp "$src" || cat "$tmp" >"$src"
+rm -f $tmp
+
 
 %postun data
 test "$1" != 0 || /usr/sbin/fedora-userdel  %{username} &>/dev/null || :
@@ -406,6 +414,11 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Tue Jun 21 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86-1
+- updated to 0.86
+- randomize freshclam startup times in -update's %%post script (suggested
+  by Stephen Smoogen); this requires some more Requires(post): also
+
 * Wed May 18 2005 Warren Togami <wtogami@redhat.com> - 0.85.1-4
 - fix dist tagging the way Enrico wants it
 
