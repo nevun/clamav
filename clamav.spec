@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.19 2005/05/19 07:45:09 wtogami Exp $
+## $Id: clamav.spec,v 1.20 2005/06/21 07:25:56 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -21,7 +21,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.86
+Version:	0.86.1
 Release:	%release_func 1
 
 License:	GPL
@@ -296,10 +296,10 @@ test -e %{freshclamlog} || {
 }
 
 min=$[ RANDOM % 60 ]
-hour=$[ RANDOM % 24 ]
+hour=$[ RANDOM % 3 ]
 tmp=$(mktemp /tmp/freshclam-cron.XXXXXX)
 src=%_sysconfdir/cron.d/clamav-update
-%__sed -e "s!@MIN@!$min!g;s!@HOUR@!$hour!g" "$src" >$tmp
+%__sed -e "s!@MIN@!$min!g;s!@HOUR@!$hour-23!g" "$src" >$tmp
 cmp -s $tmp "$src" || cat "$tmp" >"$src"
 rm -f $tmp
 
@@ -414,6 +414,11 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Sat Jun 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.1-1
+- updated to 0.86.1
+- fixed randomization in %%post scriptlet: hour should be a range but
+  not a single number
+
 * Tue Jun 21 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86-1
 - updated to 0.86
 - randomize freshclam startup times in -update's %%post script (suggested
