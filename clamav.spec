@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.22 2005/06/25 17:38:35 ensc Exp $
+## $Id: clamav.spec,v 1.23 2005/06/25 18:01:32 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -21,8 +21,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.86.1
-Release:	%release_func 2
+Version:	0.86.2
+Release:	%release_func 1
 
 License:	GPL
 Group:		Applications/File
@@ -67,10 +67,13 @@ Requires(postun):	fedora-usermgmt >= 0.7
 %package update
 Summary:	Auto-updater for the Clam Antivirus scanner data-files
 Group:		Applications/File
+Source200:	freshclam-sleep
+Source201:	freshclam.sysconfig
+Source202:	clamav-update.cron
 Requires:	clamav-data = %{version}-%{release}
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
-Requires(post):		%__chown %__chmod %__sed diffutils
+Requires(post):		%__chown %__chmod
 
 %package server
 Summary:	Clam Antivirus scanner server
@@ -204,6 +207,20 @@ perl -pi -e 's!^(s,\@INSTALL_(CLAMAV|FRESHCLAM)_CONF_TRUE\@),[^,]*,!\1,,!g;
 rm -rf "$RPM_BUILD_ROOT" _doc*
 %{__make} DESTDIR="$RPM_BUILD_ROOT" install
 
+function smartsubst() {
+	local tmp
+	local regexp=$1
+	shift
+
+	tmp=$(mktemp /tmp/%name-subst.XXXXXX)
+	for i; do
+		sed -e "$regexp" "$i" >$tmp
+		cmp -s $tmp "$i" || cat $tmp >"$i"
+		rm -f $tmp
+	done
+}
+
+
 %{__install} -d -m755 \
 	${RPM_BUILD_ROOT}%{_sysconfdir}/{clamd.d,cron.d,logrotate.d,sysconfig} \
 	${RPM_BUILD_ROOT}%{_var}/log \
@@ -230,10 +247,7 @@ mkdir _doc_server
 cp -pa _doc_server/*                    $RPM_BUILD_ROOT%pkgdatadir/template
 ln -s %pkgdatadir/clamd-wrapper         $RPM_BUILD_ROOT%_initrddir/clamd-wrapper
 
-f=$RPM_BUILD_ROOT%pkgdatadir/clamd-wrapper
-sed -e 's!/usr/share/clamav!%pkgdatadir!g' "$f" >"$f".tmp
-cmp -s "$f" "$f".tmp || cat "$f".tmp >"$f"
-rm -f "$f".tmp
+smartsubst 's!/usr/share/clamav!%pkgdatadir!g' $RPM_BUILD_ROOT%pkgdatadir/clamd-wrapper
 
 
 ## prepare the update-files
@@ -241,17 +255,17 @@ rm -f "$f".tmp
 %{__install} -m755 -p %{SOURCE8}	${RPM_BUILD_ROOT}%{_sbindir}/clamav-notify-servers
 touch ${RPM_BUILD_ROOT}%{freshclamlog}
 
-cat >${RPM_BUILD_ROOT}%{_sysconfdir}/cron.d/clamav-update <<"EOF"
-## Adjust this line...
-MAILTO=root,postmaster,webmaster,%username
+%__install -p -m0755 %SOURCE200		$RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
+%__install -p -m0644 %SOURCE201		$RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
+%__install -p -m0600 %SOURCE202		$RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 
-## It is ok to execute it as root; freshclam drops privileges and becomes
-## user 'clamav' as soon as possible
-# @MIN@  @HOUR@/3 * * * root %{_bindir}/freshclam --quiet && { test -x %{_sbindir}/clamav-notify-servers && exec %{_sbindir}/clamav-notify-servers || :; }
+smartsubst 's!webmaster,clamav!webmaster,%username!g;
+	    s!/usr/share/clamav!%pkgdatadir!g;
+	    s!/usr/bin!%_bindir!g;
+            s!/usr/sbin!%_sbindir!g;' \
+   $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
+   $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 
-## Comment out or remove this line...
-1 8 * * * %username /bin/sh -c 'echo "Please activate the clamav update in %_sysconfdir/cron.d/clamav-update" >&2'
-EOF
 
 %if 0%{!?_without_milter:1}
 #### The milter stuff
@@ -259,6 +273,7 @@ EOF
 function subst() {
 	sed -e 's!<SERVICE>!milter!g;s!<USER>!%milteruser!g;'"$3" "$1" >"$RPM_BUILD_ROOT$2"
 }
+
 
 subst etc/clamd.conf /etc/clamd.d/milter.conf \
 	's!^##*\(\(LogFile\|LocalSocket\|PidFile\|User\)\s\|\(StreamSaveToDisk\|ScanMail\)$\)!\1!;'
@@ -294,15 +309,6 @@ test -e %{freshclamlog} || {
 	%{__chmod} 0664 %{freshclamlog}
 	%{__chown} root:%{username} %{freshclamlog}
 }
-
-min=$[ RANDOM % 60 ]
-hour=$[ RANDOM % 3 ]
-tmp=$(mktemp /tmp/freshclam-cron.XXXXXX)
-src=%_sysconfdir/cron.d/clamav-update
-%__sed -e "s!@MIN@!$min!g;s!@HOUR@!$hour-23!g" "$src" >$tmp
-cmp -s $tmp "$src" || cat "$tmp" >"$src"
-rm -f $tmp
-
 
 %postun data
 test "$1" != 0 || /usr/sbin/fedora-userdel  %{username} &>/dev/null || :
@@ -375,9 +381,11 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %defattr(-,root,root,-)
 %_bindir/freshclam
 %_mandir/man1/freshclam*
-%config(noreplace) %verify(not mtime) %_sysconfdir/freshclam.conf
-%config(noreplace) %verify(not mtime) %attr(0600,root,root) %_sysconfdir/cron.d/*
-%config(noreplace) %verify(not mtime) %_sysconfdir/logrotate.d/*
+%pkgdatadir/freshclam-sleep
+%config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
+%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
+%config(noreplace) %_sysconfdir/cron.d/*
+%config(noreplace) %_sysconfdir/sysconfig/freshclam
 
 %ghost %attr(0664,root,%{username}) %verify(not size md5 mtime) %{freshclamlog}
 
@@ -414,6 +422,13 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Mon Jul 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-1
+- updated to 0.86.2 (SECURITY)
+- changed the freshclam updating mechanism (again); now, it consists
+  of a crontab which does not need to be changed and a helper script
+  (freshclam-sleep). This helper script is configured by
+  /etc/sysconfig/freshclam
+
 * Sat Jun 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.1-2
 - updated to 0.86.1
 - fixed randomization in %%post scriptlet: hour should be a range but
