@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.23 2005/06/25 18:01:32 ensc Exp $
+## $Id: clamav.spec,v 1.24 2005/07/25 17:19:21 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.86.2
-Release:	%release_func 1
+Release:	%release_func 2
 
 License:	GPL
 Group:		Applications/File
@@ -422,7 +422,7 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
-* Mon Jul 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-1
+* Mon Jul 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-2
 - updated to 0.86.2 (SECURITY)
 - changed the freshclam updating mechanism (again); now, it consists
   of a crontab which does not need to be changed and a helper script
