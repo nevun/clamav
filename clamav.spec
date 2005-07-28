@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.24 2005/07/25 17:19:21 ensc Exp $
+## $Id: clamav.spec,v 1.25 2005/07/25 17:56:56 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.86.2
-Release:	%release_func 2
+Release:	%release_func 3
 
 License:	GPL
 Group:		Applications/File
@@ -422,6 +422,17 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Thu Jul 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-3
+- Fixed calculation of sleep duration; on some systems/IPs, `hostid`
+  results in a negative number which is retained by the bash
+  modulo-operation. So the sleep may get a negative number of seconds
+  being interpreted as an option. This version makes sure that the
+  module-operations returns a non-negative value. [BZ #164494, James
+  Wilkinson]
+- added support for a /usr/sbin/clamav-notify-servers.local hook; this
+  file will be executed (source'd) before all other actions and can
+  abort the entire processing by invoking 'exit'
+
 * Mon Jul 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-2
 - updated to 0.86.2 (SECURITY)
 - changed the freshclam updating mechanism (again); now, it consists
