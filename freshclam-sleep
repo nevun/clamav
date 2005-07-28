@@ -44,7 +44,8 @@ WARNING: update of clamav database is disabled; please see
 	;;
 
     (*)
-	sleep $[ FRESHCLAM_DELAY % (FRESHCLAM_MOD*60) ]
+	let FRESHCLAM_MOD*=60
+	sleep $[ (FRESHCLAM_DELAY % FRESHCLAM_MOD + FRESHCLAM_MOD) % FRESHCLAM_MOD ]
 	;;
 esac
 
