@@ -23,6 +23,9 @@ INITRDDIR=/etc/init.d
 
 ok=1
 
+f=/usr/sbin/clamav-notify-servers.local
+test ! -e "$f" || . "$f"
+
 for i in ${BASE}*; do
     test -e "$i" || continue
 
