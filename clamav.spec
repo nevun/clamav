@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.25 2005/07/25 17:56:56 ensc Exp $
+## $Id: clamav.spec,v 1.26 2005/07/28 15:35:10 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.86.2
-Release:	%release_func 3
+Release:	%release_func 4
 
 License:	GPL
 Group:		Applications/File
@@ -39,6 +39,7 @@ Source8:	clamav-notify-servers
 Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
+Patch23:	clamav-0.86.2-timeout.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 Requires:	clamav-lib = %{version}-%{release}
 Requires:	data(clamav)
@@ -100,11 +101,9 @@ Provides:	init(clamav-milter)
 %{!?_without_milter:BuildRequires:	sendmail-devel}
 Requires:		sendmail
 Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir
-Requires(post):		chkconfig
-Requires(preun):	chkconfig
-Requires(preun):	initscripts
-Requires(postun):	initscripts
+Requires(postun):	%_initrddir initscripts
+Requires(post):		chkconfig coreutils
+Requires(preun):	chkconfig initscripts
 Requires(pre):		fedora-usermgmt >= 0.7
 Requires(postun):	fedora-usermgmt >= 0.7
 
@@ -167,6 +166,7 @@ THIS PACKAGE IS TO BE CONSIDERED AS EXPERIMENTAL!
 %patch20 -p1 -b .user
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
+%patch23 -p1 -b .timeout
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -176,6 +176,7 @@ perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
             ' etc/clamd.conf
 
 perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
+
 
 ## ------------------------------------------------------------
 
@@ -321,6 +322,11 @@ test "$1" != 0 || /usr/sbin/fedora-groupdel %{username} &>/dev/null || :
 
 %post milter
 /sbin/chkconfig --add clamav-milter
+test -e %milterlog || {
+	touch %milterlog
+	chmod 0620             %milterlog
+	chown root:%milteruser %milterlog
+}
 
 %preun milter
 test "$1" != 0 || %{_initrddir}/clamav-milter stop &>/dev/null || :
@@ -422,6 +428,13 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Fri Jul 29 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-4
+- [milter] create the milter-logfile in the %%post scriptlet
+- [milter] reverted the change of the default child_timeout value; it
+  was set to 5 minutes in 0.86.2 which conflicts with the internal
+  mode where a timeout must not be set. So, the clamav-milter would
+  not run with the default configuration
+
 * Thu Jul 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-3
 - Fixed calculation of sleep duration; on some systems/IPs, `hostid`
   results in a negative number which is retained by the bash
