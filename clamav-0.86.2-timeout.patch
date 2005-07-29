@@ -1,0 +1,11 @@
+--- clamav-0.86.2/clamav-milter/clamav-milter.c.timeout
++++ clamav-0.86.2/clamav-milter/clamav-milter.c
+@@ -373,7 +373,7 @@
+ static	pthread_cond_t	n_children_cond = PTHREAD_COND_INITIALIZER;
+ static	volatile	unsigned	int	n_children = 0;
+ static	unsigned	int	max_children = 0;
+-static	int	child_timeout = 300;	/* number of seconds to wait for
++static	int	child_timeout = 0;	/* number of seconds to wait for
+ 					 * a child to die. Set to 0 to
+ 					 * wait forever
+ 					 */
