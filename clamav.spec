@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.26 2005/07/29 16:37:45 ensc Exp $
+## $Id: clamav.spec,v 1.28 2005/09/10 11:20:26 dwmw2 Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -14,9 +14,6 @@
 %global milterlog	%_var/log/clamd.milter
 %global milteruser	clamilt
 %global milterstatedir	%_var/run/clamav-milter
-%global clameximlog	%_var/log/clamd.exim
-%global clameximuser	clamexim
-%global clameximstatedir %_var/run/clamd.exim
 %global pkgdatadir	%_datadir/%name
 
 
@@ -24,14 +21,14 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.86.2
-Release:	%release_func 5
+Version:	0.87
+Release:	%release_func 1
 
 License:	GPL
 Group:		Applications/File
 URL:		http://www.clamav.net
 Source0:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz
-#Source999:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz.sig
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%{name}-%{version}.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -42,7 +39,6 @@ Source8:	clamav-notify-servers
 Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
-Patch23:	clamav-0.86.2-timeout.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 Requires:	clamav-lib = %{version}-%{release}
 Requires:	data(clamav)
@@ -110,21 +106,6 @@ Requires(preun):	chkconfig initscripts
 Requires(pre):		fedora-usermgmt >= 0.7
 Requires(postun):	fedora-usermgmt >= 0.7
 
-%package exim
-Summary:	Exim dæmon configuration for the Clam Antivirus scanner
-Group:		System Environment/Daemons
-## For now, use this as a placeholder. Later, generate separate -sysv
-## and -minit subpackages
-Requires:	init(clamav-exim)
-Provides:	init(clamav-exim)
-Requires(pre):		exim
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir initscripts
-Requires(post):		chkconfig coreutils
-Requires(preun):	chkconfig initscripts
-Requires(pre):		fedora-usermgmt >= 0.7
-Requires(postun):	fedora-usermgmt >= 0.7
-
 
 %description
 Clam AntiVirus is an anti-virus toolkit for UNIX. The main purpose of this
@@ -177,22 +158,6 @@ to your sendmail.mc.
 
 THIS PACKAGE IS TO BE CONSIDERED AS EXPERIMENTAL!
 
-%description exim
-This package contains files which are needed to run the clamav dæmon for use
-by the Exim MTA. It can be activated by adding
-
-   av_scanner = clamd:%clameximstatedir/clamd.sock 
-
-to your exim.conf, and using the 'malware' condition in the data ACL, 
-as follows:
-
-   deny message = This message contains malware ($malware_name)
-      demime = *
-      malware = *
-
-For further details of Exim content scanning, see chapter 40 of the Exim 
-specification: http://www.exim.org/exim-html-4.50/doc/html/spec_40.html
-
 ## ------------------------------------------------------------
 
 %prep
@@ -200,7 +165,6 @@ specification: http://www.exim.org/exim-html-4.50/doc/html/spec_40.html
 %patch20 -p1 -b .user
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
-%patch23 -p1 -b .timeout
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -260,7 +224,6 @@ function smartsubst() {
 	${RPM_BUILD_ROOT}%{_sysconfdir}/{clamd.d,cron.d,logrotate.d,sysconfig} \
 	${RPM_BUILD_ROOT}%{_var}/log \
 	${RPM_BUILD_ROOT}%milterstatedir \
-	${RPM_BUILD_ROOT}%clameximstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
 	${RPM_BUILD_ROOT}%{_initrddir}
 
@@ -303,34 +266,15 @@ smartsubst 's!webmaster,clamav!webmaster,%username!g;
    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 
 
-#### The Exim stuff
-
-function subst() {
-	sed -e "s!<SERVICE>!$3!g;s!<USER>!$4!g;""$5" "$1" >"$RPM_BUILD_ROOT$2"
-}
-
-subst etc/clamd.conf %_sysconfdir/clamd.d/exim.conf exim %clameximuser \
-	's!^##*\(\(LogFile\|LocalSocket\|PidFile\|User\)\s\|\(StreamSaveToDisk\|ScanMail\|LogTime\|ScanArchive\)$\)!\1!;s!^Example!#Example!;'
-
-
-subst %{SOURCE7} %_initrddir/clamd.exim exim %clameximuser ''
-chmod 0755 $RPM_BUILD_ROOT%_initrddir/clamd.exim
-subst %{SOURCE3} %_sysconfdir/logrotate.d/clamd.exim exim %clameximuser ''
-
-cat <<EOF >$RPM_BUILD_ROOT%_sysconfdir/sysconfig/clamd.exim
-CLAMD_CONFIG='%_sysconfdir/clamd.d/exim.conf'
-CLAMD_SOCKET=%clameximstatedir/clamd.sock
-EOF
-
-mkdir -p $RPM_BUILD_ROOT/%clameximstatedir
-ln -sf clamd $RPM_BUILD_ROOT%_sbindir/clamd.exim
-
-touch $RPM_BUILD_ROOT%clameximstatedir/clamd.sock $RPM_BUILD_ROOT%clameximlog
-
 %if 0%{!?_without_milter:1}
 #### The milter stuff
 
-subst etc/clamd.conf /etc/clamd.d/milter.conf milter %milteruser \
+function subst() {
+	sed -e 's!<SERVICE>!milter!g;s!<USER>!%milteruser!g;'"$3" "$1" >"$RPM_BUILD_ROOT$2"
+}
+
+
+subst etc/clamd.conf /etc/clamd.d/milter.conf \
 	's!^##*\(\(LogFile\|LocalSocket\|PidFile\|User\)\s\|\(StreamSaveToDisk\|ScanMail\)$\)!\1!;'
 
 
@@ -390,26 +334,6 @@ test "$1" != 0 || /sbin/chkconfig --del clamav-milter
 test "$1" != 0 || /usr/sbin/fedora-userdel  %{milteruser} &>/dev/null || :
 test "$1" != 0 || /usr/sbin/fedora-groupdel %{milteruser} &>/dev/null || :
 test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
-
-%pre exim
-/usr/sbin/fedora-useradd  5 -r -s /sbin/nologin -d %clameximstatedir -M \
-                            -c 'Clamav Exim User' -g exim %clameximuser &>/dev/null || :
-
-%post exim
-/sbin/chkconfig --add clamd.exim
-test -e %clameximlog || {
-	touch %clameximlog
-	chmod 0620             %clameximlog
-	chown root:exim %clameximlog
-}
-
-%preun exim
-test "$1" != 0 || %{_initrddir}/clamd.exim stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamd.exim
-
-%postun exim
-test "$1" != 0 || /usr/sbin/fedora-userdel  %{clameximuser} &>/dev/null || :
-test "$1"  = 0 || %{_initrddir}/clamd.exim condrestart >/dev/null || :
 
 
 %post   lib -p /sbin/ldconfig
@@ -488,19 +412,6 @@ test "$1"  = 0 || %{_initrddir}/clamd.exim condrestart >/dev/null || :
 
 ## -----------------------
 
-%files exim
-%defattr(-,root,root,-)
-%_sbindir/clamd.exim
-%config %{_initrddir}/clamd.exim
-%config(noreplace) %verify(not mtime) %{_sysconfdir}/clamd.d/exim.conf
-%config(noreplace) %verify(not mtime) %{_sysconfdir}/sysconfig/clamd.exim
-%config(noreplace) %verify(not mtime) %{_sysconfdir}/logrotate.d/clamd.exim
-%attr(0750,%clameximuser,exim) %dir %clameximstatedir
-%ghost %clameximstatedir/*
-%ghost %attr(0620,root,exim) %verify(not size md5 mtime) %clameximlog
-
-## -----------------------
-
 %files milter
 %defattr(-,root,root,-)
 %doc clamav-milter/INSTALL
@@ -515,6 +426,12 @@ test "$1"  = 0 || %{_initrddir}/clamd.exim condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Sat Sep 17 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87-1
+- updated to 0.87 (SECURITY)
+- removed -timeout patch; it is solved upstream
+- reverted the -exim changes; they add yet more complexity, their
+  functionality can go into an own package and they contained flaws
+
 * Fri Sep  9 2005 David Woodhouse <dwmw2@infradead.org> - 0.86.2-5
 - Add clamav-exim configuration package
 
