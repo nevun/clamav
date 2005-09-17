@@ -11,7 +11,7 @@
 ## calculated by the 'hostid' program. This predefined value guarantees
 ## constant timespans of 3 hours between two subsequent freshclam runs.
 ##
-## This options accepts two special values:
+## This option accepts two special values:
 ## 'disabled-warn'  ...  disables the automatic freshclam update and
 ##                         gives out a warning
 ## 'disabled'       ...  disables the automatic freshclam silently
