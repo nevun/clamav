@@ -27,7 +27,7 @@ $"Usage: clamd-gen --service=<SERVICE> --version=<VERSION> --release=<RELEASE>
 function rpm.generatePreamble()
 {
     cat <<EOF
-%{!?release_func:%define release_func()	0.fdr.%1}
+%{!?release_func:%define release_func()	%1%{?dist}}
 # The name of the minit service
 %define minitsvcdir	%minitdir/services/%name
 # The configuration file for the SysV initservice
