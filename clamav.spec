@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.28 2005/09/10 11:20:26 dwmw2 Exp $
+## $Id: clamav.spec,v 1.29 2005/09/17 09:01:24 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -21,7 +21,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.87
+Version:	0.87.1
 Release:	%release_func 1
 
 License:	GPL
@@ -426,6 +426,9 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Fri Nov  4 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87.1-1
+- updated to 0.87.1
+
 * Sat Sep 17 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87-1
 - updated to 0.87 (SECURITY)
 - removed -timeout patch; it is solved upstream
