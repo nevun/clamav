@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.29 2005/09/17 09:01:24 ensc Exp $
+## $Id: clamav.spec,v 1.30 2005/11/04 12:55:25 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -21,7 +21,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.87.1
+Version:	0.88
 Release:	%release_func 1
 
 License:	GPL
@@ -84,7 +84,7 @@ Conflicts:	clamav-daemon > %{version}-%{release}
 ## For now, use this as a placeholder. Later, generate separate -sysv
 ## and -minit subpackages
 Requires:	init(clamav-server)
-Provides:	init(clamav-server)
+Provides:	init(clamav-server) = sysv
 Requires:	data(clamav)
 Requires:	clamav-lib = %{version}-%{release}
 Requires(pre):		%_initrddir
@@ -96,7 +96,7 @@ Group:		System Environment/Daemons
 ## For now, use this as a placeholder. Later, generate separate -sysv
 ## and -minit subpackages
 Requires:	init(clamav-milter)
-Provides:	init(clamav-milter)
+Provides:	init(clamav-milter) = sysv
 %{!?_without_milter:BuildRequires:	sendmail-devel}
 Requires:		sendmail
 Requires(pre):		%_initrddir
@@ -348,7 +348,7 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %{_bindir}/*
 %exclude %_bindir/clamav-config
 %exclude %_bindir/freshclam
-%exclude %_mandir/man1/freshclam*
+%exclude %_mandir/*/freshclam*
 
 ## -----------------------
 
@@ -384,7 +384,7 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %files update
 %defattr(-,root,root,-)
 %_bindir/freshclam
-%_mandir/man1/freshclam*
+%_mandir/*/freshclam*
 %pkgdatadir/freshclam-sleep
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
 %config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
@@ -398,7 +398,7 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %files server
 %defattr(-,root,root,-)
 %doc _doc_server/*
-%doc %{_mandir}/man8/*
+%doc %_mandir/*/clamd*
 %{_sbindir}/*
 %_initrddir/clamd-wrapper
 %dir %pkgdatadir
@@ -426,6 +426,18 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Tue Jan 10 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88-1
+- updated to 0.88
+- added pseudo-versions for the 'init(...)' provides as a first step
+  for the support of alternative initmethods
+
+* Tue Nov 15 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87.1-2
+- moved 'freshclam.conf.5' man page into the -update subpackage (#173221)
+- ship 'clamd.conf.5' man page in the -server subpackage *too*. The
+  same file is contained in multiple packages now, but this man-page
+  can not be removed from the base package because it also applies to
+  'clamdscan' there (#173221).
+
 * Fri Nov  4 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87.1-1
 - updated to 0.87.1
 
