@@ -1,0 +1,26 @@
+2006-04-24  Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+
+	* libclamav/unrarlib.c/stricomp(): terminate the string copied
+	  with strncpy() explicitly with '\0'. Does not seem to be
+	  exploitable at the moment due to deeply buried constraints
+	  (function will be called for buffers with a static size of
+	  260 only).
+
+	  But it is better to fix it now than to run into problems
+	  when function is used for other purposes.
+
+--- clamav-0.88.1/libclamav/unrarlib.c.strncpy	2005-06-23 22:03:12.000000000 +0200
++++ clamav-0.88.1/libclamav/unrarlib.c	2006-04-24 23:10:07.000000000 +0200
+@@ -1180,8 +1180,10 @@ int stricomp(char *Str1,char *Str2)
+   char S1[512],S2[512];
+   char *chptr;
+ 
+-  strncpy(S1,Str1,sizeof(S1));
+-  strncpy(S2,Str2,sizeof(S2));
++  strncpy(S1,Str1,sizeof(S1));
++  strncpy(S2,Str2,sizeof(S2));
++  S1[sizeof(S1)-1] = '\0';
++  S2[sizeof(S2)-1] = '\0';
+ 
+   while((chptr = strchr(S1, '\\')) != NULL) /* ignore backslash             */
+   {
