@@ -1,0 +1,157 @@
+2006-04-24  Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+
+	* Guys, please read the compiler warnings before releasing a
+	  new version. The compiler is clever enough to warn you about
+	  issues like
+
+	  | encrypted = (zdirent.d_flags & 0x2041 != 0);
+
+	  with
+
+          | scanners.c:381: warning: suggest parentheses around comparison in operand of &
+
+
+	  Ditto about the usage of implicitly declared functions.
+
+	  Warnings about uninitialized variables shall be taken
+	  seriously too; this patch fixes one existing issue. The
+	  htmlnorm.c parser should be reviewed.
+
+
+	* this patch does not fix:
+
+	  - things like
+	    | ole2_extract.c:86: warning: 'packed' attribute ignored for field of type 'unsigned char[7u]'
+
+	    which are caused by
+
+	    struct foo {
+		char	a[2] __attribute__((__packed__));
+		char	b __attribute__((__packed__));
+	    };
+
+            which can/should be written as
+
+	    struct foo {
+		char	a[2];
+		char	b;
+	    }  __attribute__((__packed__));
+
+	  - signed/unsigned comparisions. This was really too much to
+	    get fixed now. It will require rewrite/review of the
+	    complete code to use 'size_t' instead of 'int' for sizes.
+
+	    Lot of bufferover- and underflows can be prevented by
+	    correct signess.
+
+	  - missing prototypes like
+
+	    | warning: no previous prototype for
+
+
+	  'clamav' is used to operate on hostile data so its source
+	  code should have a good quality. Building with a high warning
+	  level and removing reasons for such warnings is a cheap way
+	  to eliminate a huge part of potential problems.
+
+
+
+--- clamav-0.88.1/clamd/others.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2005-10-30 21:22:01.000000000 +0100
++++ clamav-0.88.1/clamd/others.c	2006-04-24 22:53:27.000000000 +0200
+@@ -30,6 +30,7 @@
+ #include <sys/stat.h>
+ #include <errno.h>
+ #include <sys/time.h>
++#include <sys/wait.h>
+ 
+ #if HAVE_SYS_PARAM_H
+ #include <sys/param.h>
+@@ -68,6 +69,7 @@
+ #include "memory.h"
+ #include "cfgparser.h"
+ #include "session.h"
++#include "../shared/output.h"
+ 
+ #define ENV_FILE  "CLAM_VIRUSEVENT_FILENAME"
+ #define ENV_VIRUS "CLAM_VIRUSEVENT_VIRUSNAME"
+--- clamav-0.88.1/shared/misc.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2005-12-23 22:25:10.000000000 +0100
++++ clamav-0.88.1/shared/misc.c	2006-04-24 22:53:27.000000000 +0200
+@@ -28,6 +28,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
++#include <ctype.h>
+ 
+ #include "clamav.h"
+ #include "cfgparser.h"
+--- clamav-0.88.1/freshclam/manager.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-03-25 18:39:25.000000000 +0100
++++ clamav-0.88.1/freshclam/manager.c	2006-04-24 22:53:27.000000000 +0200
+@@ -50,6 +50,7 @@
+ #include "../libclamav/others.h"
+ #include "../libclamav/str.h" /* cli_strtok */
+ #include "dns.h"
++#include "execute.h"
+ 
+ 
+ int downloadmanager(const struct cfgstruct *copt, const struct optstruct *opt, const char *hostname)
+--- clamav-0.88.1/libclamav/zziplib/zzip-zip.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-03-28 01:43:53.000000000 +0200
++++ clamav-0.88.1/libclamav/zziplib/zzip-zip.c	2006-04-24 22:57:44.000000000 +0200
+@@ -16,6 +16,7 @@
+ #endif
+ 
+ #include "target.h"
++#include "others.h"
+ 
+ #include <zzip.h>                                  /* archive handling */
+ #include <zzip-file.h>
+--- clamav-0.88.1/libclamav/scanners.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-04-04 11:32:55.000000000 +0200
++++ clamav-0.88.1/libclamav/scanners.c	2006-04-24 22:53:27.000000000 +0200
+@@ -69,6 +69,7 @@ extern int cli_mbox(const char *dir, int
+ #include "untar.h"
+ #include "special.h"
+ #include "binhex.h"
++#include "../tnef.h"
+ 
+ #ifdef HAVE_ZLIB_H
+ #include <zlib.h>
+@@ -378,7 +379,7 @@ static int cli_scanzip(int desc, const c
+ 	 * Bit 6: Strong encryption was used
+ 	 * Bit 13: Encrypted central directory
+ 	 */
+-	encrypted = (zdirent.d_flags & 0x2041 != 0);
++	encrypted = (zdirent.d_flags & 0x2041) != 0;
+ 
+ 	cli_dbgmsg("Zip: %s, crc32: 0x%x, offset: %d, encrypted: %d, compressed: %u, normal: %u, method: %d, ratio: %d (max: %d)\n", zdirent.d_name, zdirent.d_crc32, zdirent.d_off, encrypted, zdirent.d_csize, zdirent.st_size, zdirent.d_compr, zdirent.d_csize ? (zdirent.st_size / zdirent.d_csize) : 0, limits ? limits->maxratio : 0);
+ 
+--- clamav-0.88.1/libclamav/pe.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-03-28 21:22:02.000000000 +0200
++++ clamav-0.88.1/libclamav/pe.c	2006-04-24 22:53:27.000000000 +0200
+@@ -1451,7 +1451,7 @@ int cli_peheader(int desc, struct cli_pe
+ {
+ 	uint16_t e_magic; /* DOS signature ("MZ") */
+ 	uint32_t e_lfanew; /* address of new exe header */
+-	uint32_t min, max;
++	uint32_t min=0, max=0;
+ 	struct pe_image_file_hdr file_hdr;
+ 	struct pe_image_optional_hdr optional_hdr;
+ 	struct pe_image_section_hdr *section_hdr;
+--- clamav-0.88.1/libclamav/htmlnorm.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-03-22 19:03:35.000000000 +0100
++++ clamav-0.88.1/libclamav/htmlnorm.c	2006-04-24 22:53:27.000000000 +0200
+@@ -391,7 +391,7 @@ static int cli_html_normalise(int fd, m_
+ {
+ 	int fd_tmp, tag_length, tag_arg_length, binary;
+ 	int retval=FALSE, escape, value, hex, tag_val_length, table_pos, in_script=FALSE;
+-	FILE *stream_in;
++	FILE *stream_in = 0;
+ 	html_state state=HTML_NORM, next_state=HTML_BAD_STATE;
+ 	char filename[1024], tag[HTML_STR_LENGTH+1], tag_arg[HTML_STR_LENGTH+1];
+ 	char tag_val[HTML_STR_LENGTH+1], *tmp_file;
+--- clamav-0.88.1/libclamav/special.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2005-06-23 22:03:13.000000000 +0200
++++ clamav-0.88.1/libclamav/special.c	2006-04-24 22:53:27.000000000 +0200
+@@ -25,6 +25,7 @@
+ #include <netinet/in.h>
+ #include <string.h>
+ 
++#include "special.h"
+ #include "clamav.h"
+ #include "others.h"
+ #include "cltypes.h"

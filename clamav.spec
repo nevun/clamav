@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.32 2006/02/18 09:33:59 ensc Exp $
+## $Id: clamav.spec,v 1.33 2006/04/06 16:50:58 ensc Exp $
 
 ## This package understands the following switches:
 ## --without milter          ...  deactivate the -milter subpackage
@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.88.1
-Release:	%release_func 1
+Release:	%release_func 2
 
 License:	GPL
 Group:		Applications/File
@@ -36,6 +36,8 @@ Source5:	clamd-README
 Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
+Patch0:		clamav-0.88.1-guys,please-read-the-compiler-warnings-before-doing-a-release.patch
+Patch1:		clamav-0.88.1-strncpy.patch
 Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
@@ -162,6 +164,9 @@ THIS PACKAGE IS TO BE CONSIDERED AS EXPERIMENTAL!
 
 %prep
 %setup -q
+%patch0  -p1 -b '.guys,please-read-the-compiler-warnings-before-doing-a-release.patch'
+%patch1  -p1 -b .strncpy
+
 %patch20 -p1 -b .user
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
@@ -186,6 +191,7 @@ perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
 ## See https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385 and
 ## http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0797
 ## also
+CFLAGS="$RPM_OPT_FLAGS -Wall -W -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
 %configure --disable-clamav --with-dbdir=/var/lib/clamav \
            --disable-zlib-vcheck \
 	   %{!?_without_milter:--enable-milter}
@@ -426,6 +432,12 @@ test "$1"  = 0 || %{_initrddir}/clamav-milter condrestart >/dev/null || :
 %endif	# _without_milter
 
 %changelog
+* Mon Apr 24 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.1-2
+- added patch which fixes some classes of compiler warnings; at least
+  the using of implicitly declared functions was reported to cause
+  segfaults on AMD64 (brought to my attention by Marc Perkel)
+- added patch which fixes wrong usage of strncpy(3) in unrarlib.c
+
 * Thu Apr 06 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.1-1
 - updated to 0.88.1 (SECURITY)
 
