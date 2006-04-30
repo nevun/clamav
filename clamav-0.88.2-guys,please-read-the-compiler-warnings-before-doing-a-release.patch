@@ -1,0 +1,22 @@
+--- clamav-0.88.2/libclamav/pe.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-04-29 19:46:09.000000000 +0200
++++ clamav-0.88.2/libclamav/pe.c	2006-04-30 11:25:53.000000000 +0200
+@@ -1555,7 +1555,7 @@ int cli_peheader(int desc, struct cli_pe
+ {
+ 	uint16_t e_magic; /* DOS signature ("MZ") */
+ 	uint32_t e_lfanew; /* address of new exe header */
+-	uint32_t min, max;
++	uint32_t min=0, max=0;
+ 	struct pe_image_file_hdr file_hdr;
+ 	struct pe_image_optional_hdr optional_hdr;
+ 	struct pe_image_section_hdr *section_hdr;
+--- clamav-0.88.2/libclamav/htmlnorm.c.guys,please-read-the-compiler-warnings-before-doing-a-release.patch	2006-03-22 19:03:35.000000000 +0100
++++ clamav-0.88.2/libclamav/htmlnorm.c	2006-04-30 11:25:53.000000000 +0200
+@@ -391,7 +391,7 @@ static int cli_html_normalise(int fd, m_
+ {
+ 	int fd_tmp, tag_length, tag_arg_length, binary;
+ 	int retval=FALSE, escape, value, hex, tag_val_length, table_pos, in_script=FALSE;
+-	FILE *stream_in;
++	FILE *stream_in = 0;
+ 	html_state state=HTML_NORM, next_state=HTML_BAD_STATE;
+ 	char filename[1024], tag[HTML_STR_LENGTH+1], tag_arg[HTML_STR_LENGTH+1];
+ 	char tag_val[HTML_STR_LENGTH+1], *tmp_file;
