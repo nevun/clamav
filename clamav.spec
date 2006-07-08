@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.35 2006/04/30 10:07:15 ensc Exp $
+## $Id: clamav.spec,v 1.36 2006/07/08 13:17:12 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -82,7 +82,7 @@ Summary:	Clam Antivirus scanner server
 Group:		System Environment/Daemons
 Provides:	clamav-daemon = %version-%release
 Obsoletes:	clamav-daemon < %version-%release
-Conflicts:	clamav-daemon > %version-%release}
+Conflicts:	clamav-daemon > %version-%release
 ## For now, use this as a placeholder. Later, generate separate -sysv
 ## and -minit subpackages
 Requires:	init(clamav-server)
@@ -184,16 +184,8 @@ perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
 ## ------------------------------------------------------------
 
 %build
-## '--disable-zlib-vcheck' is used because every FC<=3 ships zlib-1.2.1*
-## but clamav checks for zlib >= 1.2.2.  This option can be removed for
-## FC4 builds.
-##
-## See https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385 and
-## http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0797
-## also
-CFLAGS="$RPM_OPT_FLAGS -Wall -W -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
+CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
 %configure --disable-clamav --with-dbdir=/var/lib/clamav \
-           --disable-zlib-vcheck \
 	   --enable-milter
 
 ## HACK: ./configure checks if freshclam.conf/clamd.conf are existing
@@ -425,6 +417,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 
 %changelog
+* Sat Jul  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- removed a superfluous '}'
+- removed some code which was relevant for FC-3 only
+
 * Sat Jul  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.3-1
 - updated to 0.88.3
 - updated to new fedora-usermgmt macros
