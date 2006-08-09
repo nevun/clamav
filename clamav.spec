@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.36 2006/07/08 13:17:12 ensc Exp $
+## $Id: clamav.spec,v 1.37 2006/07/08 15:57:54 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -18,7 +18,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.88.3
+Version:	0.88.4
 Release:	%release_func 1
 
 License:	GPL
@@ -337,8 +337,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %defattr(-,root,root,-)
 %doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS TODO
 %doc docs/*.pdf
-%doc %_mandir/man[15]/*
 %_bindir/*
+%_mandir/man[15]/*
 %exclude %_bindir/clamav-config
 %exclude %_bindir/freshclam
 %exclude %_mandir/*/freshclam*
@@ -391,7 +391,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %files server
 %defattr(-,root,root,-)
 %doc _doc_server/*
-%doc %_mandir/*/clamd*
+%doc %_mandir/man[58]/clamd*
 %_sbindir/*
 %_initrddir/clamd-wrapper
 %dir %pkgdatadir
@@ -417,6 +417,12 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 
 %changelog
+* Tue Aug  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-1
+- updated to 0.88.4 (SECURITY)
+
+* Wed Jul 12 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- removed the clamdscan(1) manpage from the -server subpackage
+
 * Sat Jul  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - removed a superfluous '}'
 - removed some code which was relevant for FC-3 only
