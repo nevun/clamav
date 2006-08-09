@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.37 2006/07/08 15:57:54 ensc Exp $
+## $Id: clamav.spec,v 1.38 2006/08/09 06:30:01 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -391,7 +391,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %files server
 %defattr(-,root,root,-)
 %doc _doc_server/*
-%doc %_mandir/man[58]/clamd*
+%_mandir/man[58]/clamd*
 %_sbindir/*
 %_initrddir/clamd-wrapper
 %dir %pkgdatadir
