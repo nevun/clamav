@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.38 2006/08/09 06:30:01 ensc Exp $
+## $Id: clamav.spec,v 1.39 2006/08/09 06:48:12 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -19,7 +19,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.88.4
-Release:	%release_func 1
+Release:	%release_func 2
 
 License:	GPL
 Group:		Applications/File
@@ -417,6 +417,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 
 %changelog
+* Fri Sep 15 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-2
+- rebuilt
+
 * Tue Aug  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-1
 - updated to 0.88.4 (SECURITY)
 
