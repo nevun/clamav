@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.39 2006/08/09 06:48:12 ensc Exp $
+## $Id: clamav.spec,v 1.40 2006/09/15 06:21:38 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -19,7 +19,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.88.4
-Release:	%release_func 2
+Release:	%release_func 3
 
 License:	GPL
 Group:		Applications/File
@@ -80,33 +80,41 @@ Requires(post):		group(clamav)
 %package server
 Summary:	Clam Antivirus scanner server
 Group:		System Environment/Daemons
-Provides:	clamav-daemon = %version-%release
-Obsoletes:	clamav-daemon < %version-%release
-Conflicts:	clamav-daemon > %version-%release
-## For now, use this as a placeholder. Later, generate separate -sysv
-## and -minit subpackages
 Requires:	init(clamav-server)
-Provides:	init(clamav-server) = sysv
 Requires:	data(clamav)
 Requires:	clamav-lib = %version-%release
+
+%package server-sysv
+Summary:	SysV initscripts for clamav server
+Group:		System Environment/Daemons
+Provides:	init(clamav-server) = sysv
+Requires:	clamav-server = %version-%release
 Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir
 
 %package milter
 Summary:	Sendmail-milter for the Clam Antivirus scanner
 Group:		System Environment/Daemons
-## For now, use this as a placeholder. Later, generate separate -sysv
-## and -minit subpackages
 Requires:	init(clamav-milter)
-Provides:	init(clamav-milter) = sysv
 BuildRequires:	sendmail-devel
 BuildRequires:	fedora-usermgmt-devel
-Requires:		sendmail
+Provides:	user(%milteruser)
+Provides:	group(%milteruser)
+Requires:	sendmail
+Requires(post):	coreutils
+%{?FE_USERADD_REQ}
+
+%package milter-sysv
+Summary:	SysV initscripts for the clamav sendmail-milter
+Group:		System Environment/Daemons
+Provides:	init(clamav-milter) = sysv
+Requires:	clamav-milter = %version-%release
+Requires(post):		user(%milteruser) clamav-milter
+Requires(preun):	user(%milteruser) clamav-milter
 Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir initscripts
-Requires(post):		chkconfig coreutils
+Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
-%{?FE_USERADD_REQ}
 
 
 %description
@@ -150,6 +158,11 @@ of this daemon should be started for each service requiring it.
 
 See the README file how this can be done with a minimum of effort.
 
+
+%description server-sysv
+SysV initscripts template for the clamav server
+
+
 %description milter
 This package contains files which are needed to run the clamav-milter. It
 can be activated by adding
@@ -158,7 +171,9 @@ can be activated by adding
 
 to your sendmail.mc.
 
-THIS PACKAGE IS TO BE CONSIDERED AS EXPERIMENTAL!
+%description milter-sysv
+The SysV initscripts for clamav-milter.
+
 
 ## ------------------------------------------------------------
 
@@ -312,20 +327,25 @@ test -e %freshclamlog || {
                  -c 'Clamav Milter User' -g %milteruser %milteruser &>/dev/null || :
 
 %post milter
-/sbin/chkconfig --add clamav-milter
 test -e %milterlog || {
 	touch %milterlog
 	chmod 0620             %milterlog
 	chown root:%milteruser %milterlog
 }
 
-%preun milter
-test "$1" != 0 || %_initrddir/clamav-milter stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamav-milter
-
 %postun milter
 %__fe_userdel  %milteruser &>/dev/null || :
 %__fe_groupdel %milteruser &>/dev/null || :
+
+
+%post milter-sysv
+/sbin/chkconfig --add clamav-milter
+
+%preun milter-sysv
+test "$1" != 0 || %_initrddir/clamav-milter stop &>/dev/null || :
+test "$1" != 0 || /sbin/chkconfig --del clamav-milter
+
+%postun milter-sysv
 test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
@@ -393,14 +413,18 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %doc _doc_server/*
 %_mandir/man[58]/clamd*
 %_sbindir/*
-%_initrddir/clamd-wrapper
 %dir %pkgdatadir
-%dir %_sysconfdir/clamd.d
 %pkgdatadir/clamd-wrapper
-
+%dir %_sysconfdir/clamd.d
 
 %exclude %_sbindir/*milter*
 %exclude %_mandir/man8/clamav-milter*
+
+
+%files server-sysv
+%defattr(-,root,root,-)
+%_initrddir/clamd-wrapper
+
 
 ## -----------------------
 
@@ -409,14 +433,22 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %doc clamav-milter/INSTALL
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
-%config %_initrddir/clamav-milter
 %config(noreplace) %verify(not mtime) %_sysconfdir/clamd.d/milter.conf
-%config(noreplace) %verify(not mtime) %_sysconfdir/sysconfig/clamav-milter
 %attr(0700,%milteruser,%milteruser) %dir %milterstatedir
 %ghost %milterstatedir/*
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 
+
+%files milter-sysv
+%defattr(-,root,root,-)
+%config %_initrddir/clamav-milter
+%config(noreplace) %verify(not mtime) %_sysconfdir/sysconfig/clamav-milter
+
+
 %changelog
+* Thu Sep 21 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-3
+- splitted SysV initscripts of -milter and -server into own subpackages
+
 * Fri Sep 15 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-2
 - rebuilt
 
