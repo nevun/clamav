@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.40 2006/09/15 06:21:38 ensc Exp $
+## $Id: clamav.spec,v 1.41 2006/09/21 18:27:43 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -19,7 +19,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.88.4
-Release:	%release_func 3
+Release: %release_func 4
 
 License:	GPL
 Group:		Applications/File
@@ -446,6 +446,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Oct 05 2006 Christian Iseli <Christian.Iseli@licr.org> 0.88.4-4
+ - rebuilt for unwind info generation, broken in gcc-4.1.1-21
+
 * Thu Sep 21 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-3
 - splitted SysV initscripts of -milter and -server into own subpackages
 
