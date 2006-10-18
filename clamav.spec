@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.41 2006/09/21 18:27:43 ensc Exp $
+## $Id: clamav.spec,v 1.42 2006/10/04 22:32:25 c4chris Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -18,8 +18,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.88.4
-Release: %release_func 4
+Version:	0.88.5
+Release: %release_func 1
 
 License:	GPL
 Group:		Applications/File
@@ -38,6 +38,7 @@ Patch1:		clamav-0.88.1-strncpy.patch
 Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
+Patch23:	clamav-0.88.4-visibility.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -185,6 +186,7 @@ The SysV initscripts for clamav-milter.
 %patch20 -p1 -b .user
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
+%patch23 -p1 -b .visibility
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -446,6 +448,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Oct 18 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.5-1
+- updated to 0.88.5 (SECURITY); fixes CVE-2006-4182, CVE-2006-5295
+- added patch to set '__attribute__ ((visibility("hidden")))' for
+  exported MD5_*() functions (fixes #202043)
+
 * Thu Oct 05 2006 Christian Iseli <Christian.Iseli@licr.org> 0.88.4-4
  - rebuilt for unwind info generation, broken in gcc-4.1.1-21
 
