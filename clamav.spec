@@ -1,9 +1,11 @@
-## $Id: clamav.spec,v 1.44 2006/11/05 20:11:19 ensc Exp $
+## $Id: clamav.spec,v 1.45 2006/12/12 08:17:53 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
 ##
 
+
+%global rcver		rc3
 
 %global username	clamav
 %global homedir		%_var/lib/clamav
@@ -18,14 +20,14 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.88.7
-Release:	%release_func 1
+Version:	0.90
+Release:	%release_func 0.2.rc3
 
 License:	GPL
 Group:		Applications/File
 URL:		http://www.clamav.net
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?rcver}.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?rcver}.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -33,9 +35,6 @@ Source5:	clamd-README
 Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
-Patch0:		clamav-0.88.2-guys,please-read-the-compiler-warnings-before-doing-a-release.patch
-Patch1:		clamav-0.88.1-strncpy.patch
-Patch20:	clamav-0.70-user.patch
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch23:	clamav-0.88.4-visibility.patch
@@ -44,6 +43,17 @@ Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel tcp_wrappers curl-devel
 BuildRequires:	bc
+
+%package filesystem
+Summary:	Filesystem structure for clamav
+Group:		Applications/File
+Provides:	user(clamav)
+Provides:	group(clamav)
+# Prevent version mix
+Conflicts:	%name < %version-%release
+Conflicts:	%name > %version-%release
+BuildRequires:	fedora-usermgmt-devel
+%{?FE_USERADD_REQ}
 
 %package lib
 Summary:	Dynamic libraries for the Clam Antivirus scanner
@@ -54,17 +64,25 @@ Requires:	data(clamav)
 Summary:	Header files and libraries for the Clam Antivirus scanner
 Group:		Development/Libraries
 Source100:	clamd-gen
-Requires:	clamav-lib = %version-%release
+Requires:	clamav-lib        = %version-%release
+Requires:	clamav-filesystem = %version-%release
 Requires(pre):	%_libdir/pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
-Provides:	data(clamav)
-Provides:	user(clamav)
-Provides:	group(clamav)
-BuildRequires:	fedora-usermgmt-devel
-%{?FE_USERADD_REQ}
+Requires(pre):		clamav-filesystem = %version-%release
+Requires(postun):	clamav-filesystem = %version-%release
+Provides:		data(clamav) = full
+Conflicts:		data(clamav) < full
+Conflicts:		data(clamav) > full
+
+%package data-empty
+Summary:	Empty data package for the Clam Antivirus scanner
+Group:		Applications/File
+Provides:	data(clamav) = empty
+Conflicts:	data(clamav) < empty
+Conflicts:	data(clamav) > empty
 
 %package update
 Summary:	Auto-updater for the Clam Antivirus scanner data-files
@@ -72,7 +90,7 @@ Group:		Applications/File
 Source200:	freshclam-sleep
 Source201:	freshclam.sysconfig
 Source202:	clamav-update.cron
-Requires:	clamav-data = %version-%release
+Requires:		clamav-filesystem = %version-%release
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
 Requires(post):		%__chown %__chmod
@@ -83,7 +101,8 @@ Summary:	Clam Antivirus scanner server
 Group:		System Environment/Daemons
 Requires:	init(clamav-server)
 Requires:	data(clamav)
-Requires:	clamav-lib = %version-%release
+Requires:	clamav-filesystem = %version-%release
+Requires:	clamav-lib        = %version-%release
 
 %package server-sysv
 Summary:	SysV initscripts for clamav server
@@ -129,6 +148,9 @@ the virus database from OpenAntiVirus, but contains additional signatures
 (including signatures for popular polymorphic viruses, too) and is KEPT UP
 TO DATE.
 
+%description filesystem
+This package provides the filesystem structure and contains the
+user-creation scripts required by clamav.
 
 %description lib
 This package contains dynamic libraries shared between applications
@@ -141,7 +163,29 @@ build applications using clamav.
 %description data
 This package contains the virus-database needed by clamav. This
 database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job.
+ships a corresponding cron-job. This package and the
+'clamav-data-empty' package are mutually exclusive.
+
+Use -data when you want a working (but perhaps outdated) virus scanner
+immediately after package installation.
+
+Use -data-empty when you are updating the virus database regulary and
+do not want to download a >5MB sized rpm-package with outdated virus
+definitions.
+
+
+%description data-empty
+This is an empty package to fulfill inter-package dependencies of the
+clamav suite. This package and the 'clamav-data' package are mutually
+exclusive.
+
+Use -data when you want a working (but perhaps outdated) virus scanner
+immediately after package installation.
+
+Use -data-empty when you are updating the virus database regulary and
+do not want to download a >5MB sized rpm-package with outdated virus
+definitions.
+
 
 %description update
 This package contains programs which can be used to update the clamav
@@ -179,11 +223,8 @@ The SysV initscripts for clamav-milter.
 ## ------------------------------------------------------------
 
 %prep
-%setup -q
-%patch0  -p1 -b '.guys,please-read-the-compiler-warnings-before-doing-a-release.patch'
-%patch1  -p1 -b .strncpy
+%setup -q -n %name-%version%{?rcver}
 
-%patch20 -p1 -b .user
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
 %patch23 -p1 -b .visibility
@@ -240,10 +281,15 @@ install -d -m755 \
 	${RPM_BUILD_ROOT}%_var/log \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
-	${RPM_BUILD_ROOT}%_initrddir
+	${RPM_BUILD_ROOT}%_initrddir \
+	${RPM_BUILD_ROOT}%homedir/daily.inc
 
 rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
 	${RPM_BUILD_ROOT}%_libdir/*.la
+
+for i in COPYING daily.{db,fp,hdb,info,ndb,pdb,zmd}; do
+	touch ${RPM_BUILD_ROOT}%homedir/daily.inc/$i
+done
 
 
 ## prepare the server-files
@@ -290,10 +336,7 @@ subst etc/clamd.conf /etc/clamd.d/milter.conf \
 
 
 cat <<EOF >$RPM_BUILD_ROOT%_sysconfdir/sysconfig/clamav-milter
-## The '-blo' options might be usefully here -- especially for testing; see
-## "man 8 clamav-milter" for further options
-CLAMAV_FLAGS='--max-children=2 -c /etc/clamd.d/milter.conf local:%milterstatedir/clamav.sock'
-CLAMAV_USER='%milteruser'
+CLAMAV_FLAGS='-lo -c /etc/clamd.d/milter.conf local:%milterstatedir/clamav.sock'
 EOF
 
 install -p -m755 contrib/init/RedHat/clamav-milter $RPM_BUILD_ROOT%_initrddir/clamav-milter
@@ -307,10 +350,15 @@ rm -rf "$RPM_BUILD_ROOT"
 
 ## ------------------------------------------------------------
 
-%pre data
+%pre filesystem
 %__fe_groupadd 4 -r %username &>/dev/null || :
 %__fe_useradd  4 -r -s /sbin/nologin -d %homedir -M          \
                  -c 'Clamav database update user' -g %username %username &>/dev/null || :
+
+%postun filesystem
+%__fe_userdel  %username &>/dev/null || :
+%__fe_groupdel %username &>/dev/null || :
+
 
 %post update
 test -e %freshclamlog || {
@@ -318,10 +366,6 @@ test -e %freshclamlog || {
 	%__chmod 0664 %freshclamlog
 	%__chown root:%username %freshclamlog
 }
-
-%postun data
-%__fe_userdel  %username &>/dev/null || :
-%__fe_groupdel %username &>/dev/null || :
 
 %pre milter
 %__fe_groupadd 5 -r %milteruser &>/dev/null || :
@@ -378,7 +422,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %_includedir/*
 %_libdir/*.*a
 %_libdir/*.so
-%dir %pkgdatadir
 %pkgdatadir/template
 %pkgdatadir/clamd-gen
 %_libdir/pkgconfig/*
@@ -386,13 +429,24 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 ## -----------------------
 
+%files filesystem
+%attr(-,%username,%username) %dir %homedir
+%attr(-,%username,%username) %dir %homedir/daily.inc
+%attr(-,root,root)           %dir %pkgdatadir
+
+## -----------------------
+
 %files data
 %defattr(-,%username,%username,-)
-%dir %homedir
 # use %%config to keep files which were updated by 'freshclam'
 # already. Without this tag, they would be overridden with older
 # versions whenever a new -data package is installed.
 %config %verify(not size md5 mtime) %homedir/*.cvd
+
+
+%files data-empty
+%defattr(-,%username,%username,-)
+%ghost %attr(0664,%username,%username) %homedir/main.cvd
 
 ## -----------------------
 
@@ -408,6 +462,16 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
 
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/COPYING
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.db
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.fp
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.hdb
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.info
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.ndb
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.pdb
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.zmd
+
+
 ## -----------------------
 
 %files server
@@ -415,7 +479,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %doc _doc_server/*
 %_mandir/man[58]/clamd*
 %_sbindir/*
-%dir %pkgdatadir
 %pkgdatadir/clamd-wrapper
 %dir %_sysconfdir/clamd.d
 
@@ -448,6 +511,15 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sat Feb  3 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.2.rc3
+- updated to 0.90rc3
+- splitted mandatory parts from the data-file into a separate -filesystem
+  subpackage
+- added a -data-empty subpackage to allow a setup where database is
+  updated per cron-job and user does not want to download the large
+  -data package with outdated virus definitations (#214949)
+- %%ghost'ed the files downloaded by freshclam
+
 * Tue Dec 12 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.7-1
 - updated to 0.88.7
 
