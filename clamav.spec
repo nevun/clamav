@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.45 2006/12/12 08:17:53 ensc Exp $
+## $Id: clamav.spec,v 1.46 2007/02/03 15:16:08 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -21,7 +21,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.90
-Release:	%release_func 0.2.rc3
+Release:	%release_func 0.3.rc3
 
 License:	GPL
 Group:		Applications/File
@@ -38,6 +38,7 @@ Source8:	clamav-notify-servers
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch23:	clamav-0.88.4-visibility.patch
+Patch24:	clamav-0.90rc3-private.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -228,6 +229,7 @@ The SysV initscripts for clamav-milter.
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
 %patch23 -p1 -b .visibility
+%patch24 -p1 -b .private
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -243,15 +245,12 @@ perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
+export LDFLAGS='-Wl,--as-needed'
+# HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
+export LIBS='-lmilter -lpthread'
 %configure --disable-clamav --with-dbdir=/var/lib/clamav \
-	   --enable-milter
-
-## HACK: ./configure checks if freshclam.conf/clamd.conf are existing
-## in current filesystem and skips its installation then. Was introduced
-## by 0.66.
-perl -pi -e 's!^(s,\@INSTALL_(CLAMAV|FRESHCLAM)_CONF_TRUE\@),[^,]*,!\1,,!g;
-             s!^(s,\@INSTALL_(CLAMAV|FRESHCLAM)_CONF_FALSE\@),[^,]*,!\1,\#,!g' config.status
-./config.status
+	   --enable-milter --disable-static
+sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
 
 make %{?_smp_mflags}
 
@@ -420,7 +419,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %files devel
 %defattr(-,root,root,-)
 %_includedir/*
-%_libdir/*.*a
 %_libdir/*.so
 %pkgdatadir/template
 %pkgdatadir/clamd-gen
@@ -511,6 +509,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Feb  4 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.3.rc3
+- build with -Wl,-as-needed and cleaned up pkgconfig file
+- removed old hack which forced installation of freshclam.conf; related
+  check was removed upstream
+- removed static library
+- removed %%changelog entries from before 2004
+
 * Sat Feb  3 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.2.rc3
 - updated to 0.90rc3
 - splitted mandatory parts from the data-file into a separate -filesystem
@@ -799,83 +804,3 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 * Mon Feb  9 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.5
 - added security fix for
   http://www.securityfocus.com/archive/1/353194/2004-02-06/2004-02-12/1
-
-* Fri Nov 28 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.4
-- fixed typo in README (sysconf.d vs. sysconf)
-- make build on rhl8 succeed by adding '|| :' to %%check
-
-* Tue Nov 18 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.3
-- substitute 'User' in sample cfg-file also
-- uncommented some cfg-options which are needed for a proper operation
-- fixed typos in README (thanks to Michael Schwendt)
-
-* Mon Nov 17 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.2
-- fixed path of 'LocalSocket' and documented steps how to create it
-- added a missing backslash at the configure-call
-- do not package clamav-milter.8 manpage
-- documented 'User' in the README
-
-* Sat Nov 15 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.1
-- updated to 0.65
-- added gmp-devel buildrequires:
-- changed installed databases from 'viruses.db*' to '*.cvb'
-- made milter-build conditional; 0.65 is missing some files which would break the build else
-- fixed typo (clamav-notify-server -> clamav-notify-servers)
-
-* Fri Oct 31 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.60-0.fdr.5
-- created -update subpackage and filled it with files from main and -data package
-- set more reasonable default-values in the sample config-file
-- made the README in -server more clear
-- moved clamav-milter man-page into -milter subpackage
-- use fedora-usermgmt
-- renamed -daemon subpackage and related files to -server
-- use abstract 'data(clamav)' notation for clamav-data dependencies
-- use 'init(...)' requirements as placeholder for future -sysv/-minit subpackages
-
-* Sat Aug 16 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.4
-- backported clamav-sockwrite.c to C89
-
-* Fri Aug 15 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.3
-- updated Source0 URL
-- fixed portuguese i18n-abbreviation
-
-* Fri Jul 18 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.3
-- use LSB compliant exit-codes in the init-script
-- other init-script cleanups
-
-* Tue Jul 15 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.2
-- updated %%description
-- removed README from %%doc-list
-
-* Thu Jun 26 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.1
-- disabled -milter subpackage; I do not get it to run :(
-
-* Thu Jun 26 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.60-0.fdr.0.1
-- updated to 0.60
-- modernized usercreation
-- added -milter subpackage
-
-* Thu May  8 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.54-0.fdr.2
-- added BUGS file
-- moved clamd.8 man-page into daemon-subpackage
-- some cosmetical cleanups
-- removed config-patch; it was unused
-- made some paths more fedora-compliant
-- honor $RPM_OPT_FLAGS
-- added clamav-notify-daemons script
-- removed obsoleted %%socketdir
-
-* Wed May  7 2003 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0:0.54-0.fdr.0.1
-- splitted into additional -data/-daemon packages
-- added clamav-sockwrite program
-- updated to recent fedora policies
-
-* Thu Nov 21 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0.54-1
-- updated to 0.54
-- updated config-patch
-
-* Tue Oct 29 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> 0.52-1
-- updated to 0.52
-
-* Tue Sep 17 2002 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
-- Initial build.
