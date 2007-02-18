@@ -1,11 +1,8 @@
-## $Id: clamav.spec,v 1.46 2007/02/03 15:16:08 ensc Exp $
+## $Id: clamav.spec,v 1.47 2007/02/04 11:57:35 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
 ##
-
-
-%global rcver		rc3
 
 %global username	clamav
 %global homedir		%_var/lib/clamav
@@ -21,13 +18,13 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.90
-Release:	%release_func 0.3.rc3
+Release:	%release_func 0.4
 
 License:	GPL
 Group:		Applications/File
 URL:		http://www.clamav.net
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?rcver}.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?rcver}.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -37,7 +34,6 @@ Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
-Patch23:	clamav-0.88.4-visibility.patch
 Patch24:	clamav-0.90rc3-private.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
@@ -224,11 +220,10 @@ The SysV initscripts for clamav-milter.
 ## ------------------------------------------------------------
 
 %prep
-%setup -q -n %name-%version%{?rcver}
+%setup -q
 
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
-%patch23 -p1 -b .visibility
 %patch24 -p1 -b .private
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
@@ -509,6 +504,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Feb 18 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-1
+- updated to final 0.90
+- removed -visibility patch since fixed upstream
+
 * Sun Feb  4 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.3.rc3
 - build with -Wl,-as-needed and cleaned up pkgconfig file
 - removed old hack which forced installation of freshclam.conf; related
