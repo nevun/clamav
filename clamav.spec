@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.51 2007/03/02 17:59:09 ensc Exp $
+## $Id: clamav.spec,v 1.52 2007/04/13 07:37:40 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -17,7 +17,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.90.2
+Version:	0.90.3
 Release:	%release_func 1
 
 License:	GPL
@@ -39,7 +39,7 @@ BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
-BuildRequires:	tcp_wrappers-devel
+BuildRequires:	%_libdir/libwrap.so
 BuildRequires:	bc
 
 %package filesystem
@@ -505,6 +505,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu May 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.3-1
+- updated to 0.90.3
+- BR libwrap.so instead of tcp_wrappers(-devel) to make it build both
+  in FC6- and F7+
+
 * Fri Apr 13 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.2-1
 - [SECURITY] updated to 0.90.2; fixes CVE-2007-1745, CVE-2007-1997 
 
