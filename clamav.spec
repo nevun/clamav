@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.52 2007/04/13 07:37:40 ensc Exp $
+## $Id: clamav.spec,v 1.53 2007/05/31 07:40:24 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -39,7 +39,7 @@ BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
-BuildRequires:	%_libdir/libwrap.so
+BuildRequires:	%_includedir/tcpd.h
 BuildRequires:	bc
 
 %package filesystem
@@ -507,7 +507,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %changelog
 * Thu May 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.3-1
 - updated to 0.90.3
-- BR libwrap.so instead of tcp_wrappers(-devel) to make it build both
+- BR tcpd.h instead of tcp_wrappers(-devel) to make it build both
   in FC6- and F7+
 
 * Fri Apr 13 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.2-1
