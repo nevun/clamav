@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.53 2007/05/31 07:40:24 ensc Exp $
+## $Id: clamav.spec,v 1.54 2007/05/31 19:37:44 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -17,8 +17,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.90.3
-Release:	%release_func 1
+Version:	0.91
+Release:	%release_func 0
 
 License:	GPL
 Group:		Applications/File
@@ -505,6 +505,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Jul 12 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91-1
+- updated to 0.91
+
 * Thu May 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.3-1
 - updated to 0.90.3
 - BR tcpd.h instead of tcp_wrappers(-devel) to make it build both
