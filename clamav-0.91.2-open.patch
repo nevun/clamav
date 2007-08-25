@@ -1,0 +1,22 @@
+--- clamav-0.91.2/clamd/dazukoio_compat12.c.open	2007-03-06 14:38:06.000000000 +0100
++++ clamav-0.91.2/clamd/dazukoio_compat12.c	2007-08-25 12:36:30.000000000 +0200
+@@ -89,7 +89,7 @@ int dazukoRegister_TS_compat12(struct da
+ 	if (dazuko->device < 0)
+ 	{
+ 
+-		dazuko->device = open("/dev/dazuko", 0);
++		dazuko->device = open("/dev/dazuko", O_RDONLY);
+ 		if (dazuko->device < 0)
+ 			return -1;
+ 
+--- clamav-0.91.2/shared/misc.c.open	2007-03-31 21:27:31.000000000 +0200
++++ clamav-0.91.2/shared/misc.c	2007-08-25 12:36:30.000000000 +0200
+@@ -165,7 +165,7 @@ int filecopy(const char *src, const char
+     if((s = open(src, O_RDONLY|O_BINARY)) == -1)
+ 	return -1;
+ 
+-    if((d = open(dest, O_CREAT|O_WRONLY|O_TRUNC|O_BINARY)) == -1) {
++    if((d = open(dest, O_CREAT|O_WRONLY|O_TRUNC|O_BINARY, 0600)) == -1) {
+ 	close(s);
+ 	return -1;
+     }
