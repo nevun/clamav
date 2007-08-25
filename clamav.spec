@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.56 2007/07/17 07:27:38 ensc Exp $
+## $Id: clamav.spec,v 1.57 2007/08/25 10:12:31 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -35,6 +35,7 @@ Source8:	clamav-notify-servers
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.90rc3-private.patch
+Patch25:	clamav-0.91.2-open.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -226,6 +227,7 @@ The SysV initscripts for clamav-milter.
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
+%patch25 -p1 -b .open
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -511,6 +513,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - DOS in html normalizer
 - arbitrary command execution by special crafted recipients in
   clamav-milter's black-hole mode
+- fixed an open(2) issue
 
 * Tue Jul 17 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91.1-0
 - updated to 0.91.1
