@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.57 2007/08/25 10:12:31 ensc Exp $
+## $Id: clamav.spec,v 1.58 2007/08/25 10:40:56 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -18,7 +18,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.91.2
-Release:	%release_func 1
+Release:	%release_func 2
 
 License:	GPL
 Group:		Applications/File
@@ -507,6 +507,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Sep 24 2007 Jesse Keating <jkeating@redhat.com> - 0.91.2-2
+- Bump release for upgrade path.
+
 * Sat Aug 25 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91.2-1
 - updated to 0.91.2 (SECURITY):
 - CVE-2007-4510 DOS in RTF parser
