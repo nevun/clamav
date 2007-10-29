@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.58 2007/08/25 10:40:56 ensc Exp $
+## $Id: clamav.spec,v 1.60 2007/10/29 10:22:00 spot Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -18,13 +18,17 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.91.2
-Release:	%release_func 2
+Release:	%release_func 3
 
-License:	GPL
+License:	GPLv2
 Group:		Applications/File
 URL:		http://www.clamav.net
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
+# Unfortunately, clamav includes support for RAR v3, derived from GPL 
+# incompatible unrar from RARlabs. We have to pull this code out.
+Source0:	clamav-0.91.2-clean.tar.bz2
+# Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
+# No sense in using this file for the time being.
+# Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -507,6 +511,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Oct 29 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.91.2-3
+- remove RAR decompression code from source tarball because of 
+  legal problems (resolves 334371)
+- correct license tag
+
 * Mon Sep 24 2007 Jesse Keating <jkeating@redhat.com> - 0.91.2-2
 - Bump release for upgrade path.
 
