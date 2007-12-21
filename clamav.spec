@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.60 2007/10/29 10:22:00 spot Exp $
+## $Id: clamav.spec,v 1.60 2007/10/29 14:25:28 spot Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -17,7 +17,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.91.2
+Version:	0.92
 Release:	%release_func 3
 
 License:	GPLv2
@@ -25,7 +25,9 @@ Group:		Applications/File
 URL:		http://www.clamav.net
 # Unfortunately, clamav includes support for RAR v3, derived from GPL 
 # incompatible unrar from RARlabs. We have to pull this code out.
-Source0:	clamav-0.91.2-clean.tar.bz2
+# All that is needed to make the clean tarball is: rm -rf libclamunrar*
+# Note that you also need patch26.
+Source0:	clamav-%{version}.clean.tar.gz
 # Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
 # No sense in using this file for the time being.
 # Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
@@ -39,7 +41,8 @@ Source8:	clamav-notify-servers
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.90rc3-private.patch
-Patch25:	clamav-0.91.2-open.patch
+Patch25:	clamav-0.92-open.patch
+Patch26:	clamav-0.92-nounrar.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -232,6 +235,7 @@ The SysV initscripts for clamav-milter.
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
+%patch26 -p1 -b .nounrar
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -251,8 +255,12 @@ export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
 export LIBS='-lmilter -lpthread'
 %configure --disable-clamav --with-dbdir=/var/lib/clamav \
-	   --enable-milter --disable-static
+	   --enable-milter --disable-static --disable-unrar
 sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
+# No rpath
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
 
 make %{?_smp_mflags}
 
@@ -511,6 +519,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-1
+- updated to 0.92 (SECURITY):
+- CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
+
 * Mon Oct 29 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.91.2-3
 - remove RAR decompression code from source tarball because of 
   legal problems (resolves 334371)
