@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.60 2007/10/29 14:25:28 spot Exp $
+## $Id: clamav.spec,v 1.61 2007/12/21 18:06:29 spot Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       fedora
@@ -519,7 +519,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
-* Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-1
+* Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-3
 - updated to 0.92 (SECURITY):
 - CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
 
