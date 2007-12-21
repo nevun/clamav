@@ -1,0 +1,28 @@
+--- clamav-0.90rc3/libclamav.pc.in.private	2004-07-14 13:35:38.000000000 +0200
++++ clamav-0.90rc3/libclamav.pc.in	2007-02-04 12:24:35.000000000 +0100
+@@ -6,6 +6,6 @@
+ Name: libclamav
+ Description: A GPL virus scanner
+ Version: @LIBCLAMAV_VERSION@
+-Libs: -L${libdir} -lclamav @LIBCLAMAV_LIBS@
+-Cflags: -I${includedir} @CFLAGS@
+-
++Libs: -L${libdir} -lclamav
++Libs.private: -L${libdir} -lclamav @LIBCLAMAV_LIBS@
++Cflags: -I${includedir}
+--- clamav-0.90rc3/clamav-config.in.private	2004-06-06 03:50:08.000000000 +0200
++++ clamav-0.90rc3/clamav-config.in	2007-02-04 12:25:27.000000000 +0100
+@@ -55,11 +55,11 @@
+ 	;;
+ 
+     --cflags)
+-       	echo -I@includedir@ @CFLAGS@
++       	echo -I@includedir@
+        	;;
+ 
+     --libs)
+-       	echo -L@libdir@ @LIBCLAMAV_LIBS@
++       	echo -L@libdir@ -lclamav 
+        	;;
+ 
+     *)
