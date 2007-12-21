@@ -1,7 +1,7 @@
-## $Id: clamav.spec,v 1.61 2007/12/21 18:06:29 spot Exp $
+## $Id: clamav.spec,v 1.28 2007/12/21 18:10:56 spot Exp $
 
 ## Fedora Extras specific customization below...
-%bcond_without       fedora
+# %bcond_without       fedora
 ##
 
 %global username	clamav
@@ -18,7 +18,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.92
-Release:	%release_func 3
+Release:	%release_func 4
 
 License:	GPLv2
 Group:		Applications/File
@@ -519,6 +519,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-4
+- EPEL fixes
+
 * Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-3
 - updated to 0.92 (SECURITY):
 - CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
