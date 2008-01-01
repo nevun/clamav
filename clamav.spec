@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.64 2008/01/01 14:59:15 ensc Exp $
+## $Id: clamav.spec,v 1.65 2008/01/01 17:10:12 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -257,7 +257,7 @@ Sendmail customizations of the clamav-milter.
 install -p -m0644 %SOURCE300 clamav-milter/
 
 mkdir -p libclamunrar{,_iface}
-%{!?with_unrar:> libclamunrar/Makefile.in; >libclamunrar_iface/Makefile.in; touch libclamunrar{,_iface}/{all,install}}
+%{!?with_unrar:touch libclamunrar{,_iface}/{Makefile.in,all,install}}
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
