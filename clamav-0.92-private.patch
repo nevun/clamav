@@ -1,0 +1,29 @@
+--- clamav-0.92/libclamav.pc.in.private
++++ clamav-0.92/libclamav.pc.in
+@@ -6,6 +6,6 @@ includedir=@includedir@
+ Name: libclamav
+ Description: A GPL virus scanner
+ Version: @LIBCLAMAV_VERSION@
+-Libs: -L${libdir} -lclamav @LIBCLAMAV_LIBS@
+-Cflags: -I${includedir} @CFLAGS@
+-
++Libs: -L${libdir} -lclamav
++Libs.private: -L${libdir} -lclamav @LIBCLAMAV_LIBS@
++Cflags: -I${includedir}
+--- clamav-0.92/clamav-config.in.private
++++ clamav-0.92/clamav-config.in
+@@ -54,12 +54,8 @@ while test $# -gt 0; do
+ 	usage 0
+ 	;;
+ 
+-    --cflags)
+-       	echo -I@includedir@ @CFLAGS@
+-       	;;
+-
+-    --libs)
+-       	echo -L@libdir@ @LIBCLAMAV_LIBS@
++    (--cflags|--libs)
++       	${PKG_CONFIG:-pkg-config} "$1" libclamav
+        	;;
+ 
+     *)

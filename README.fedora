@@ -1,0 +1,5 @@
+Add
+
+  INPUT_MAIL_FILTER(`clamav', `S=local:/var/run/clamav-milter/clamav.sock, F=, T=S:4m;R:4m')dnl
+
+to your sendmail.mc.

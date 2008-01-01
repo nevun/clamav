@@ -28,7 +28,7 @@ CLAMD_CONFIGFILE=/etc/clamd.d/${CLAMD_SERVICE}.conf
 CLAMD_OPTIONS=
 ## backward-compatibility check...
 for i in /var/run/clamd.${CLAMD_SERVICE}/clamd.sock \
-         /var/run/clamav.${CLAMD_SERVICE}/clamd.sock; do
+	 /var/run/clamav.${CLAMD_SERVICE}/clamd.sock; do
   CLAMD_SOCKET=$i
   test ! -e "$i" || break
 done
