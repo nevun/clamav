@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.62 2007/12/21 18:11:32 spot Exp $
+## $Id: clamav.spec,v 1.63 2008/01/01 13:19:16 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -19,7 +19,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.92
-Release:	%release_func 4
+Release:	%release_func 5
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -248,14 +248,13 @@ export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
 export LIBS='-lmilter -lpthread'
 %configure --disable-clamav --with-dbdir=/var/lib/clamav	\
-	--enable-milter --disable-static --disable-rpath	\
+	--enable-milter --disable-static			\
 	%{!?with_unrar:--disable-unrar}
 
 # build with --as-needed and disable rpath
 sed -i \
 	-e 's! -shared ! -Wl,--as-needed\0!g' 					\
-	-e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g'	\
-	-e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' 		\
+	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!/lib!/%_lib!g'	\
 	libtool
 
 
@@ -515,6 +514,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-5
+- use a better way to disable RPATH-generation (needed for '--with
+  unrar' builds)
+
 * Mon Dec 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-4
 - added a README.fedora to the milter package (#240610)
 - ship original sources again; unrar is now licensed correctly (no more
