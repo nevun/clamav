@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.63 2008/01/01 13:19:16 ensc Exp $
+## $Id: clamav.spec,v 1.64 2008/01/01 14:59:15 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -19,13 +19,20 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.92
-Release:	%release_func 5
+Release:	%release_func 6
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
+%if 0%{?with_unrar:1}
 Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
 Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
+%else
+# Unfortunately, clamav includes support for RAR v3, derived from GPL 
+# incompatible unrar from RARlabs. We have to pull this code out.
+# All that is needed to make the clean tarball is: rm -rf libclamunrar*
+Source0:	%name-%version.clean.tar.gz
+%endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -114,17 +121,31 @@ Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir
 
 %package milter
-Summary:	Sendmail-milter for the Clam Antivirus scanner
+Summary:	Milter module for the Clam Antivirus scanner
+Group:		System Environment/Daemons
+Requires:	clamav-milter-core = %version-%release
+Requires:	milter(clamav)
+
+%package milter-core
+Summary:	Core milter module for the Clam Antivirus scanner
 Group:		System Environment/Daemons
 Requires:	init(clamav-milter)
-Source300:	README.fedora
 BuildRequires:	sendmail-devel
 BuildRequires:	fedora-usermgmt-devel
 Provides:	user(%milteruser)
 Provides:	group(%milteruser)
-Requires:	sendmail
 Requires(post):	coreutils
 %{?FE_USERADD_REQ}
+
+%package milter-sendmail
+Summary:	Sendmail customizations for clamav-milter
+Group:		System Environment/Daemons
+Source300:	README.fedora
+Requires:	sendmail
+Requires:	clamav-milter-core = %version-%release
+Provides:	milter(clamav) = sendmail
+Conflicts:	milter(clamav) < sendmail
+Conflicts:	milter(clamav) > sendmail
 
 %package milter-sysv
 Summary:	SysV initscripts for the clamav sendmail-milter
@@ -216,6 +237,12 @@ This package contains files which are needed to run the clamav-milter.
 %description milter-sysv
 The SysV initscripts for clamav-milter.
 
+%description milter-core
+Core files for the clamav-milter.
+
+%description milter-sendmail
+Sendmail customizations of the clamav-milter.
+
 
 ## ------------------------------------------------------------
 
@@ -229,6 +256,8 @@ The SysV initscripts for clamav-milter.
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
+mkdir -p libclamunrar{,_iface}
+%{!?with_unrar:> libclamunrar/Makefile.in; >libclamunrar_iface/Makefile.in; touch libclamunrar{,_iface}/{all,install}}
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -498,14 +527,20 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files milter
 %defattr(-,root,root,-)
-%doc clamav-milter/INSTALL clamav-milter/README.fedora
+
+%files milter-core
+%defattr(-,root,root,-)
+%doc clamav-milter/INSTALL
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
 %config(noreplace) %verify(not mtime) %_sysconfdir/clamd.d/milter.conf
-%attr(0700,%milteruser,%milteruser) %dir %milterstatedir
-%ghost %milterstatedir/*
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 
+%files milter-sendmail
+%defattr(-,root,root,-)
+%doc clamav-milter/README.fedora
+%attr(0700,%milteruser,%milteruser) %dir %milterstatedir
+%ghost %milterstatedir/*
 
 %files milter-sysv
 %defattr(-,root,root,-)
@@ -514,6 +549,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-6
+- redisabled unrar stuff completely by using clean sources
+- splitted -milter subpackage into pieces to allow use without sendmail
+  (#239037)
+
 * Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-5
 - use a better way to disable RPATH-generation (needed for '--with
   unrar' builds)
