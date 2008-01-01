@@ -1,7 +1,8 @@
-## $Id: clamav.spec,v 1.61 2007/12/21 18:06:29 spot Exp $
+## $Id: clamav.spec,v 1.62 2007/12/21 18:11:32 spot Exp $
 
 ## Fedora Extras specific customization below...
-%bcond_without       fedora
+%bcond_without       	fedora
+%bcond_with		unrar
 ##
 
 %global username	clamav
@@ -18,19 +19,13 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.92
-Release:	%release_func 3
+Release:	%release_func 4
 
-License:	GPLv2
+License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
-# Unfortunately, clamav includes support for RAR v3, derived from GPL 
-# incompatible unrar from RARlabs. We have to pull this code out.
-# All that is needed to make the clean tarball is: rm -rf libclamunrar*
-# Note that you also need patch26.
-Source0:	clamav-%{version}.clean.tar.gz
-# Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
-# No sense in using this file for the time being.
-# Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
@@ -40,9 +35,8 @@ Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
 Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
-Patch24:	clamav-0.90rc3-private.patch
+Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
-Patch26:	clamav-0.92-nounrar.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -73,6 +67,7 @@ Source100:	clamd-gen
 Requires:	clamav-lib        = %version-%release
 Requires:	clamav-filesystem = %version-%release
 Requires(pre):	%_libdir/pkgconfig
+Requires:	pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -122,6 +117,7 @@ Requires(postun):	%_initrddir
 Summary:	Sendmail-milter for the Clam Antivirus scanner
 Group:		System Environment/Daemons
 Requires:	init(clamav-milter)
+Source300:	README.fedora
 BuildRequires:	sendmail-devel
 BuildRequires:	fedora-usermgmt-devel
 Provides:	user(%milteruser)
@@ -215,12 +211,7 @@ SysV initscripts template for the clamav server
 
 
 %description milter
-This package contains files which are needed to run the clamav-milter. It
-can be activated by adding
-
-| INPUT_MAIL_FILTER(`clamav', `S=local:%milterstatedir/clamav.sock, F=, T=S:4m;R:4m')dnl
-
-to your sendmail.mc.
+This package contains files which are needed to run the clamav-milter.
 
 %description milter-sysv
 The SysV initscripts for clamav-milter.
@@ -235,7 +226,9 @@ The SysV initscripts for clamav-milter.
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
-%patch26 -p1 -b .nounrar
+
+install -p -m0644 %SOURCE300 clamav-milter/
+
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -254,12 +247,16 @@ CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std
 export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
 export LIBS='-lmilter -lpthread'
-%configure --disable-clamav --with-dbdir=/var/lib/clamav \
-	   --enable-milter --disable-static --disable-unrar
-sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
-# No rpath
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+%configure --disable-clamav --with-dbdir=/var/lib/clamav	\
+	--enable-milter --disable-static --disable-rpath	\
+	%{!?with_unrar:--disable-unrar}
+
+# build with --as-needed and disable rpath
+sed -i \
+	-e 's! -shared ! -Wl,--as-needed\0!g' 					\
+	-e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g'	\
+	-e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' 		\
+	libtool
 
 
 make %{?_smp_mflags}
@@ -291,14 +288,19 @@ install -d -m755 \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
 	${RPM_BUILD_ROOT}%_initrddir \
-	${RPM_BUILD_ROOT}%homedir/daily.inc
+	${RPM_BUILD_ROOT}%homedir/{main,daily}.inc
 
 rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
 	${RPM_BUILD_ROOT}%_libdir/*.la
 
-for i in COPYING daily.{db,fp,hdb,info,ndb,pdb,zmd}; do
-	touch ${RPM_BUILD_ROOT}%homedir/daily.inc/$i
+
+for i in cfg db fp hdb info mdb mdu ndb ndu pdb wdb zmd; do
+	touch ${RPM_BUILD_ROOT}%homedir/daily.inc/daily.$i
+	touch ${RPM_BUILD_ROOT}%homedir/main.inc/main.$i
 done
+
+touch ${RPM_BUILD_ROOT}%homedir/daily.inc/COPYING
+touch ${RPM_BUILD_ROOT}%homedir/main.inc/COPYING
 
 
 ## prepare the server-files
@@ -470,14 +472,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
 
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/COPYING
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.db
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.fp
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.hdb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.info
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.ndb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.pdb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.zmd
+%ghost %attr(0664,%username,%username) %homedir/daily.inc/*
+%ghost %attr(0664,%username,%username) %homedir/main.inc/*
 
 
 ## -----------------------
@@ -503,7 +499,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files milter
 %defattr(-,root,root,-)
-%doc clamav-milter/INSTALL
+%doc clamav-milter/INSTALL clamav-milter/README.fedora
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
 %config(noreplace) %verify(not mtime) %_sysconfdir/clamd.d/milter.conf
@@ -519,6 +515,16 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Dec 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-4
+- added a README.fedora to the milter package (#240610)
+- ship original sources again; unrar is now licensed correctly (no more
+  stolen code put under GPL). Nevertheless, this license is not GPL
+  compatible, and to allow libclamav to be used by GPL applications,
+  unrar is disabled by a ./configure switch.
+- use pkg-config in clamav-config to emulate --cflags and --libs
+  operations (fixes partly multilib issues)
+- registered some more auto-updated files and marked them as %%ghost
+
 * Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-3
 - updated to 0.92 (SECURITY):
 - CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
