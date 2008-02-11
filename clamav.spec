@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.65 2008/01/01 17:10:12 ensc Exp $
+## $Id: clamav.spec,v 1.66 2008/01/01 17:33:05 ensc Exp $
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -18,8 +18,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.92
-Release:	%release_func 6
+Version:	0.92.1
+Release:	%release_func 1
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -30,8 +30,14 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL 
 # incompatible unrar from RARlabs. We have to pull this code out.
-# All that is needed to make the clean tarball is: rm -rf libclamunrar*
-Source0:	%name-%version.clean.tar.gz
+# tarball was created by
+#
+# zcat clamav-$V.tar.gz | tar --delete -f - '*/libclamunrar/*' | bzip2 -c > clamav-$V-norar.tar.bz2
+#
+# or
+#
+# make clean-sources [TARBALL=<original-tarball>]
+Source0:	%name-%version-norar.tar.bz2
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -257,7 +263,7 @@ Sendmail customizations of the clamav-milter.
 install -p -m0644 %SOURCE300 clamav-milter/
 
 mkdir -p libclamunrar{,_iface}
-%{!?with_unrar:touch libclamunrar{,_iface}/{Makefile.in,all,install}}
+%{!?with_unrar:touch libclamunrar/{Makefile.in,all,install}}
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -549,6 +555,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Feb 11 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92.1-1
+- updated to 0.92.1
+
 * Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-6
 - redisabled unrar stuff completely by using clean sources
 - splitted -milter subpackage into pieces to allow use without sendmail
