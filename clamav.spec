@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.47 2007/12/21 19:12:19 spot Exp $
+## $Id: clamav.spec,v 1.48 2007/12/21 19:23:28 spot Exp $
 
 ## Fedora Extras specific customization below...
 # %bcond_without       fedora
@@ -17,8 +17,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.92
-Release:	%release_func 4.1
+Version:	0.92.1
+Release:	%release_func 1
 
 License:	GPLv2
 Group:		Applications/File
@@ -27,7 +27,7 @@ URL:		http://www.clamav.net
 # incompatible unrar from RARlabs. We have to pull this code out.
 # All that is needed to make the clean tarball is: rm -rf libclamunrar*
 # Note that you also need patch26.
-Source0:	clamav-%{version}.clean.tar.gz
+Source0:	clamav-%{version}-norar.tar.bz2
 # Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
 # No sense in using this file for the time being.
 # Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
@@ -519,6 +519,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Feb 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.92.1-1
+- Upgrade to 0.92.1 (SECURITY):
+- CVE-2008-0318 Integer overflow in libclamav (#432623)
+
 * Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-4
 - EPEL fixes
 
