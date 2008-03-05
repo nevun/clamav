@@ -1,4 +1,6 @@
-## $Id: clamav.spec,v 1.66 2008/01/01 17:33:05 ensc Exp $
+## $Id: clamav.spec,v 1.67 2008/02/11 22:30:35 ensc Exp $
+
+%global snapshot	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -18,26 +20,21 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.92.1
-Release:	%release_func 1
+Version:	0.93
+Release:	%release_func 0.0%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
 %if 0%{?with_unrar:1}
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL 
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
-#
-# zcat clamav-$V.tar.gz | tar --delete -f - '*/libclamunrar/*' | bzip2 -c > clamav-$V-norar.tar.bz2
-#
-# or
-#
-# make clean-sources [TARBALL=<original-tarball>]
-Source0:	%name-%version-norar.tar.bz2
+#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
+Source0:	%name-%version%{?snapshot}-norar.tar.bz2
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -253,7 +250,7 @@ Sendmail customizations of the clamav-milter.
 ## ------------------------------------------------------------
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}%{?snapshot}
 
 %patch21 -p1 -b .path
 %patch22 -p1 -b .initoff
@@ -284,12 +281,13 @@ export LDFLAGS='-Wl,--as-needed'
 export LIBS='-lmilter -lpthread'
 %configure --disable-clamav --with-dbdir=/var/lib/clamav	\
 	--enable-milter --disable-static			\
+	--disable-rpath						\
 	%{!?with_unrar:--disable-unrar}
 
 # build with --as-needed and disable rpath
 sed -i \
 	-e 's! -shared ! -Wl,--as-needed\0!g' 					\
-	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!/lib!/%_lib!g'	\
+	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!\"\/lib \/usr\/lib !/\"/%_lib /usr/%_lib !g'	\
 	libtool
 
 
@@ -555,6 +553,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Mar  4 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.0.rc1
+- updated to 0.93rc1
+- fixed rpath issues
+
 * Mon Feb 11 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92.1-1
 - updated to 0.92.1
 
