@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.67 2008/02/11 22:30:35 ensc Exp $
+## $Id: clamav.spec,v 1.68 2008/03/05 07:30:58 ensc Exp $
 
 %global snapshot	rc1
 
@@ -21,7 +21,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.93
-Release:	%release_func 0.0%{?snapshot:.%snapshot}
+Release:	%release_func 0.1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -146,6 +146,8 @@ Group:		System Environment/Daemons
 Source300:	README.fedora
 Requires:	sendmail
 Requires:	clamav-milter-core = %version-%release
+Requires(pre):	user(%milteruser)
+Requires(pre):	group(%milteruser)
 Provides:	milter(clamav) = sendmail
 Conflicts:	milter(clamav) < sendmail
 Conflicts:	milter(clamav) > sendmail
@@ -410,19 +412,19 @@ test -e %freshclamlog || {
 	%__chown root:%username %freshclamlog
 }
 
-%pre milter
+%pre milter-core
 %__fe_groupadd 5 -r %milteruser &>/dev/null || :
 %__fe_useradd  5 -r -s /sbin/nologin -d %milterstatedir -M \
                  -c 'Clamav Milter User' -g %milteruser %milteruser &>/dev/null || :
 
-%post milter
+%post milter-core
 test -e %milterlog || {
 	touch %milterlog
 	chmod 0620             %milterlog
 	chown root:%milteruser %milterlog
 }
 
-%postun milter
+%postun milter-core
 %__fe_userdel  %milteruser &>/dev/null || :
 %__fe_groupdel %milteruser &>/dev/null || :
 
@@ -553,6 +555,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Mar 12 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- moved -milter scriptlets into -milter-core subpackage
+- added a requirement on the milteruser to the -milter-sendmail
+  subpackage (reported by Bruce Jerrick)
+
 * Tue Mar  4 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.0.rc1
 - updated to 0.93rc1
 - fixed rpath issues
