@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.68 2008/03/05 07:30:58 ensc Exp $
+## $Id: clamav.spec,v 1.69 2008/03/12 08:38:02 ensc Exp $
 
 %global snapshot	rc1
 
@@ -555,7 +555,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
-* Wed Mar 12 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+* Wed Mar 12 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.1.rc1
 - moved -milter scriptlets into -milter-core subpackage
 - added a requirement on the milteruser to the -milter-sendmail
   subpackage (reported by Bruce Jerrick)
