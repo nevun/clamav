@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.48 2007/12/21 19:23:28 spot Exp $
+## $Id: clamav.spec,v 1.49 2008/02/14 16:00:40 robert Exp $
 
 ## Fedora Extras specific customization below...
 # %bcond_without       fedora
@@ -17,7 +17,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.92.1
+Version:	0.93
 Release:	%release_func 1
 
 License:	GPLv2
@@ -42,7 +42,6 @@ Patch21:	clamav-0.70-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.90rc3-private.patch
 Patch25:	clamav-0.92-open.patch
-Patch26:	clamav-0.92-nounrar.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -235,7 +234,9 @@ The SysV initscripts for clamav-milter.
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
-%patch26 -p1 -b .nounrar
+
+mkdir -p libclamunrar{,_iface}
+touch libclamunrar/{Makefile.in,all,install}
 
 perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
 	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
@@ -291,14 +292,13 @@ install -d -m755 \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
 	${RPM_BUILD_ROOT}%_initrddir \
-	${RPM_BUILD_ROOT}%homedir/daily.inc
+	${RPM_BUILD_ROOT}%homedir
 
 rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
 	${RPM_BUILD_ROOT}%_libdir/*.la
 
-for i in COPYING daily.{db,fp,hdb,info,ndb,pdb,zmd}; do
-	touch ${RPM_BUILD_ROOT}%homedir/daily.inc/$i
-done
+touch ${RPM_BUILD_ROOT}%homedir/daily.cld
+touch ${RPM_BUILD_ROOT}%homedir/main.cld
 
 
 ## prepare the server-files
@@ -439,7 +439,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files filesystem
 %attr(-,%username,%username) %dir %homedir
-%attr(-,%username,%username) %dir %homedir/daily.inc
 %attr(-,root,root)           %dir %pkgdatadir
 
 ## -----------------------
@@ -454,7 +453,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files data-empty
 %defattr(-,%username,%username,-)
-%ghost %attr(0664,%username,%username) %homedir/main.cvd
+%ghost %attr(0664,%username,%username) %homedir/*.cvd
 
 ## -----------------------
 
@@ -470,14 +469,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
 
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/COPYING
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.db
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.fp
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.hdb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.info
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.ndb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.pdb
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/daily.zmd
+%ghost %attr(0664,%username,%username) %homedir/*.cld
 
 
 ## -----------------------
@@ -519,6 +511,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Apr 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.93-1
+- Upgrade to 0.93 (SECURITY):
+- CVE-2008-1100 Upack processing buffer overflow (#442360)
+- Removed *.inc directories; got replaced by *.cld containers
+
 * Thu Feb 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.92.1-1
 - Upgrade to 0.92.1 (SECURITY):
 - CVE-2008-0318 Integer overflow in libclamav (#432623)
