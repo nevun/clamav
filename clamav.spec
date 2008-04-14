@@ -1,6 +1,6 @@
-## $Id: clamav.spec,v 1.69 2008/03/12 08:38:02 ensc Exp $
+## $Id: clamav.spec,v 1.70 2008/03/12 08:40:04 ensc Exp $
 
-%global snapshot	rc1
+#global snapshot	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -21,7 +21,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.93
-Release:	%release_func 0.1%{?snapshot:.%snapshot}
+Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -322,19 +322,14 @@ install -d -m755 \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
 	${RPM_BUILD_ROOT}%_initrddir \
-	${RPM_BUILD_ROOT}%homedir/{main,daily}.inc
+	${RPM_BUILD_ROOT}%homedir
 
 rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
 	${RPM_BUILD_ROOT}%_libdir/*.la
 
 
-for i in cfg db fp hdb info mdb mdu ndb ndu pdb wdb zmd; do
-	touch ${RPM_BUILD_ROOT}%homedir/daily.inc/daily.$i
-	touch ${RPM_BUILD_ROOT}%homedir/main.inc/main.$i
-done
-
-touch ${RPM_BUILD_ROOT}%homedir/daily.inc/COPYING
-touch ${RPM_BUILD_ROOT}%homedir/main.inc/COPYING
+touch ${RPM_BUILD_ROOT}%homedir/daily.cld
+touch ${RPM_BUILD_ROOT}%homedir/main.cld
 
 
 ## prepare the server-files
@@ -475,7 +470,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files filesystem
 %attr(-,%username,%username) %dir %homedir
-%attr(-,%username,%username) %dir %homedir/daily.inc
 %attr(-,root,root)           %dir %pkgdatadir
 
 ## -----------------------
@@ -490,7 +484,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files data-empty
 %defattr(-,%username,%username,-)
-%ghost %attr(0664,%username,%username) %homedir/main.cvd
+%ghost %attr(0664,%username,%username) %homedir/*.cvd
+
 
 ## -----------------------
 
@@ -505,9 +500,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
-
-%ghost %attr(0664,%username,%username) %homedir/daily.inc/*
-%ghost %attr(0664,%username,%username) %homedir/main.inc/*
+%ghost %attr(0664,%username,%username) %homedir/*.cld
 
 
 ## -----------------------
@@ -555,6 +548,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Apr 14 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-1
+- updated to final 0.93
+- removed daily.inc + main.inc directories; they are now replaced by
+  *.cld containers
+- trimmed down MAILTO list of cronjob to 'root' again; every well
+  configured system has an alias for this recipient
+
 * Wed Mar 12 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.1.rc1
 - moved -milter scriptlets into -milter-core subpackage
 - added a requirement on the milteruser to the -milter-sendmail
