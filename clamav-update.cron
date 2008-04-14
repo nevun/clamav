@@ -1,5 +1,5 @@
 ## Adjust this line...
-MAILTO=root,postmaster,webmaster,clamav
+MAILTO=root
 
 ## It is ok to execute it as root; freshclam drops privileges and becomes
 ## user 'clamav' as soon as possible
