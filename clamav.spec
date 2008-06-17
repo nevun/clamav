@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.70 2008/03/12 08:40:04 ensc Exp $
+## $Id: clamav.spec,v 1.72 2008/06/17 19:57:54 ensc Exp $
 
 #global snapshot	rc1
 
@@ -20,7 +20,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93
+Version:	0.93.1
 Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -43,7 +43,7 @@ Source5:	clamd-README
 Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
-Patch21:	clamav-0.70-path.patch
+Patch21:	clamav-0.93.1-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
@@ -548,6 +548,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Jun 17 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.1-1
+- updated to 0.93.1
+- rediffed -path patch
+- CVE-2008-2713 Invalid Memory Access Denial Of Service Vulnerability
+
 * Mon Apr 14 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-1
 - updated to final 0.93
 - removed daily.inc + main.inc directories; they are now replaced by
