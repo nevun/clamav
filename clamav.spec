@@ -1,4 +1,4 @@
-## $Id: clamav.spec,v 1.49 2008/02/14 16:00:40 robert Exp $
+## $Id: clamav.spec,v 1.50 2008/04/14 20:31:45 robert Exp $
 
 ## Fedora Extras specific customization below...
 # %bcond_without       fedora
@@ -17,7 +17,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93
+Version:	0.93.1
 Release:	%release_func 1
 
 License:	GPLv2
@@ -38,7 +38,7 @@ Source5:	clamd-README
 Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
-Patch21:	clamav-0.70-path.patch
+Patch21:	clamav-0.93.1-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.90rc3-private.patch
 Patch25:	clamav-0.92-open.patch
@@ -511,6 +511,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Jun 18 2008 Robert Scheck <robert@fedoraproject.org> - 0.93.1-1
+- Upgrade to 0.93.1, rediffed -path patch
+- CVE-2008-2713 Invalid Memory Access Denial Of Service Vulnerability
+
 * Mon Apr 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.93-1
 - Upgrade to 0.93 (SECURITY):
 - CVE-2008-1100 Upack processing buffer overflow (#442360)
