@@ -1,5 +1,4 @@
 # Makefile for source rpm: clamav
-# $Id: Makefile,v 1.2 2004/11/24 03:10:01 gafton Exp $
 NAME := clamav
 SPECFILE = $(firstword $(wildcard *.spec))
 
