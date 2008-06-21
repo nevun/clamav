@@ -1,5 +1,3 @@
-## $Id: clamav.spec,v 1.72 2008/06/17 19:57:54 ensc Exp $
-
 #global snapshot	rc1
 
 ## Fedora Extras specific customization below...
