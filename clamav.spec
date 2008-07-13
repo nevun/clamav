@@ -18,7 +18,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93.1
+Version:	0.93.3
 Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -45,6 +45,7 @@ Patch21:	clamav-0.93.1-path.patch
 Patch22:	clamav-0.80-initoff.patch
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
+Patch26:	clamav-0.93.3-pid.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -256,6 +257,7 @@ Sendmail customizations of the clamav-milter.
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
+%patch26 -p1 -b .pid
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -546,6 +548,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Jul 13 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.3-1
+- updated to 0.93.3; another fix for CVE-2008-2713 (out-of-bounds read
+  on petite files)
+- put pid instead of pgrp into pidfile of clamav-milter (bz #452359)
+
 * Tue Jun 17 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.1-1
 - updated to 0.93.1
 - rediffed -path patch
