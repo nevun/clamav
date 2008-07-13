@@ -42,7 +42,7 @@ Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
 Patch21:	clamav-0.93.1-path.patch
-Patch22:	clamav-0.80-initoff.patch
+Patch22:	clamav-0.93.3-initoff.patch
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.93.3-pid.patch
@@ -552,6 +552,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - updated to 0.93.3; another fix for CVE-2008-2713 (out-of-bounds read
   on petite files)
 - put pid instead of pgrp into pidfile of clamav-milter (bz #452359)
+- rediffed patches
 
 * Tue Jun 17 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.1-1
 - updated to 0.93.1
