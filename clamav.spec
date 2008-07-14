@@ -1,5 +1,3 @@
-## $Id: clamav.spec,v 1.50 2008/04/14 20:31:45 robert Exp $
-
 ## Fedora Extras specific customization below...
 # %bcond_without       fedora
 ##
@@ -17,7 +15,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93.1
+Version:	0.93.3
 Release:	%release_func 1
 
 License:	GPLv2
@@ -39,9 +37,10 @@ Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
 Patch21:	clamav-0.93.1-path.patch
-Patch22:	clamav-0.80-initoff.patch
+Patch22:	clamav-0.93.3-initoff.patch
 Patch24:	clamav-0.90rc3-private.patch
 Patch25:	clamav-0.92-open.patch
+Patch26:	clamav-0.93.3-pid.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -234,6 +233,7 @@ The SysV initscripts for clamav-milter.
 %patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
+%patch26 -p1 -b .pid
 
 mkdir -p libclamunrar{,_iface}
 touch libclamunrar/{Makefile.in,all,install}
@@ -511,8 +511,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Jul 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.93.3-1
+- Upgrade to 0.93.3 (SECURITY), rediffed -initoff patch:
+- CVE-2008-2713 Out-of-bounds read on petite files
+- Put pid instead of pgrp into pid file of clamav-milter (#452359)
+
 * Wed Jun 18 2008 Robert Scheck <robert@fedoraproject.org> - 0.93.1-1
-- Upgrade to 0.93.1, rediffed -path patch
+- Upgrade to 0.93.1 (SECURITY), rediffed -path patch:
 - CVE-2008-2713 Invalid Memory Access Denial Of Service Vulnerability
 
 * Mon Apr 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.93-1
