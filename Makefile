@@ -19,3 +19,16 @@ MAKEFILE_COMMON := $(shell $(checkout-makefile-common))
 endif
 
 include $(MAKEFILE_COMMON)
+
+
+# can not use final tarball name here as it will conflict with rules
+# within Makefile.common
+TARBALL_CLEAN =	${NAME}-${VERSION}-norar.tar.bz2.tmp
+TARBALL =	${NAME}-${VERSION}.tar.gz
+
+clean-sources:	${TARBALL_CLEAN}
+
+${TARBALL_CLEAN}:	${TARBALL}
+	rm -f $@.tmp
+	zcat $< | tar --delete -f - '*/libclamunrar/*' | bzip2 -c > $@.tmp
+	mv $@.tmp $@

@@ -15,16 +15,16 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93.3
+Version:	0.94
 Release:	%release_func 1
 
 License:	GPLv2
 Group:		Applications/File
 URL:		http://www.clamav.net
-# Unfortunately, clamav includes support for RAR v3, derived from GPL 
+# Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
-# All that is needed to make the clean tarball is: rm -rf libclamunrar*
-# Note that you also need patch26.
+# tarball was created by
+#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	clamav-%{version}-norar.tar.bz2
 # Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
 # No sense in using this file for the time being.
@@ -511,6 +511,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Oct 26 2008 Robert Scheck <robert@fedoraproject.org> - 0.94-1
+- Upgrade to 0.94 (SECURITY), fixes #461461:
+- CVE-2008-1389 Invalid memory access in the CHM unpacker
+- CVE-2008-3912 Out-of-memory NULL pointer dereference in mbox/msg
+- CVE-2008-3913 Memory leak in code path in freshclam's manager.c
+- CVE-2008-3914 Multiple file descriptor leaks on the code paths
+
 * Mon Jul 14 2008 Robert Scheck <robert@fedoraproject.org> - 0.93.3-1
 - Upgrade to 0.93.3 (SECURITY), rediffed -initoff patch:
 - CVE-2008-2713 Out-of-bounds read on petite files
