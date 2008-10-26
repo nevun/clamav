@@ -18,7 +18,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.93.3
+Version:	0.94
 Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -548,6 +548,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Oct 26 2008 Robert Scheck <robert@fedoraproject.org> - 0.94-1
+- Upgrade to 0.94 (SECURITY), fixes #461461:
+- CVE-2008-1389 Invalid memory access in the CHM unpacker
+- CVE-2008-3912 Out-of-memory NULL pointer dereference in mbox/msg
+- CVE-2008-3913 Memory leak in code path in freshclam's manager.c
+- CVE-2008-3914 Multiple file descriptor leaks on the code paths
+
 * Sun Jul 13 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.3-1
 - updated to 0.93.3; another fix for CVE-2008-2713 (out-of-bounds read
   on petite files)
