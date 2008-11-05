@@ -15,7 +15,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.94
+Version:	0.94.1
 Release:	%release_func 1
 
 License:	GPLv2
@@ -511,6 +511,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Nov 05 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.1-1
+- Upgrade to 0.94.1
+
 * Sun Oct 26 2008 Robert Scheck <robert@fedoraproject.org> - 0.94-1
 - Upgrade to 0.94 (SECURITY), fixes #461461:
 - CVE-2008-1389 Invalid memory access in the CHM unpacker
