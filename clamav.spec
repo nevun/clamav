@@ -18,7 +18,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.94.1
+Version:	0.94.2
 Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -548,6 +548,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Dec 02 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.2-1
+- Upgrade to 0.94.2 (#474002)
+
 * Wed Nov 05 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.1-1
 - Upgrade to 0.94.1
 
