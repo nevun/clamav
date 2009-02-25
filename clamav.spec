@@ -19,7 +19,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.94.2
-Release:	%release_func 2%{?snapshot:.%snapshot}
+Release:	%release_func 3%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -81,6 +81,7 @@ Requires:	pkgconfig
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
+BuildArch:		noarch
 Requires(pre):		clamav-filesystem = %version-%release
 Requires(postun):	clamav-filesystem = %version-%release
 Provides:		data(clamav) = full
@@ -90,6 +91,7 @@ Conflicts:		data(clamav) > full
 %package data-empty
 Summary:	Empty data package for the Clam Antivirus scanner
 Group:		Applications/File
+BuildArch:	noarch
 Provides:	data(clamav) = empty
 Conflicts:	data(clamav) < empty
 Conflicts:	data(clamav) > empty
@@ -117,6 +119,7 @@ Requires:	clamav-lib        = %version-%release
 %package server-sysv
 Summary:	SysV initscripts for clamav server
 Group:		System Environment/Daemons
+BuildArch:	noarch
 Provides:	init(clamav-server) = sysv
 Requires:	clamav-server = %version-%release
 Requires(pre):		%_initrddir
@@ -156,6 +159,7 @@ Summary:	SysV initscripts for the clamav sendmail-milter
 Group:		System Environment/Daemons
 Provides:	init(clamav-milter) = sysv
 Requires:	clamav-milter = %version-%release
+BuildArch:	noarch
 Requires(post):		user(%milteruser) clamav-milter
 Requires(preun):	user(%milteruser) clamav-milter
 Requires(pre):		%_initrddir
@@ -548,6 +552,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Feb 25 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.94.2-3
+- made some subpackages noarch
+- fixed typo in SysV initscript which removes 'touch' file (#473513)
+
 * Mon Feb 23 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.94.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 

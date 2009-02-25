@@ -52,7 +52,7 @@ stop () {
 	killproc $procname
 	RETVAL=$?
 	echo
-	[ $RETVAL -eq 0 ] && rm -f touch $lockfile
+	[ $RETVAL -eq 0 ] && rm -f $lockfile
 	return $RETVAL
 }
 
