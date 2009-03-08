@@ -51,7 +51,7 @@ start () {
 
 stop () {
 	echo -n $"Stopping $prog: "
-	killproc $procname
+	killproc -p ${CLAMD_PIDFILE} $procname
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && rm -f $lockfile
@@ -79,7 +79,7 @@ case "$1" in
   start|stop|restart|reload)
 	$1 ;;
   status)
-	status $procname ;;
+	status -p ${CLAMD_PIDFILE} $procname ;;
   condrestart)
 	test ! -f $lockfile || restart
 	;;
