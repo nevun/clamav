@@ -1,0 +1,19 @@
+
+### Uncomment these lines when you want clamav-milter to be a milter
+### for a locally running MDA
+#start on starting\ sendmail
+#start on starting sendmail
+#start on starting\ postfix
+#start on starting postfix
+
+### Uncomment these lines when you want clamav-milter to be a milter
+### for a remotely running MDA
+#start on starting\ local
+#start on starting local
+
+stop  on runlevel 0
+stop  on runlevel 1
+stop  on runlevel 6
+
+respawn
+exec /usr/sbin/clamav-milter -c /etc/mail/clamav-milter --nofork=yes
