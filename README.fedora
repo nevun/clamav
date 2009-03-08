@@ -24,7 +24,7 @@ A clamav-milter setup consists of the following three components:
   -upstart requires modification of /etc/event.d/clamd.scan to enable
   automatic startup.  See comments there for more details.
 
-* the MDA (sendmail/postfix)
+* the MTA (sendmail/postfix)
 
   --> you should know how to install this...
 
