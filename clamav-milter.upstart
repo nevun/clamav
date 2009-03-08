@@ -16,4 +16,4 @@ stop  on runlevel 1
 stop  on runlevel 6
 
 respawn
-exec /usr/sbin/clamav-milter -c /etc/mail/clamav-milter --nofork=yes
+exec /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --nofork=yes

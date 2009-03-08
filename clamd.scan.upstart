@@ -12,4 +12,4 @@ stop  on runlevel 1
 stop  on runlevel 6
 
 respawn
-exec /usr/sbin/clamd -c /etc/clamd.d/clamd.scan --nofork=yes
+exec /usr/sbin/clamd -c /etc/clamd.d/scan.conf --nofork=yes

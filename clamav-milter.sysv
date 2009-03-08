@@ -11,7 +11,7 @@
 exec=/usr/sbin/clamav-milter
 prog="clamav-milter"
 
-OPTS=
+OPTS='-c /etc/mail/clamav-milter.conf'
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
 pidfile=/var/run/clamav-milter/milter.pid
@@ -21,8 +21,7 @@ start() {
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
-    daemon --pidfile=${pidfile} \
-	   $exec $OPTS --nofork=no --pid=${pidfile} && success || failure
+    daemon --pidfile=${pidfile} $exec $OPTS --nofork=no --pid=${pidfile}
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
@@ -31,7 +30,7 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    killproc -o "${pidfile} $exec && success || failure
+    killproc -p "${pidfile}" $exec
     retval=$?
     echo
     [ $retval -eq 0 ] && rm -f $lockfile
@@ -53,7 +52,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $prog
+    status -p "${pidfile}" $prog
 }
 
 rh_status_q() {
