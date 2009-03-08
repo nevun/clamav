@@ -1,13 +1,13 @@
 
 ### Uncomment these lines when you want clamav-milter to be a milter
-### for a locally running MDA
+### for a locally running MTA
 #start on starting\ sendmail
 #start on starting sendmail
 #start on starting\ postfix
 #start on starting postfix
 
 ### Uncomment these lines when you want clamav-milter to be a milter
-### for a remotely running MDA
+### for a remotely running MTA
 #start on starting\ local
 #start on starting local
 
