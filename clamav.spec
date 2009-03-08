@@ -21,7 +21,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95
-Release:	%release_func 0.0.1%{?snapshot:.%snapshot}
+Release:	%release_func 0.0.3%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -46,6 +46,7 @@ Source8:	clamav-notify-servers
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
+Patch27:	clamav-0.95rc1-umask.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -310,6 +311,7 @@ The Upstart initscripts for clamav-milter.
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
 %patch26 -p1 -b .cliopts
+%patch27 -p1 -b .umask
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -422,7 +424,7 @@ smartsubst 's!webmaster,clamav!webmaster,%username!g;
 
 ### The scanner stuff
 sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
-    etc/clamd.conf > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/clamd.scan
+    etc/clamd.conf > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/scan.conf
 
 sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
@@ -629,7 +631,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %files scanner
 %defattr(-,root,root,-)
 %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
-%config(noreplace) %_sysconfdir/clamd.d/clamd.scan
+%config(noreplace) %_sysconfdir/clamd.d/scan.conf
 %ghost %scanstatedir/clamd.sock
 
 %files scanner-sysvinit
