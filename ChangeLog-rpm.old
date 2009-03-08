@@ -1,0 +1,279 @@
+* Tue Dec 12 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.7-1
+- updated to 0.88.7
+
+* Sun Nov  5 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.6-1
+- updated to 0.88.6
+
+* Wed Oct 18 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.5-1
+- updated to 0.88.5 (SECURITY); fixes CVE-2006-4182, CVE-2006-5295
+- added patch to set '__attribute__ ((visibility("hidden")))' for
+  exported MD5_*() functions (fixes #202043)
+
+* Thu Oct 05 2006 Christian Iseli <Christian.Iseli@licr.org> 0.88.4-4
+ - rebuilt for unwind info generation, broken in gcc-4.1.1-21
+
+* Thu Sep 21 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-3
+- splitted SysV initscripts of -milter and -server into own subpackages
+
+* Fri Sep 15 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-2
+- rebuilt
+
+* Tue Aug  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.4-1
+- updated to 0.88.4 (SECURITY)
+
+* Wed Jul 12 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- removed the clamdscan(1) manpage from the -server subpackage
+
+* Sat Jul  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- removed a superfluous '}'
+- removed some code which was relevant for FC-3 only
+
+* Sat Jul  8 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.3-1
+- updated to 0.88.3
+- updated to new fedora-usermgmt macros
+
+* Tue May 16 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.2-2
+- cleanups: removed unneeded curlies, use plain command instead of
+  %%__XXX macro, whitespace cleanup, removed unneeded versioned
+  dependencies
+- added a 'Requires(post): group(clamav)' dependencies for -update and
+  added the corresponding Provides: to -data
+- removed the %%_without_milter conditional; you won't gain anything
+  when milter would be disabled at buildtime
+
+* Sun Apr 30 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.2-1
+- updated to 0.88.2 (SECURITY)
+- rediffed patches; most issues handled by 0.88.1-2 are fixed in
+  0.88.2
+
+* Mon Apr 24 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.1-2
+- added patch which fixes some classes of compiler warnings; at least
+  the using of implicitly declared functions was reported to cause
+  segfaults on AMD64 (brought to my attention by Marc Perkel)
+- added patch which fixes wrong usage of strncpy(3) in unrarlib.c
+
+* Thu Apr 06 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88.1-1
+- updated to 0.88.1 (SECURITY)
+
+* Sat Feb 18 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88-2
+- rebuilt for FC5
+
+* Tue Jan 10 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.88-1
+- updated to 0.88
+- added pseudo-versions for the 'init(...)' provides as a first step
+  for the support of alternative initmethods
+
+* Tue Nov 15 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87.1-2
+- moved 'freshclam.conf.5' man page into the -update subpackage (#173221)
+- ship 'clamd.conf.5' man page in the -server subpackage *too*. The
+  same file is contained in multiple packages now, but this man-page
+  can not be removed from the base package because it also applies to
+  'clamdscan' there (#173221).
+
+* Fri Nov  4 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87.1-1
+- updated to 0.87.1
+
+* Sat Sep 17 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.87-1
+- updated to 0.87 (SECURITY)
+- removed -timeout patch; it is solved upstream
+- reverted the -exim changes; they add yet more complexity, their
+  functionality can go into an own package and they contained flaws
+
+* Fri Sep  9 2005 David Woodhouse <dwmw2@infradead.org> - 0.86.2-5
+- Add clamav-exim configuration package
+
+* Fri Jul 29 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-4
+- [milter] create the milter-logfile in the %%post scriptlet
+- [milter] reverted the change of the default child_timeout value; it
+  was set to 5 minutes in 0.86.2 which conflicts with the internal
+  mode where a timeout must not be set. So, the clamav-milter would
+  not run with the default configuration
+
+* Thu Jul 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-3
+- Fixed calculation of sleep duration; on some systems/IPs, `hostid`
+  results in a negative number which is retained by the bash
+  modulo-operation. So the sleep may get a negative number of seconds
+  being interpreted as an option. This version makes sure that the
+  module-operations returns a non-negative value. [BZ #164494, James
+  Wilkinson]
+- added support for a /usr/sbin/clamav-notify-servers.local hook; this
+  file will be executed (source'd) before all other actions and can
+  abort the entire processing by invoking 'exit'
+
+* Mon Jul 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.2-2
+- updated to 0.86.2 (SECURITY)
+- changed the freshclam updating mechanism (again); now, it consists
+  of a crontab which does not need to be changed and a helper script
+  (freshclam-sleep). This helper script is configured by
+  /etc/sysconfig/freshclam
+
+* Sat Jun 25 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86.1-2
+- updated to 0.86.1
+- fixed randomization in %%post scriptlet: hour should be a range but
+  not a single number
+
+* Tue Jun 21 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.86-1
+- updated to 0.86
+- randomize freshclam startup times in -update's %%post script (suggested
+  by Stephen Smoogen); this requires some more Requires(post): also
+
+* Wed May 18 2005 Warren Togami <wtogami@redhat.com> - 0.85.1-4
+- fix dist tagging the way Enrico wants it
+
+* Tue May 17 2005 Oliver Falk <oliver@linux-kernel.at>					  - 0.85.1-2
+- Rebuild
+
+* Tue May 17 2005 Oliver Falk <oliver@linux-kernel.at>					  - 0.85.1-1
+- Update
+
+* Sat May 14 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.85-0
+- updated to 0.85
+
+* Sun May  1 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.84-0
+- updated to 0.84
+
+* Fri Apr  7 2005 Michael Schwendt <mschwendt[AT]users.sf.net>
+- rebuilt
+
+* Tue Feb 15 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.83-1
+- updated to 0.83
+
+* Tue Feb  8 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.82-1
+- updated to 0.82
+- minor spec cleanups
+
+* Fri Jan 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.81-0.fdr.2
+- build the package with '--disable-zlib-vcheck' because RH is unable to
+  apply a fix for a 5 month old and solved security issue.  Please fill
+  your comments at https://bugzilla.redhat.com/beta/show_bug.cgi?id=131385
+- added 'BuildRequires: bc' (should work without also, but ./configure
+  gives out ugly warnings else)
+
+* Fri Jan 28 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.81-0.fdr.1
+- updated to 0.81
+- do not ship the 'clamd.milter' daemon anymore; clamav-milter supports
+  an internal mode now which is enabled by default
+- updated -milter %%description
+
+* Thu Jan 20 2005 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.80-0.fdr.2
+- s!cron.d/clamav!cron.d/clamav-update! in the %%description of the -update
+  subpackage (https://bugzilla.fedora.us/show_bug.cgi?id=1715#c39)
+
+* Wed Nov  3 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.80-0.fdr.1
+- updated to 0.80
+- removed DMS, FreeBSD-HOWTO and localized docs as it is not shipped anymore
+- buildrequire 'curl-devel'
+- renamed clamav.conf to clamd.conf (upstream change)
+- updated -initoff patch
+
+* Tue Sep 14 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.75.1-0.fdr.1
+- updated to 0.75.1
+- use %%configure, the problems with the architecture specification
+  seem to have passed (probably because of an autoconf update)
+- set mode 0600 for the cron-script (required by vixie-cron)
+- made the cronjob a spambot and send mail about deactivated freshclam
+  service to nearly everybody... (root, postmaster, webmaster)
+- other fixes in the notification cronjob
+
+* Fri Jul 23 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.75-0.fdr.1
+- updated to 0.75
+
+* Thu Jul 15 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.74-0.fdr.2
+- moved /usr/bin/clamav-config from main into -devel
+
+* Wed Jun 30 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.74-0.fdr.1
+- updated to 0.74
+
+* Mon Jun 14 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.73-0.fdr.1
+- updated to 0.73
+- added pkgconfig file
+
+* Fri Jun 11 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.72-0.fdr.3
+- notify the user about a deactivated clamav-update service
+- added clamd-gen script which generates template spec-files for
+  services using clamd
+- copied template configuration files to %pkgdatadir/template (needed
+  for clamd-gen)
+- moved the clamd-wrapper from %_initrddir to %{pkgdatadir}; a symlink
+  will be provided for compatibility reasons
+- conditionalized building of the -milter subpackage ('--without
+  milter' switch) to enable builds on RH73 (bug #1715, comment #5/#7)
+
+* Fri Jun  4 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.72-0.fdr.2
+- removed 'BuildRequires: dietlibc'; it was a leftover from the
+  pre-use-signal era (before 0.70) (bug #1716)
+
+* Thu Jun  3 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.72-0.fdr.1
+- updated to 0.72
+
+* Thu May 20 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.71-0.fdr.2
+- removed the randomization in the cronjob; it seems to be impossible
+  to use the mod-operator (%%) there. Instead of, the user has to
+  replace some placeholders...
+
+* Wed May 19 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.71-0.fdr.1
+- updated to 0.71
+
+* Fri May  7 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.70-0.fdr.1.1
+- quote 'EOF' to delay $RANDOM expansion
+
+* Tue Apr 27 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.70-0.fdr.2
+- updated GECOS entry for the 'clamav' user to describe its purpose
+  more accurately
+- use explicit '-m755' when creating directories with install
+
+* Tue Apr 20 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.70-0.fdr.1
+- updated to 0.70; rediffed some patches
+- updated logrotate script to use signals and documented the steps
+  which are needed to make it work
+- adapted initscript to use signals instead of sockwrite
+- removed sockwrite; signals can now be used to reload the database
+- added logfile to the -milter subpackage
+
+* Tue Apr 20 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.68-0.fdr.2.1
+- tagged some Requires:, since clamav-server is required in the milter-%%post* scriptlets
+
+* Sat Mar 20 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.68-0.fdr.2
+- split the double Requires(...,...): statements; see
+  https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=118773
+- require the recent fedora-usermgmt package (0.7) which fixes similar
+  ordering issues
+
+* Thu Mar 18 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.68-0.fdr.1
+- updated to 0.68 (using the -1 version)
+- ship milter-files in the -milter instead of the -server subpackage
+
+* Tue Feb 24 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.67-0.fdr.3
+- fixed ':' vs. '.' in chown
+
+* Tue Feb 17 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.67-0.fdr.2
+- randomize freshclam startup to prevent server peaks
+
+* Mon Feb 16 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.67-0.fdr.1
+- updated to 0.67 (using the -1 version)
+
+* Wed Feb 11 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.66-0.fdr.2
+- updated to 0.66; important, packaging-relevant changes are
+  freshclam:
+  * $http_proxy is not supported anymore; you have to configure it in
+    /etc/freshclam.conf
+  * the logfile has been renamed to /var/log/freshclam.log
+- removed %%check section; buildroot check is implemented in local
+  testsuite already
+- added some %%verify(not mtime) modifiers to avoid unnecessary .rpmnew
+  files
+- added some directory-Requires:
+- activated milter-package and made it work
+- added patch to disable clamav-milter service by default
+- renamed /var/run/clamav.<SERVICE> to /var/run/clamd.<SERVICE>; this
+  makes things more consistently but can break backward compatibility. The
+  initscript should deal with the old version too, but I would not bet on
+  it...
+- updated some descriptions
+- fixed the update-mechanism; now it happens in two stages: at first,
+  the files will be downloaded as user 'clamav' and then, root initiates
+  the daemon-reload.
+
+* Mon Feb  9 2004 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0:0.65-0.fdr.5
+- added security fix for
+  http://www.securityfocus.com/archive/1/353194/2004-02-06/2004-02-12/1

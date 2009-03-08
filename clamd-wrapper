@@ -26,6 +26,7 @@ procname=clamd.${CLAMD_SERVICE}
 
 CLAMD_CONFIGFILE=/etc/clamd.d/${CLAMD_SERVICE}.conf
 CLAMD_OPTIONS=
+CLAMD_PIDFILE=/var/run/clamd.${CLAMD_SERVICE}/clamd.pid
 ## backward-compatibility check...
 for i in /var/run/clamd.${CLAMD_SERVICE}/clamd.sock \
 	 /var/run/clamav.${CLAMD_SERVICE}/clamd.sock; do
@@ -40,7 +41,8 @@ prog="clamd.${CLAMD_SERVICE}"
 
 start () {
 	echo -n $"Starting $prog: "
-	daemon $procname  ${CLAMD_CONFIGFILE:+-c $CLAMD_CONFIGFILE} ${CLAMD_OPTIONS}
+	daemon --pidfile=${CLAMD_PIDFILE} \
+	    $procname  ${CLAMD_CONFIGFILE:+-c $CLAMD_CONFIGFILE} ${CLAMD_OPTIONS} --pid ${CLAMD_PIDFILE}
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch $lockfile
@@ -59,10 +61,10 @@ stop () {
 reload() {
 	rc=0
 	echo -n $"Reloading $prog: "
-	killproc $procname -SIGHUP  || rc=$?
+	killproc -p ${CLAMD_PIDFILE} $procname -SIGHUP  || rc=$?
 	echo
 	echo -n $"Loading new virus-database: "
-	killproc $procname -SIGUSR2 || rc=$?
+	killproc -p ${CLAMD_PIDFILE} $procname -SIGUSR2 || rc=$?
 	echo
 	return $rc
 }

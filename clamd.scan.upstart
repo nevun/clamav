@@ -1,0 +1,15 @@
+### Uncomment these lines when you want clamd.scan to be a scanner
+### for a locally running clamav-milter
+#start on starting clamav-milter
+
+### Uncomment these lines when you want clamd.scan to be a generic
+### scanner service
+#start on starting\ local
+#start on starting local
+
+stop  on runlevel 0
+stop  on runlevel 1
+stop  on runlevel 6
+
+respawn
+exec /usr/sbin/clamd -c /etc/clamd.d/clamd.scan --nofork=yes
