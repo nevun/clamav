@@ -134,8 +134,8 @@ Summary:	Clamav scanner daemon
 Group:		System Environment/Daemons
 BuildArch:	noarch
 Requires:	init(clamav-scanner)
-Provides:	user(%scanuser)  = 99
-Provides:	group(%scanuser) = 99
+Provides:	user(%scanuser)  = 49
+Provides:	group(%scanuser) = 49
 Requires:	clamav-server = %version-%release
 
 %package scanner-sysvinit
