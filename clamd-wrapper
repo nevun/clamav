@@ -42,7 +42,8 @@ prog="clamd.${CLAMD_SERVICE}"
 start () {
 	echo -n $"Starting $prog: "
 	daemon --pidfile=${CLAMD_PIDFILE} \
-	    $procname  ${CLAMD_CONFIGFILE:+-c $CLAMD_CONFIGFILE} ${CLAMD_OPTIONS} --pid ${CLAMD_PIDFILE}
+	    exec -a $procname /usr/sbin/clamd \
+	    ${CLAMD_CONFIGFILE:+-c $CLAMD_CONFIGFILE} ${CLAMD_OPTIONS} --pid ${CLAMD_PIDFILE}
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch $lockfile
