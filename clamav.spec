@@ -1,4 +1,4 @@
-%global snapshot	rc1
+#global snapshot	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
@@ -21,7 +21,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95
-Release:	%release_func 0.1%{?snapshot:.%snapshot}
+Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -51,6 +51,7 @@ BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
+BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
 BuildRequires:	bc
 
@@ -337,6 +338,8 @@ CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std
 export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
 export LIBS='-lmilter -lpthread'
+# IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
+export have_cv_ipv6=yes
 %configure --disable-clamav --with-dbdir=/var/lib/clamav	\
 	--enable-milter --disable-static			\
 	--disable-rpath						\
@@ -663,6 +666,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Mar 25 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95-1
+- updated to final 0.95
+- added ncurses-devel (-> clamdtop) BR
+- enforced IPv6 support
+
 * Sun Mar  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95-0.1.rc1
 - updated to 0.95rc1
 - added -upstart subpackages
