@@ -15,7 +15,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.94.2
+Version:	0.95.1
 Release:	%release_func 1
 
 License:	GPLv2
@@ -25,7 +25,7 @@ URL:		http://www.clamav.net
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	clamav-%{version}-norar.tar.bz2
+Source0:	%name-%version-norar.tar.bz2
 # Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz
 # No sense in using this file for the time being.
 # Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version.tar.gz.sig
@@ -36,15 +36,15 @@ Source5:	clamd-README
 Source6:	clamav-update.logrotate
 Source7:	clamd.SERVICE.init
 Source8:	clamav-notify-servers
-Patch21:	clamav-0.93.1-path.patch
-Patch22:	clamav-0.93.3-initoff.patch
-Patch24:	clamav-0.90rc3-private.patch
+Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
-Patch26:	clamav-0.93.3-pid.patch
+Patch26:	clamav-0.95-cliopts.patch
+Patch27:	clamav-0.95rc1-umask.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
+BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
 BuildRequires:	bc
 
@@ -71,6 +71,7 @@ Source100:	clamd-gen
 Requires:	clamav-lib        = %version-%release
 Requires:	clamav-filesystem = %version-%release
 Requires(pre):	%_libdir/pkgconfig
+Requires:	pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -131,6 +132,7 @@ Requires(post):	coreutils
 %package milter-sysv
 Summary:	SysV initscripts for the clamav sendmail-milter
 Group:		System Environment/Daemons
+Source320:	clamav-milter.sysv
 Provides:	init(clamav-milter) = sysv
 Requires:	clamav-milter = %version-%release
 Requires(post):		user(%milteruser) clamav-milter
@@ -229,23 +231,24 @@ The SysV initscripts for clamav-milter.
 %prep
 %setup -q
 
-%patch21 -p1 -b .path
-%patch22 -p1 -b .initoff
 %patch24 -p1 -b .private
 %patch25 -p1 -b .open
-%patch26 -p1 -b .pid
+%patch26 -p1 -b .cliopts
+%patch27 -p1 -b .umask
 
 mkdir -p libclamunrar{,_iface}
 touch libclamunrar/{Makefile.in,all,install}
 
-perl -pi -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g;
-	     s!^#?(LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g;
-	     s!^#?(PidFile ).*!\1/var/run/clamd.<SERVICE>/clamd.pid!g;
-	     s!^#?(User ).*!\1<USER>!g;
-             s! /usr/local/share/clamav,! %homedir,!g;
-            ' etc/clamd.conf
+sed -ri \
+    -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g' \
+    -e 's!^(#?LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g' \
+    -e 's!^(#?PidFile ).*!\1/var/run/clamd.<SERVICE>/clamd.pid!g' \
+    -e 's!^#?(User ).*!\1<USER>!g' \
+    -e 's!^#?(AllowSupplementaryGroups|LogSyslog).*!\1 yes!g' \
+    -e 's! /usr/local/share/clamav,! %homedir,!g' \
+    etc/clamd.conf
 
-perl -pi -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
+sed -ri -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
 
 
 ## ------------------------------------------------------------
@@ -255,12 +258,17 @@ CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std
 export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
 export LIBS='-lmilter -lpthread'
-%configure --disable-clamav --with-dbdir=/var/lib/clamav \
-	   --enable-milter --disable-static --disable-unrar
-sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
-# No rpath
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+# IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
+export have_cv_ipv6=yes
+%configure --disable-clamav --with-dbdir=/var/lib/clamav	\
+	--enable-milter --disable-static			\
+	--disable-rpath --disable-unrar
+
+# build with --as-needed and disable rpath
+sed -i \
+	-e 's! -shared ! -Wl,--as-needed\0!g' 					\
+	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!\"\/lib \/usr\/lib !/\"/%_lib /usr/%_lib !g'	\
+	libtool
 
 
 make %{?_smp_mflags}
@@ -296,6 +304,7 @@ install -d -m755 \
 
 rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
 	${RPM_BUILD_ROOT}%_libdir/*.la
+
 
 touch ${RPM_BUILD_ROOT}%homedir/daily.cld
 touch ${RPM_BUILD_ROOT}%homedir/main.cld
@@ -348,7 +357,8 @@ cat <<EOF >$RPM_BUILD_ROOT%_sysconfdir/sysconfig/clamav-milter
 CLAMAV_FLAGS='-lo -c /etc/clamd.d/milter.conf local:%milterstatedir/clamav.sock'
 EOF
 
-install -p -m755 contrib/init/RedHat/clamav-milter $RPM_BUILD_ROOT%_initrddir/clamav-milter
+install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
+rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
 touch $RPM_BUILD_ROOT%milterstatedir/clamav.sock $RPM_BUILD_ROOT%milterlog
 
 
@@ -455,6 +465,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %defattr(-,%username,%username,-)
 %ghost %attr(0664,%username,%username) %homedir/*.cvd
 
+
 ## -----------------------
 
 %files update
@@ -468,7 +479,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
-
 %ghost %attr(0664,%username,%username) %homedir/*.cld
 
 
@@ -495,13 +505,12 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files milter
 %defattr(-,root,root,-)
-%doc clamav-milter/INSTALL
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
 %config(noreplace) %verify(not mtime) %_sysconfdir/clamd.d/milter.conf
-%attr(0700,%milteruser,%milteruser) %dir %milterstatedir
-%ghost %milterstatedir/*
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
+%attr(0710,%milteruser,%milteruser) %dir %milterstatedir
+%ghost %milterstatedir/*
 
 
 %files milter-sysv
@@ -511,6 +520,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Fri Apr 10 2009 Robert Scheck <robert@fedoraproject.org> - 0.95.1-1
+- Upgrade to 0.95.1 (#495036, #495039) and enabled IPv6 support
+- Fixed typo in SysV initscript which removes 'touch' file (#473513)
+- Added build requirement to ncurses-devel for clamdtop
+
 * Tue Dec 02 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.2-1
 - Upgrade to 0.94.2 (#474002)
 
