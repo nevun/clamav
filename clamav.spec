@@ -20,7 +20,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.95
+Version:	0.95.1
 Release:	%release_func 1%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -666,6 +666,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Fri Apr 10 2009 Robert Scheck <robert@fedoraproject.org> - 0.95.1-1
+- Upgrade to 0.95.1 (#495039)
+
 * Wed Mar 25 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95-1
 - updated to final 0.95
 - added ncurses-devel (-> clamdtop) BR
