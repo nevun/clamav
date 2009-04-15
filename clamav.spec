@@ -2,6 +2,7 @@
 
 ## Fedora Extras specific customization below...
 %bcond_without       	fedora
+%bcond_without		upstart
 %bcond_with		unrar
 ##
 
@@ -21,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95.1
-Release:	%release_func 1%{?snapshot:.%snapshot}
+Release:	%release_func 2%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -197,8 +198,8 @@ Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir initscripts
 Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
-Provides:		milter-sysv = %version-%release
-Obsoletes:		milter-sysv < %version-%release
+Provides:		clamav-milter-sysv = %version-%release
+Obsoletes:		clamav-milter-sysv < %version-%release
 
 %package milter-upstart
 Summary:	Upstart initscripts for the clamav sendmail-milter
@@ -453,6 +454,7 @@ install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
 touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
 
+%{!?with_upstart:rm -rf %_sysconfdir/event.d}
 
 ## ------------------------------------------------------------
 
@@ -640,9 +642,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %files scanner-sysvinit
 %attr(0755,root,root) %config %_initrddir/clamd.scan
 
+%if 0%{?with_upstart:1}
 %files scanner-upstart
 %defattr(-,root,root,-)
 %config(noreplace) %_sysconfdir/event.d/clamd.scan
+%endif
 
 ## -----------------------
 
@@ -660,12 +664,20 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %defattr(-,root,root,-)
 %config %_initrddir/clamav-milter
 
+%if 0%{?with_upstart:1}
 %files milter-upstart
 %defattr(-,root,root,-)
 %config(noreplace) %_sysconfdir/event.d/clamav-milter
+%endif
 
 
 %changelog
+* Wed Apr 15 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.1-2
+- added '%%bcond_without upstart' conditional to ease skipping of
+  -upstart subpackage creation e.g. on EL5 systems
+- fixed Provides/Obsoletes: typo in -milter-sysvinit subpackage which
+  broke update path
+
 * Fri Apr 10 2009 Robert Scheck <robert@fedoraproject.org> - 0.95.1-1
 - Upgrade to 0.95.1 (#495039)
 
