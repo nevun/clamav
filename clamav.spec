@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95.1
-Release:	%release_func 2%{?snapshot:.%snapshot}
+Release:	%release_func 3%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -454,7 +454,7 @@ install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
 touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
 
-%{!?with_upstart:rm -rf %_sysconfdir/event.d}
+%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/event.d}
 
 ## ------------------------------------------------------------
 
@@ -672,6 +672,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Apr 19 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.1-3
+- fixed '--without upstart' operation
+
 * Wed Apr 15 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.1-2
 - added '%%bcond_without upstart' conditional to ease skipping of
   -upstart subpackage creation e.g. on EL5 systems
