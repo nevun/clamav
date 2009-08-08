@@ -6,7 +6,7 @@
 %bcond_with		unrar
 ##
 
-%global username	clamav
+%global username	clamupdate
 %global homedir		%_var/lib/clamav
 %global freshclamlog	%_var/log/freshclam.log
 %global milteruser	clamilt
@@ -22,7 +22,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95.2
-Release:	%release_func 2%{?snapshot:.%snapshot}
+Release:	%release_func 5%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -110,7 +110,7 @@ Requires:		clamav-filesystem = %version-%release
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
 Requires(post):		%__chown %__chmod
-Requires(post):		group(clamav)
+Requires(post):		group(%username)
 
 %package server
 Summary:	Clam Antivirus scanner server
@@ -344,7 +344,12 @@ export have_cv_ipv6=yes
 %configure --disable-clamav --with-dbdir=/var/lib/clamav	\
 	--enable-milter --disable-static			\
 	--disable-rpath						\
+	--with-user=%username		\
+	--with-group=%username		\
 	%{!?with_unrar:--disable-unrar}
+
+# TODO: check periodically that CLAMAVUSER is used for freshclam only
+
 
 # build with --as-needed and disable rpath
 sed -i \
@@ -463,6 +468,14 @@ rm -rf "$RPM_BUILD_ROOT"
 
 ## ------------------------------------------------------------
 
+%triggerprein filesystem -- clamav-filesystem < 0.95.2-3
+## REMOVE me in F14 or F15 (added in pre F12)
+! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || { 
+	/usr/sbin/usermod  -l %username clamav || :
+	/usr/sbin/groupmod -n %username clamav || :
+	logger -t rpm/clamav "Renamed clamav user+group to %username" || :
+}
+
 %pre filesystem
 %__fe_groupadd 4 -r %username &>/dev/null || :
 %__fe_useradd  4 -r -s /sbin/nologin -d %homedir -M          \
@@ -508,6 +521,12 @@ test -e %freshclamlog || {
 	%__chmod 0664 %freshclamlog
 	%__chown root:%username %freshclamlog
 }
+
+
+%triggerin milter -- clamav-scanner
+# Add the milteruser to the scanuser group; this is required when
+# milter and clamd communicate through local sockets
+/usr/sbin/usermod -a -G %scanuser %milteruser &>/dev/null || :
 
 %pre milter
 %__fe_groupadd 5 -r %milteruser &>/dev/null || :
@@ -672,6 +691,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Aug  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-4
+- renamed 'clamav' user/group to 'clamupdate'
+- add the '%milteruser' user to the '%scanuser' group when the -scanner
+  subpackage is installed
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.95.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
