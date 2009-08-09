@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 #
 # clamav-milter Starts/stop the "clamav-milter" daemon
 #
-# chkconfig:   345 99 1
+# chkconfig:   - 99 1
 # description: A virus scanning milter
 
 # Source function library.

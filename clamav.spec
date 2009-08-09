@@ -321,15 +321,18 @@ mkdir -p libclamunrar{,_iface}
 %{!?with_unrar:touch libclamunrar/{Makefile.in,all,install}}
 
 sed -ri \
-    -e 's!^(#?LogFile ).*!\1/var/log/clamd.<SERVICE>!g' \
-    -e 's!^(#?LocalSocket ).*!\1/var/run/clamd.<SERVICE>/clamd.sock!g' \
+    -e 's!^#?(LogFile ).*!#\1/var/log/clamd.<SERVICE>!g' \
+    -e 's!^#?(LocalSocket ).*!#\1/var/run/clamd.<SERVICE>/clamd.sock!g' \
     -e 's!^(#?PidFile ).*!\1/var/run/clamd.<SERVICE>/clamd.pid!g' \
     -e 's!^#?(User ).*!\1<USER>!g' \
     -e 's!^#?(AllowSupplementaryGroups|LogSyslog).*!\1 yes!g' \
     -e 's! /usr/local/share/clamav,! %homedir,!g' \
     etc/clamd.conf
 
-sed -ri -e 's!^#(UpdateLogFile )!\1!g;' etc/freshclam.conf
+sed -ri \
+    -e 's!^#?(UpdateLogFile )!#\1!g;' \
+    -e 's!^#?(LogSyslog).*!\1 yes!g' \
+    -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf
 
 
 ## ------------------------------------------------------------
@@ -468,7 +471,7 @@ rm -rf "$RPM_BUILD_ROOT"
 
 ## ------------------------------------------------------------
 
-%triggerprein filesystem -- clamav-filesystem < 0.95.2-3
+%triggerprein filesystem -- clamav-filesystem < 0.96
 ## REMOVE me in F14 or F15 (added in pre F12)
 ! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || { 
 	/usr/sbin/usermod  -l %username clamav || :
@@ -691,6 +694,12 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Aug  9 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-5
+- modified freshclam configuration to log by syslog by default
+- disabled LocalSocket option in sample configuration
+- fixed clamav-milter sysv initscript to use bash interpreter and to
+  be disabled by default
+
 * Sat Aug  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-4
 - renamed 'clamav' user/group to 'clamupdate'
 - add the '%milteruser' user to the '%scanuser' group when the -scanner
