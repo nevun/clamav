@@ -1,9 +1,10 @@
 #global snapshot	rc1
 
 ## Fedora Extras specific customization below...
-%bcond_without       	fedora
+%bcond_without		fedora
 %bcond_without		upstart
 %bcond_with		unrar
+%bcond_without		noarch
 ##
 
 %global username	clamupdate
@@ -17,6 +18,7 @@
 %global scanuser	clamscan
 %global scanstatedir	%_var/run/clamd.scan
 
+%{?with_noarch:%global noarch	BuildArch:	noarch}
 %{!?release_func:%global release_func() %1%{?dist}}
 
 Summary:	End-user tools for the Clam Antivirus scanner
@@ -31,7 +33,7 @@ URL:		http://www.clamav.net
 Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
 Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz.sig
 %else
-# Unfortunately, clamav includes support for RAR v3, derived from GPL 
+# Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
@@ -59,13 +61,13 @@ BuildRequires:	bc
 %package filesystem
 Summary:	Filesystem structure for clamav
 Group:		Applications/File
-BuildArch:	noarch
 Provides:	user(%username)  = 4
 Provides:	group(%username) = 4
 # Prevent version mix
 Conflicts:	%name < %version-%release
 Conflicts:	%name > %version-%release
 BuildRequires:	fedora-usermgmt-devel
+%{?noarch}
 %{?FE_USERADD_REQ}
 
 %package lib
@@ -85,20 +87,20 @@ Requires:	pkgconfig
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
-BuildArch:	noarch
 Requires(pre):		clamav-filesystem = %version-%release
 Requires(postun):	clamav-filesystem = %version-%release
 Provides:		data(clamav) = full
 Conflicts:		data(clamav) < full
 Conflicts:		data(clamav) > full
+%{?noarch}
 
 %package data-empty
 Summary:	Empty data package for the Clam Antivirus scanner
 Group:		Applications/File
-BuildArch:	noarch
 Provides:	data(clamav) = empty
 Conflicts:	data(clamav) < empty
 Conflicts:	data(clamav) > empty
+%{?noarch}
 
 %package update
 Summary:	Auto-updater for the Clam Antivirus scanner data-files
@@ -122,28 +124,27 @@ Requires:	clamav-lib        = %version-%release
 %package server-sysvinit
 Summary:	SysV initscripts for clamav server
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Provides:	init(clamav-server) = sysv
 Requires:	clamav-server = %version-%release
 Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir
 Provides:	clamav-server-sysv = %version-%release
 Obsoletes:	clamav-server-sysv < %version-%release
+%{?noarch}
 
 
 %package scanner
 Summary:	Clamav scanner daemon
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Requires:	init(clamav-scanner)
 Provides:	user(%scanuser)  = 49
 Provides:	group(%scanuser) = 49
 Requires:	clamav-server = %version-%release
+%{?noarch}
 
 %package scanner-sysvinit
 Summary:	SysV initscripts for clamav scanner daemon
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Provides:	init(clamav-scanner) = sysv
 Requires:	clamav-server-sysvinit = %version-%release
 Requires:	clamav-scanner = %version-%release
@@ -151,18 +152,19 @@ Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir initscripts
 Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
+%{?noarch}
 
 %package scanner-upstart
 Summary:	Upstart initscripts for clamav scanner daemon
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Source410:	clamd.scan.upstart
 Provides:	init(clamav-scanner) = upstart
 Requires:	clamav-scanner = %version-%release
 # implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d	
+Requires(pre):		/etc/event.d
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
+%{?noarch}
 
 
 %package milter
@@ -188,7 +190,6 @@ Obsoletes:	clamav-milter-sendmail < %version-%release
 %package milter-sysvinit
 Summary:	SysV initscripts for the clamav sendmail-milter
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Source320:	clamav-milter.sysv
 Provides:	init(clamav-milter) = sysvinit
 Requires:	clamav-milter = %version-%release
@@ -200,18 +201,19 @@ Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
 Provides:		clamav-milter-sysv = %version-%release
 Obsoletes:		clamav-milter-sysv < %version-%release
+%{?noarch}
 
 %package milter-upstart
 Summary:	Upstart initscripts for the clamav sendmail-milter
 Group:		System Environment/Daemons
-BuildArch:	noarch
 Source310:	clamav-milter.upstart
 Provides:	init(clamav-milter) = upstart
 Requires:	clamav-milter = %version-%release
 # implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d	
+Requires(pre):		/etc/event.d
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
+%{?noarch}
 
 
 %description
@@ -356,7 +358,7 @@ export have_cv_ipv6=yes
 
 # build with --as-needed and disable rpath
 sed -i \
-	-e 's! -shared ! -Wl,--as-needed\0!g' 					\
+	-e 's! -shared ! -Wl,--as-needed\0!g'					\
 	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!\"\/lib \/usr\/lib !/\"/%_lib /usr/%_lib !g'	\
 	libtool
 
@@ -406,10 +408,10 @@ mkdir _doc_server
 install -m644 -p %SOURCE2	_doc_server/clamd.sysconfig
 install -m644 -p %SOURCE3       _doc_server/clamd.logrotate
 install -m755 -p %SOURCE7	_doc_server/clamd.init
-install -m644 -p %SOURCE5      	_doc_server/README
+install -m644 -p %SOURCE5	_doc_server/README
 install -m644 -p etc/clamd.conf _doc_server/clamd.conf
 
-install -m644 -p %SOURCE1  	$RPM_BUILD_ROOT%pkgdatadir
+install -m644 -p %SOURCE1	$RPM_BUILD_ROOT%pkgdatadir
 install -m755 -p %SOURCE100     $RPM_BUILD_ROOT%pkgdatadir
 cp -pa _doc_server/*            $RPM_BUILD_ROOT%pkgdatadir/template
 ln -s %pkgdatadir/clamd-wrapper $RPM_BUILD_ROOT%_initrddir/clamd-wrapper
@@ -473,7 +475,7 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %triggerprein filesystem -- clamav-filesystem < 0.96
 ## REMOVE me in F14 or F15 (added in pre F12)
-! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || { 
+! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || {
 	/usr/sbin/usermod  -l %username clamav || :
 	/usr/sbin/groupmod -n %username clamav || :
 	logger -t rpm/clamav "Renamed clamav user+group to %username" || :
@@ -694,6 +696,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Sep 13 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- conditionalized build of noarch subpackages to ease packaging under RHEL5
+
 * Sun Aug  9 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-5
 - modified freshclam configuration to log by syslog by default
 - disabled LocalSocket option in sample configuration
@@ -811,7 +816,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
 
 * Mon Oct 29 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.91.2-3
-- remove RAR decompression code from source tarball because of 
+- remove RAR decompression code from source tarball because of
   legal problems (resolves 334371)
 - correct license tag
 
@@ -838,7 +843,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
   in FC6- and F7+
 
 * Fri Apr 13 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.2-1
-- [SECURITY] updated to 0.90.2; fixes CVE-2007-1745, CVE-2007-1997 
+- [SECURITY] updated to 0.90.2; fixes CVE-2007-1745, CVE-2007-1997
 
 * Fri Mar  2 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.1-2
 - BR 'tcp_wrappers-devel' instead of plain 'tcp_wrappers'
