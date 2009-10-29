@@ -23,8 +23,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.95.2
-Release:	%release_func 5%{?snapshot:.%snapshot}
+Version:	0.95.3
+Release:	%release_func 1200%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -49,7 +49,7 @@ Source8:	clamav-notify-servers
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
-Patch27:	clamav-0.95rc1-umask.patch
+Patch27:	clamav-0.95.3-umask.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -696,6 +696,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu Oct 29 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1200
+- updated to 0.95.3
+
 * Sun Sep 13 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - conditionalized build of noarch subpackages to ease packaging under RHEL5
 
