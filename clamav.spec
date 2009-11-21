@@ -20,6 +20,8 @@
 
 %{?with_noarch:%global noarch	BuildArch:	noarch}
 %{!?release_func:%global release_func() %1%{?dist}}
+%{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p%%{-p*}} %%{-b:-b%%{-b*}} \
+%nil}
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
@@ -312,10 +314,10 @@ The Upstart initscripts for clamav-milter.
 %prep
 %setup -q -n %{name}-%{version}%{?snapshot}
 
-%patch24 -p1 -b .private
-%patch25 -p1 -b .open
-%patch26 -p1 -b .cliopts
-%patch27 -p1 -b .umask
+%apply -n24 -p1 -b .private
+%apply -n25 -p1 -b .open
+%apply -n26 -p1 -b .cliopts
+%apply -n27 -p1 -b .umask
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -696,6 +698,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Nov 21 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- adjusted chkconfig positions for clamav-milter (#530101)
+- use %%apply instead of %%patch
+
 * Thu Oct 29 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1300
 - updated to 0.95.3
 
