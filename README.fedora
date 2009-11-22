@@ -67,12 +67,11 @@ B)  On the clamav-milter host (assumed hostname 'host-milter')
 
      and all the other options which are required on your system
 
-  3. Edit /etc/event.d/clamav-milter and uncomment the both
+  3. Edit /etc/event.d/clamav-milter and uncomment the
 
-    | start on starting\ local
     | start on starting local
 
-     lines. Restart your system or execute
+     line. Restart your system or execute
 
     | initctl emit starting local
 
@@ -98,12 +97,11 @@ C)  On the clamav-scanner host (assumed hostname 'host-scanner')
      comment out possible 'LocalSocket' lines and set all the other
      options which are required on your system
 
-  3. Edit /etc/event.d/clamav-scanner and uncomment the both
+  3. Edit /etc/event.d/clamav-scanner and uncomment the
 
-    | start on starting\ local
     | start on starting local
 
-     lines. Restart your system or execute
+     line. Restart your system or execute
 
     | initctl emit starting local
 

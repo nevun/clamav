@@ -4,7 +4,6 @@
 
 ### Uncomment these lines when you want clamd.scan to be a generic
 ### scanner service
-#start on starting\ local
 #start on starting local
 
 stop  on runlevel 0
