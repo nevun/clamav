@@ -26,7 +26,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.95.3
-Release:	%release_func 1300%{?snapshot:.%snapshot}
+Release:	%release_func 1301%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -162,8 +162,7 @@ Group:		System Environment/Daemons
 Source410:	clamd.scan.upstart
 Provides:	init(clamav-scanner) = upstart
 Requires:	clamav-scanner = %version-%release
-# implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d
+Requires(pre):		/etc/init
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
 %{?noarch}
@@ -211,8 +210,7 @@ Group:		System Environment/Daemons
 Source310:	clamav-milter.upstart
 Provides:	init(clamav-milter) = upstart
 Requires:	clamav-milter = %version-%release
-# implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d
+Requires(pre):		/etc/init
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
 %{?noarch}
@@ -389,7 +387,7 @@ function smartsubst() {
 
 
 install -d -m755 \
-	${RPM_BUILD_ROOT}%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,sysconfig,event.d} \
+	${RPM_BUILD_ROOT}%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,sysconfig,init} \
 	${RPM_BUILD_ROOT}%_var/log \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
@@ -445,7 +443,7 @@ sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
 sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
 
-install -p -m 644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamd.scan
+install -p -m 644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.conf
 
 touch $RPM_BUILD_ROOT%scanstatedir/clamd.sock
 
@@ -459,14 +457,14 @@ sed -r \
     -e 's! /tmp/clamav-milter.log! %milterlog!g' \
     etc/clamav-milter.conf > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
 
-install -p -m 644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamav-milter
+install -p -m 644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/init/clamav-milter.conf
 install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 
 
 rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
 touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
 
-%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/event.d}
+%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/init}
 
 ## ------------------------------------------------------------
 
@@ -671,7 +669,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %if 0%{?with_upstart:1}
 %files scanner-upstart
 %defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/event.d/clamd.scan
+%config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
 
 ## -----------------------
@@ -693,11 +691,14 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %if 0%{?with_upstart:1}
 %files milter-upstart
 %defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/event.d/clamav-milter
+%config(noreplace) %_sysconfdir/init/clamav-milter*
 %endif
 
 
 %changelog
+* Sun Dec  6 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1301
+- updated -upstart to upstart 0.6.3
+
 * Sat Nov 21 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - adjusted chkconfig positions for clamav-milter (#530101)
 - use %%apply instead of %%patch
