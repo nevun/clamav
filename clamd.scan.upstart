@@ -6,11 +6,9 @@
 
 ### Uncomment this line when you want clamd.scan to be a generic
 ### scanner service
-#start on starting local
+#start on runlevel [345] and starting local
 
-stop  on (runlevel 0 or
-	  runlevel 1 or
-	  runlevel 6)
+stop  on runlevel [!345]
 
 respawn
 exec /usr/sbin/clamd -c /etc/clamd.d/scan.conf --nofork=yes
