@@ -20,7 +20,7 @@
 
 %{?with_noarch:%global noarch	BuildArch:	noarch}
 %{!?release_func:%global release_func() %1%{?dist}}
-%{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p%%{-p*}} %%{-b:-b%%{-b*}} \
+%{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
 
 Summary:	End-user tools for the Clam Antivirus scanner
