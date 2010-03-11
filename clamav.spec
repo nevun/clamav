@@ -1,4 +1,4 @@
-#global snapshot	rc1
+%global snapshot	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without		fedora
@@ -25,8 +25,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.95.3
-Release:	%release_func 1301%{?snapshot:.%snapshot}
+Version:	0.96
+Release:	%release_func 1400%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -39,7 +39,7 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?s
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	%name-%version%{?snapshot}-norar.tar.bz2
+Source0:	%name-%version%{?snapshot}-norar.tar.xz
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -58,7 +58,7 @@ Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
-BuildRequires:	bc
+BuildRequires:	bc tcl ocaml groff graphviz
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -347,6 +347,7 @@ export LIBS='-lmilter -lpthread'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
 %configure --disable-clamav --with-dbdir=/var/lib/clamav	\
+	--disable-silent-rules					\
 	--enable-milter --disable-static			\
 	--disable-rpath						\
 	--with-user=%username		\
@@ -696,6 +697,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu Mar 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1400.rc1
+- updated to 0.96rc1
+- added some BRs
+
 * Sun Dec  6 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1301
 - updated -upstart to upstart 0.6.3
 
