@@ -1,10 +1,11 @@
-%global snapshot	rc1
+%global prerelease	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without		fedora
 %bcond_without		upstart
 %bcond_with		unrar
 %bcond_without		noarch
+%bcond_with		bytecode
 ##
 
 %global username	clamupdate
@@ -19,27 +20,26 @@
 %global scanstatedir	%_var/run/clamd.scan
 
 %{?with_noarch:%global noarch	BuildArch:	noarch}
-%{!?release_func:%global release_func() %1%{?dist}}
+%{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96
-Release:	%release_func %{?snapshot:0.}1400%{?snapshot:.%snapshot}
-
+Release:	%release_func 1401
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
 %if 0%{?with_unrar:1}
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	%name-%version%{?snapshot}-norar.tar.xz
+Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -58,7 +58,7 @@ Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
-BuildRequires:	bc tcl ocaml groff graphviz
+%{?with_bytecode:BuildRequires:	bc tcl ocaml groff graphviz}
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -310,7 +310,7 @@ The Upstart initscripts for clamav-milter.
 ## ------------------------------------------------------------
 
 %prep
-%setup -q -n %{name}-%{version}%{?snapshot}
+%setup -q -n %{name}-%{version}%{?prerelease}
 
 %apply -n24 -p1 -b .private
 %apply -n25 -p1 -b .open
@@ -334,6 +334,7 @@ sed -ri \
 sed -ri \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
     -e 's!^#?(LogSyslog).*!\1 yes!g' \
+    -e 's!^#?(Bytecode).*!\1 no!g' \
     -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf
 
 
@@ -346,12 +347,17 @@ export LDFLAGS='-Wl,--as-needed'
 export FRESHCLAM_LIBS='-lz'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
-%configure --disable-clamav --with-dbdir=/var/lib/clamav	\
-	--disable-silent-rules					\
-	--enable-milter --disable-static			\
-	--disable-rpath						\
-	--with-user=%username		\
-	--with-group=%username		\
+%configure \
+	--disable-static \
+	--disable-rpath \
+	--disable-silent-rules \
+	--disable-clamav \
+	--with-user=%username \
+	--with-group=%username \
+	--with-dbdir=/var/lib/clamav \
+	--enable-milter \
+	--enable-clamdtop \
+	%{!?with_bytecode:--disable-llvm} \
 	%{!?with_unrar:--disable-unrar}
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
@@ -697,6 +703,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Mar 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-0.1401.rc1
+- do not build the bytecode interpreter for now, until it can be disabled
+  at runtime (#573191)
+
 * Thu Mar 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1400.rc1
 - updated to 0.96rc1
 - added some BRs
