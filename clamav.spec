@@ -704,7 +704,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %changelog
 * Sat Mar 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-0.1401.rc1
-- do not build the bytecode interpreter for now, until it can be disabled
+- do not build the bytecode JIT compiler for now until it can be disabled
   at runtime (#573191)
 
 * Thu Mar 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1400.rc1
