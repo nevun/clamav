@@ -1,11 +1,11 @@
-%global prerelease	rc1
+#global prerelease	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without		fedora
 %bcond_without		upstart
 %bcond_with		unrar
 %bcond_without		noarch
-%bcond_with		bytecode
+%bcond_without		bytecode
 ##
 
 %global username	clamupdate
@@ -27,7 +27,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96
-Release:	%release_func 1401
+Release:	%release_func 1402
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -52,6 +52,9 @@ Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
 Patch27:	clamav-0.95.3-umask.patch
+# https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
+Patch28:	clamav-0.96-disable-jit.patch
+Patch29:	clamav-0.96-jitoff.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -83,8 +86,6 @@ Group:		Development/Libraries
 Source100:	clamd-gen
 Requires:	clamav-lib        = %version-%release
 Requires:	clamav-filesystem = %version-%release
-Requires(pre):	%_libdir/pkgconfig
-Requires:	pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -316,6 +317,8 @@ The Upstart initscripts for clamav-milter.
 %apply -n25 -p1 -b .open
 %apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
+%apply -n28 -p1 -b .jit-disable
+%apply -n29 -p1 -b .jitoff
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -334,7 +337,6 @@ sed -ri \
 sed -ri \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
     -e 's!^#?(LogSyslog).*!\1 yes!g' \
-    -e 's!^#?(Bytecode).*!\1 no!g' \
     -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf
 
 
@@ -703,6 +705,13 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Apr 21 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1402
+- updated to final 0.96
+- applied upstream patch which allows to disable JIT compiler (#573191)
+- build JIT compiler again
+- disabled JIT compiler by default
+- removed explicit 'pkgconfig' requirements in -devel (#533956)
+
 * Sat Mar 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-0.1401.rc1
 - do not build the bytecode JIT compiler for now until it can be disabled
   at runtime (#573191)
