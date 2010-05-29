@@ -1,0 +1,16 @@
+--- clamav-0.96.org/libclamav/pdf.c	2010-05-29 17:22:12.345315695 +0530
++++ clamav-0.96/libclamav/pdf.c	2010-05-29 17:33:19.747313775 +0530
+@@ -451,10 +451,12 @@
+ 			}
+ 			if(ret) {
+ 				unsigned char *t;
++				unsigned size;
+ 
+ 				real_streamlen = ret;
+ 				/* free unused trailing bytes */
+-				t = (unsigned char *)cli_realloc(tmpbuf,calculated_streamlen);
++				size = real_streamlen > calculated_streamlen ? real_streamlen : calculated_streamlen;
++				t = (unsigned char *)cli_realloc(tmpbuf,size);
+ 				if(t == NULL) {
+ 					free(tmpbuf);
+ 					close(fout);

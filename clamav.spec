@@ -27,7 +27,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96
-Release:	%release_func 1402
+Release:	%release_func 1403
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -55,6 +55,7 @@ Patch27:	clamav-0.95.3-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
 Patch28:	clamav-0.96-disable-jit.patch
 Patch29:	clamav-0.96-jitoff.patch
+Patch30:	clamav-0.96-pdf.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -319,6 +320,7 @@ The Upstart initscripts for clamav-milter.
 %apply -n27 -p1 -b .umask
 %apply -n28 -p1 -b .jit-disable
 %apply -n29 -p1 -b .jitoff
+%apply -n30 -p1 -b .pdf
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -705,6 +707,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat May 19 2010 Rakesh Pandit <rakesh@fedoraproject.org> - 0.96.1403
+- CVE-2010-1639 Clam AntiVirus: Heap-based overflow, when processing malicious PDF file(s)
+
 * Wed Apr 21 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1402
 - updated to final 0.96
 - applied upstream patch which allows to disable JIT compiler (#573191)
