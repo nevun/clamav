@@ -1,6 +1,8 @@
---- a/clamd/clamd.c	
-+++ a/clamd/clamd.c	
-@@ -431,6 +431,9 @@ int main(int argc, char **argv)
+Index: clamav-0.96.1/clamd/clamd.c
+===================================================================
+--- clamav-0.96.1.orig/clamd/clamd.c
++++ clamav-0.96.1/clamd/clamd.c
+@@ -434,6 +434,9 @@ int main(int argc, char **argv)
      if((opt = optget(opts,"BytecodeTimeout"))->enabled) {
  	cl_engine_set_num(engine, CL_ENGINE_BYTECODE_TIMEOUT, opt->numarg);
      }
@@ -10,9 +12,11 @@
  
      if(optget(opts,"PhishingScanURLs")->enabled)
  	dboptions |= CL_DB_PHISHING_URLS;
---- a/clamscan/manager.c	
-+++ a/clamscan/manager.c	
-@@ -405,6 +405,8 @@ int scanmanager(const struct optstruct *opts)
+Index: clamav-0.96.1/clamscan/manager.c
+===================================================================
+--- clamav-0.96.1.orig/clamscan/manager.c
++++ clamav-0.96.1/clamscan/manager.c
+@@ -404,6 +404,8 @@ int scanmanager(const struct optstruct *
  	cl_engine_set_num(engine, CL_ENGINE_BYTECODE_SECURITY, CL_BYTECODE_TRUST_ALL);
      if((opt = optget(opts,"bytecode-timeout"))->enabled)
  	cl_engine_set_num(engine, CL_ENGINE_BYTECODE_TIMEOUT, opt->numarg);
@@ -21,8 +25,10 @@
  
      if((opt = optget(opts, "tempdir"))->enabled) {
  	if((ret = cl_engine_set_str(engine, CL_ENGINE_TMPDIR, opt->strarg))) {
---- a/docs/man/clamd.conf.5.in	
-+++ a/docs/man/clamd.conf.5.in	
+Index: clamav-0.96.1/docs/man/clamd.conf.5.in
+===================================================================
+--- clamav-0.96.1.orig/docs/man/clamd.conf.5.in
++++ clamav-0.96.1/docs/man/clamd.conf.5.in
 @@ -253,6 +253,12 @@ Default: TrustSigned
  Set bytecode timeout in milliseconds.
  .br
@@ -36,9 +42,11 @@
  .TP 
  \fBDetectPUA BOOL\fR
  Detect Possibly Unwanted Applications.
---- a/docs/man/clamscan.1.in	
-+++ a/docs/man/clamscan.1.in	
-@@ -86,6 +86,10 @@ This option disables safety checks and makes ClamAV trust all bytecode. It shoul
+Index: clamav-0.96.1/docs/man/clamscan.1.in
+===================================================================
+--- clamav-0.96.1.orig/docs/man/clamscan.1.in
++++ clamav-0.96.1/docs/man/clamscan.1.in
+@@ -86,6 +86,10 @@ This option disables safety checks and m
  .TP 
  \fB\-\-bytecode\-timeout=N\fR
  Set bytecode timeout in milliseconds (default: 60000 = 60s)
@@ -49,9 +57,11 @@
  .TP 
  \fB\-\-detect\-pua[=yes/no(*)]\fR
  Detect Possibly Unwanted Applications.
---- a/etc/clamd.conf	
-+++ a/etc/clamd.conf	
-@@ -474,3 +474,8 @@ Example
+Index: clamav-0.96.1/etc/clamd.conf
+===================================================================
+--- clamav-0.96.1.orig/etc/clamd.conf
++++ clamav-0.96.1/etc/clamd.conf
+@@ -472,3 +472,8 @@ Example
  # 
  # Default: 60000
  # BytecodeTimeout 60000
@@ -60,9 +70,11 @@
 +# 
 +# Default: no
 +#BytecodeDisableJIT no
---- a/libclamav/clamav.h	
-+++ a/libclamav/clamav.h	
-@@ -142,7 +142,8 @@ enum cl_engine_field {
+Index: clamav-0.96.1/libclamav/clamav.h
+===================================================================
+--- clamav-0.96.1.orig/libclamav/clamav.h
++++ clamav-0.96.1/libclamav/clamav.h
+@@ -144,7 +144,8 @@ enum cl_engine_field {
      CL_ENGINE_TMPDIR,		    /* (char *) */
      CL_ENGINE_KEEPTMP,		    /* uint32_t */
      CL_ENGINE_BYTECODE_SECURITY,     /* uint32_t */
@@ -72,8 +84,10 @@
  };
  
  enum bytecode_security {
---- a/libclamav/others.c	
-+++ a/libclamav/others.c	
+Index: clamav-0.96.1/libclamav/others.c
+===================================================================
+--- clamav-0.96.1.orig/libclamav/others.c
++++ clamav-0.96.1/libclamav/others.c
 @@ -301,6 +301,7 @@ struct cl_engine *cl_engine_new(void)
      new->bytecode_security = CL_BYTECODE_TRUST_SIGNED;
      /* 5 seconds timeout */
@@ -82,7 +96,7 @@
      new->refcount = 1;
      new->ac_only = 0;
      new->ac_mindepth = CLI_DEFAULT_AC_MINDEPTH;
-@@ -395,6 +396,9 @@ int cl_engine_set_num(struct cl_engine *engine, enum cl_engine_field field, long
+@@ -399,6 +400,9 @@ int cl_engine_set_num(struct cl_engine *
  	case CL_ENGINE_BYTECODE_TIMEOUT:
  	    engine->bytecode_timeout = num;
  	    break;
@@ -92,9 +106,11 @@
  	default:
  	    cli_errmsg("cl_engine_set_num: Incorrect field number\n");
  	    return CL_EARG;
---- a/libclamav/others.h	
-+++ a/libclamav/others.h	
-@@ -249,6 +249,7 @@ struct cl_engine {
+Index: clamav-0.96.1/libclamav/others.h
+===================================================================
+--- clamav-0.96.1.orig/libclamav/others.h
++++ clamav-0.96.1/libclamav/others.h
+@@ -253,6 +253,7 @@ struct cl_engine {
      unsigned hook_lsig_ids;
      enum bytecode_security bytecode_security;
      uint32_t bytecode_timeout;
@@ -102,9 +118,11 @@
  };
  
  struct cl_settings {
---- a/libclamav/readdb.c	
-+++ a/libclamav/readdb.c	
-@@ -2566,7 +2566,10 @@ int cl_load(const char *path, struct cl_engine *engine, unsigned int *signo, uns
+Index: clamav-0.96.1/libclamav/readdb.c
+===================================================================
+--- clamav-0.96.1.orig/libclamav/readdb.c
++++ clamav-0.96.1/libclamav/readdb.c
+@@ -2595,7 +2595,10 @@ int cl_load(const char *path, struct cl_
  	    return ret;
  
      if((dboptions & CL_DB_BYTECODE) && !engine->bcs.engine && (engine->dconf->bytecode & BYTECODE_ENGINE_MASK)) {
@@ -116,9 +134,11 @@
  	    return ret;
      } else {
  	cli_dbgmsg("Bytecode engine disabled\n");
---- a/shared/optparser.c	
-+++ a/shared/optparser.c	
-@@ -252,6 +252,9 @@ const struct clam_option __clam_options[] = {
+Index: clamav-0.96.1/shared/optparser.c
+===================================================================
+--- clamav-0.96.1.orig/shared/optparser.c
++++ clamav-0.96.1/shared/optparser.c
+@@ -252,6 +252,9 @@ const struct clam_option __clam_options[
  	"Set bytecode security level.\nPossible values:\n\tNone - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS\n\tTrustSigned - trust bytecode loaded from signed .c[lv]d files,\n\t\t insert runtime safety checks for bytecode loaded from other sources\n\tParanoid - don't trust any bytecode, insert runtime checks for all\nRecommended: TrustSigned, because bytecode in .cvd files already has these checks\n","TrustSigned"},
      { "BytecodeTimeout", "bytecode-timeout", 0, TYPE_NUMBER, MATCH_NUMBER, 60000, NULL, 0, OPT_CLAMD | OPT_CLAMSCAN, 
  	"Set bytecode timeout in miliseconds.\n","60000"},

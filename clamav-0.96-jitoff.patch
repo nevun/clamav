@@ -1,8 +1,58 @@
-Index: clamav-0.96/etc/clamd.conf
+Index: clamav-0.96.1/etc/clamd.conf
 ===================================================================
---- clamav-0.96.orig/etc/clamd.conf
-+++ clamav-0.96/etc/clamd.conf
-@@ -476,6 +476,10 @@ AllowSupplementaryGroups yes
+--- clamav-0.96.1.orig/etc/clamd.conf
++++ clamav-0.96.1/etc/clamd.conf
+@@ -11,7 +11,7 @@ Example
+ # LogFile must be writable for the user running daemon.
+ # A full path is required.
+ # Default: disabled
+-#LogFile /tmp/clamd.log
++#LogFile /var/log/clamd.<SERVICE>
+ 
+ # By default the log file is locked for writing - the lock protects against
+ # running clamd multiple times (if want to run another clamd, please
+@@ -40,7 +40,7 @@ Example
+ 
+ # Use system logger (can work together with LogFile).
+ # Default: no
+-#LogSyslog yes
++LogSyslog yes
+ 
+ # Specify the type of syslog messages - please refer to 'man syslog'
+ # for facility names.
+@@ -54,7 +54,7 @@ Example
+ # This option allows you to save a process identifier of the listening
+ # daemon (main thread).
+ # Default: disabled
+-#PidFile /var/run/clamd.pid
++#PidFile /var/run/clamd.<SERVICE>/clamd.pid
+ 
+ # Optional path to the global temporary directory.
+ # Default: system specific (usually /tmp or /var/tmp).
+@@ -73,7 +73,7 @@ Example
+ 
+ # Path to a local socket file the daemon will listen on.
+ # Default: disabled (must be specified by a user)
+-#LocalSocket /tmp/clamd.socket
++#LocalSocket /var/run/clamd.<SERVICE>/clamd.sock
+ 
+ # Sets the group ownership on the unix socket.
+ # Default: disabled (the primary group of the user running clamd)
+@@ -183,11 +183,11 @@ Example
+ 
+ # Run as another user (clamd must be started by root for this option to work)
+ # Default: don't drop privileges
+-#User clamav
++User <USER>
+ 
+ # Initialize supplementary group access (clamd must be started by root).
+ # Default: no
+-#AllowSupplementaryGroups no
++AllowSupplementaryGroups yes
+ 
+ # Stop daemon when libclamav reports out of memory condition.
+ #ExitOnOOM yes
+@@ -474,6 +474,10 @@ Example
  # BytecodeTimeout 60000
   
  # Disable JIT and fallback to interpreter. WARNING: disabling JIT affects performance.
@@ -15,10 +65,10 @@ Index: clamav-0.96/etc/clamd.conf
 +#
 +# Default: yes
  #BytecodeDisableJIT no
-Index: clamav-0.96/shared/optparser.c
+Index: clamav-0.96.1/shared/optparser.c
 ===================================================================
---- clamav-0.96.orig/shared/optparser.c
-+++ clamav-0.96/shared/optparser.c
+--- clamav-0.96.1.orig/shared/optparser.c
++++ clamav-0.96.1/shared/optparser.c
 @@ -252,7 +252,7 @@ const struct clam_option __clam_options[
  	"Set bytecode security level.\nPossible values:\n\tNone - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS\n\tTrustSigned - trust bytecode loaded from signed .c[lv]d files,\n\t\t insert runtime safety checks for bytecode loaded from other sources\n\tParanoid - don't trust any bytecode, insert runtime checks for all\nRecommended: TrustSigned, because bytecode in .cvd files already has these checks\n","TrustSigned"},
      { "BytecodeTimeout", "bytecode-timeout", 0, TYPE_NUMBER, MATCH_NUMBER, 60000, NULL, 0, OPT_CLAMD | OPT_CLAMSCAN, 
