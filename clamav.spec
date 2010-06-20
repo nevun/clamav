@@ -5,6 +5,7 @@
 %bcond_without		upstart
 %bcond_with		unrar
 %bcond_without		noarch
+%bcond_without		bytecode
 ##
 
 %global username	clamupdate
@@ -23,7 +24,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.95.3
+Version:	0.96.1
 Release:	%release_func 1200%{?snapshot:.%snapshot}
 
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
@@ -37,7 +38,7 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?s
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	%name-%version%{?snapshot}-norar.tar.bz2
+Source0:	%name-%version%{?snapshot}-norar.tar.xz
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -50,13 +51,16 @@ Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
 Patch27:	clamav-0.95.3-umask.patch
+# https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
+Patch28:	clamav-0.96-disable-jit.patch
+Patch29:	clamav-0.96-jitoff.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
-BuildRequires:	bc
+%{?with_bytecode:BuildRequires:	bc tcl ocaml groff graphviz}
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -81,8 +85,6 @@ Group:		Development/Libraries
 Source100:	clamd-gen
 Requires:	clamav-lib        = %version-%release
 Requires:	clamav-filesystem = %version-%release
-Requires(pre):	%_libdir/pkgconfig
-Requires:	pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -316,6 +318,8 @@ The Upstart initscripts for clamav-milter.
 %patch25 -p1 -b .open
 %patch26 -p1 -b .cliopts
 %patch27 -p1 -b .umask
+%patch28 -p1 -b .jit-disable
+%patch29 -p1 -b .jitoff
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -342,15 +346,21 @@ sed -ri \
 %build
 CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
 export LDFLAGS='-Wl,--as-needed'
-# HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
-export LIBS='-lmilter -lpthread'
+# HACK: remove me...
+export FRESHCLAM_LIBS='-lz'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
-%configure --disable-clamav --with-dbdir=/var/lib/clamav	\
-	--enable-milter --disable-static			\
-	--disable-rpath						\
-	--with-user=%username		\
-	--with-group=%username		\
+%configure \
+	--disable-static \
+	--disable-rpath \
+	--disable-silent-rules \
+	--disable-clamav \
+	--with-user=%username \
+	--with-group=%username \
+	--with-dbdir=/var/lib/clamav \
+	--enable-milter \
+	--enable-clamdtop \
+	%{!?with_bytecode:--disable-llvm} \
 	%{!?with_unrar:--disable-unrar}
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
@@ -696,6 +706,14 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Jun 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.1-1200
+- updated to 0.96.1
+- applied upstream patch which allows to disable JIT compiler (#573191)
+- disabled JIT compiler by default
+- removed explicit 'pkgconfig' requirements in -devel (#533956)
+- added some BRs
+- rediffed patches
+
 * Sat Nov 21 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - adjusted chkconfig positions for clamav-milter (#530101)
 
