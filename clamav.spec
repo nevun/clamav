@@ -8,6 +8,12 @@
 %bcond_without		bytecode
 ##
 
+%ifnarch s390 s390x
+%global have_ocaml	1
+%else
+%global have_ocaml	0
+%endif
+
 %global username	clamupdate
 %global homedir		%_var/lib/clamav
 %global freshclamlog	%_var/log/freshclam.log
@@ -27,7 +33,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96.1
-Release:	%release_func 1400
+Release:	%release_func 1401
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -61,7 +67,10 @@ Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
-%{?with_bytecode:BuildRequires:	bc tcl ocaml groff graphviz}
+%{?with_bytecode:BuildRequires:	bc tcl groff graphviz}
+%if %{have_ocaml}
+%{?with_bytecode:BuildRequires:	ocaml}
+%endif
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -705,6 +714,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Jul 13 2010 Dan Horák <dan[at]danny.cz> - 0.96.1-1401
+- ocaml not available (at least) on s390(x)
+
 * Tue Jun  1 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.1-1400
 - updated to 0.96.1
 - rediffed patches
