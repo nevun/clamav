@@ -491,14 +491,6 @@ rm -rf "$RPM_BUILD_ROOT"
 
 ## ------------------------------------------------------------
 
-%triggerprein filesystem -- clamav-filesystem < 0.96
-## REMOVE me in F14 or F15 (added in pre F12)
-! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || {
-	/usr/sbin/usermod  -l %username clamav || :
-	/usr/sbin/groupmod -n %username clamav || :
-	logger -t rpm/clamav "Renamed clamav user+group to %username" || :
-}
-
 %pre filesystem
 %__fe_groupadd 4 -r %username &>/dev/null || :
 %__fe_useradd  4 -r -s /sbin/nologin -d %homedir -M          \
@@ -714,6 +706,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Aug 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- removed old %%trigger which renamed the 'clamav' user- and groupnames
+  to 'clamupdate'
+
 * Tue Jul 13 2010 Dan Horák <dan[at]danny.cz> - 0.96.1-1401
 - ocaml not available (at least) on s390(x)
 
