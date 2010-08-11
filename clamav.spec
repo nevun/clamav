@@ -1,4 +1,4 @@
-#global prerelease	rc1
+#global snapshot	rc1
 
 ## Fedora Extras specific customization below...
 %bcond_without		fedora
@@ -7,12 +7,6 @@
 %bcond_without		noarch
 %bcond_without		bytecode
 ##
-
-%ifnarch s390 s390x
-%global have_ocaml	1
-%else
-%global have_ocaml	0
-%endif
 
 %global username	clamupdate
 %global homedir		%_var/lib/clamav
@@ -26,26 +20,25 @@
 %global scanstatedir	%_var/run/clamd.scan
 
 %{?with_noarch:%global noarch	BuildArch:	noarch}
-%{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
-%{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
-%nil}
+%{!?release_func:%global release_func() %1%{?dist}}
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96.1
-Release:	%release_func 1401
+Release:	%release_func 1200%{?snapshot:.%snapshot}
+
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
 %if 0%{?with_unrar:1}
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz.sig
+Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
+Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	%name-%version%{?prerelease}-norar.tar.xz
+Source0:	%name-%version%{?snapshot}-norar.tar.xz
 %endif
 Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
@@ -67,10 +60,7 @@ Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	%_includedir/tcpd.h
-%{?with_bytecode:BuildRequires:	bc tcl groff graphviz}
-%if %{have_ocaml}
-%{?with_bytecode:BuildRequires:	ocaml}
-%endif
+%{?with_bytecode:BuildRequires:	bc tcl ocaml groff graphviz}
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -172,7 +162,8 @@ Group:		System Environment/Daemons
 Source410:	clamd.scan.upstart
 Provides:	init(clamav-scanner) = upstart
 Requires:	clamav-scanner = %version-%release
-Requires(pre):		/etc/init
+# implicates a conflict with upstart 0.5+
+Requires(pre):		/etc/event.d
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
 %{?noarch}
@@ -220,7 +211,8 @@ Group:		System Environment/Daemons
 Source310:	clamav-milter.upstart
 Provides:	init(clamav-milter) = upstart
 Requires:	clamav-milter = %version-%release
-Requires(pre):		/etc/init
+# implicates a conflict with upstart 0.5+
+Requires(pre):		/etc/event.d
 Requires(post):		/usr/bin/killall
 Requires(postun):	/sbin/initctl
 %{?noarch}
@@ -320,14 +312,14 @@ The Upstart initscripts for clamav-milter.
 ## ------------------------------------------------------------
 
 %prep
-%setup -q -n %{name}-%{version}%{?prerelease}
+%setup -q -n %{name}-%{version}%{?snapshot}
 
-%apply -n24 -p1 -b .private
-%apply -n25 -p1 -b .open
-%apply -n26 -p1 -b .cliopts
-%apply -n27 -p1 -b .umask
-%apply -n28 -p1 -b .jit-disable
-%apply -n29 -p1 -b .jitoff
+%patch24 -p1 -b .private
+%patch25 -p1 -b .open
+%patch26 -p1 -b .cliopts
+%patch27 -p1 -b .umask
+%patch28 -p1 -b .jit-disable
+%patch29 -p1 -b .jitoff
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -405,7 +397,7 @@ function smartsubst() {
 
 
 install -d -m755 \
-	${RPM_BUILD_ROOT}%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,sysconfig,init} \
+	${RPM_BUILD_ROOT}%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,sysconfig,event.d} \
 	${RPM_BUILD_ROOT}%_var/log \
 	${RPM_BUILD_ROOT}%milterstatedir \
 	${RPM_BUILD_ROOT}%pkgdatadir/template \
@@ -461,7 +453,7 @@ sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
 sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
 
-install -p -m 644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.conf
+install -p -m 644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamd.scan
 
 touch $RPM_BUILD_ROOT%scanstatedir/clamd.sock
 
@@ -475,14 +467,14 @@ sed -r \
     -e 's! /tmp/clamav-milter.log! %milterlog!g' \
     etc/clamav-milter.conf > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
 
-install -p -m 644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/init/clamav-milter.conf
+install -p -m 644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamav-milter
 install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 
 
 rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
 touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
 
-%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/init}
+%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/event.d}
 
 ## ------------------------------------------------------------
 
@@ -687,7 +679,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %if 0%{?with_upstart:1}
 %files scanner-upstart
 %defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/init/clamd.scan*
+%config(noreplace) %_sysconfdir/event.d/clamd.scan
 %endif
 
 ## -----------------------
@@ -709,44 +701,23 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %if 0%{?with_upstart:1}
 %files milter-upstart
 %defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/init/clamav-milter*
+%config(noreplace) %_sysconfdir/event.d/clamav-milter
 %endif
 
 
 %changelog
-* Tue Jul 13 2010 Dan Horák <dan[at]danny.cz> - 0.96.1-1401
-- ocaml not available (at least) on s390(x)
-
-* Tue Jun  1 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.1-1400
+* Sun Jun 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.1-1200
 - updated to 0.96.1
-- rediffed patches
-
-* Sat May 19 2010 Rakesh Pandit <rakesh@fedoraproject.org> - 0.96.1403
-- CVE-2010-1639 Clam AntiVirus: Heap-based overflow, when processing malicious PDF file(s)
-
-* Wed Apr 21 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1402
-- updated to final 0.96
 - applied upstream patch which allows to disable JIT compiler (#573191)
-- build JIT compiler again
 - disabled JIT compiler by default
 - removed explicit 'pkgconfig' requirements in -devel (#533956)
-
-* Sat Mar 20 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-0.1401.rc1
-- do not build the bytecode JIT compiler for now until it can be disabled
-  at runtime (#573191)
-
-* Thu Mar 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1400.rc1
-- updated to 0.96rc1
 - added some BRs
-
-* Sun Dec  6 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1301
-- updated -upstart to upstart 0.6.3
+- rediffed patches
 
 * Sat Nov 21 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - adjusted chkconfig positions for clamav-milter (#530101)
-- use %%apply instead of %%patch
 
-* Thu Oct 29 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1300
+* Thu Oct 29 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1200
 - updated to 0.95.3
 
 * Sun Sep 13 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
