@@ -541,7 +541,7 @@ test -e %freshclamlog || {
 %triggerin milter -- clamav-scanner
 # Add the milteruser to the scanuser group; this is required when
 # milter and clamd communicate through local sockets
-/usr/sbin/usermod -a -G %scanuser %milteruser &>/dev/null || :
+/usr/sbin/groupmems -g %scanuser -a %milteruser &>/dev/null || :
 
 %pre milter
 %__fe_groupadd 5 -r %milteruser &>/dev/null || :
@@ -709,6 +709,8 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Wed Aug 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - removed old %%trigger which renamed the 'clamav' user- and groupnames
   to 'clamupdate'
+- use 'groupmems', not 'usermod' to add a user to a group because
+  'usermod' does not work when user does not exist in local /etc/passwd
 
 * Tue Jul 13 2010 Dan Horák <dan[at]danny.cz> - 0.96.1-1401
 - ocaml not available (at least) on s390(x)
