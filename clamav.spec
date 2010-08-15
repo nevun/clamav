@@ -32,8 +32,8 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.96.1
-Release:	%release_func 1401
+Version:	0.96.2
+Release:	%release_func 1500
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -705,6 +705,12 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Aug 15 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.2-1500
+- updated to 0.96.2
+- rediffed patches
+- removed the -jit-disable patch which is replaced upstream by a more
+  detailed configuration option.
+
 * Wed Aug 11 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - removed old %%trigger which renamed the 'clamav' user- and groupnames
   to 'clamupdate'
