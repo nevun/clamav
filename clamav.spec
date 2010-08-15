@@ -326,6 +326,7 @@ The Upstart initscripts for clamav-milter.
 %apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
+%{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
