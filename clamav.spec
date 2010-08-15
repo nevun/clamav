@@ -59,8 +59,7 @@ Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
 Patch27:	clamav-0.95.3-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch28:	clamav-0.96-disable-jit.patch
-Patch29:	clamav-0.96-jitoff.patch
+Patch29:	clamav-0.96.2-jitoff.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -326,7 +325,6 @@ The Upstart initscripts for clamav-milter.
 %apply -n25 -p1 -b .open
 %apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
-%apply -n28 -p1 -b .jit-disable
 %apply -n29 -p1 -b .jitoff
 
 install -p -m0644 %SOURCE300 clamav-milter/

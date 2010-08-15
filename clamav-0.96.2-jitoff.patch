@@ -1,0 +1,34 @@
+Index: clamav-0.96.2/etc/clamd.conf
+===================================================================
+--- clamav-0.96.2.orig/etc/clamd.conf
++++ clamav-0.96.2/etc/clamd.conf
+@@ -459,6 +459,16 @@ Example
+ # Default: yes
+ #Bytecode yes
+ 
++# Bytecode mode
++#
++# This option has been set to 'ForceInterpreter' in Fedora due to
++# security concerns by default.  You might need to enable the
++# 'clamd_use_jit' SELinux boolean after setting this option to the
++# more efficient 'ForceJIT' value.
++#
++# Default: ForceInterpreter
++#ByteCodeMode ForceInterpreter
++
+ # Set bytecode security level.
+ # Possible values:
+ #       None - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS
+Index: clamav-0.96.2/shared/optparser.c
+===================================================================
+--- clamav-0.96.2.orig/shared/optparser.c
++++ clamav-0.96.2/shared/optparser.c
+@@ -254,7 +254,7 @@ const struct clam_option __clam_options[
+ 	"Set bytecode security level.\nPossible values:\n\tNone - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS\n\tTrustSigned - trust bytecode loaded from signed .c[lv]d files,\n\t\t insert runtime safety checks for bytecode loaded from other sources\n\tParanoid - don't trust any bytecode, insert runtime checks for all\nRecommended: TrustSigned, because bytecode in .cvd files already has these checks\n","TrustSigned"},
+     { "BytecodeTimeout", "bytecode-timeout", 0, TYPE_NUMBER, MATCH_NUMBER, 60000, NULL, 0, OPT_CLAMD | OPT_CLAMSCAN, 
+ 	"Set bytecode timeout in miliseconds.\n","60000"},
+-    { "BytecodeMode", "bytecode-mode", 0, TYPE_STRING, "^(Auto|ForceJIT|ForceInterpreter|Test)$", -1, "Auto", FLAG_REQUIRED, OPT_CLAMD | OPT_CLAMSCAN,
++    { "BytecodeMode", "bytecode-mode", 0, TYPE_STRING, "^(Auto|ForceJIT|ForceInterpreter|Test)$", -1, "ForceInterpreter", FLAG_REQUIRED, OPT_CLAMD | OPT_CLAMSCAN,
+ 	"Set bytecode execution mode.\nPossible values:\n\tAuto - automatically choose JIT if possible, fallback to interpreter\nForceJIT - always choose JIT, fail if not possible\nForceIntepreter - always choose interpreter\nTest - run with both JIT and interpreter and compare results. Make all failures fatal\n","Auto"},
+     { "DetectPUA", "detect-pua", 0, TYPE_BOOL, MATCH_BOOL, 0, NULL, 0, OPT_CLAMD | OPT_CLAMSCAN, "Detect Potentially Unwanted Applications.", "yes" },
+ 
