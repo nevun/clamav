@@ -32,7 +32,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.96.2
+Version:	0.96.3
 Release:	%release_func 1500
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -705,6 +705,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Sep 22 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.3-1500
+- updated to 0.96.3
+- fixes CVE-2010-0405 in shipped bzlib.c copy
+
 * Sun Aug 15 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.2-1500
 - updated to 0.96.2
 - rediffed patches
