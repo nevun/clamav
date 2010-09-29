@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Xchkconfig: - 75 25
+# Xchkconfig: - 75 35
 # Xdescription: The clamd daemon listens for incoming connections on		\
 #               Unix or TCP socket and scans files or directories on demand.
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# chkconfig: - 75 25
+# chkconfig: - 75 35
 # description: The clamd server running for <SERVICE>
 
 CLAMD_SERVICE=<SERVICE>
