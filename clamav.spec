@@ -485,6 +485,11 @@ touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
 
 ## ------------------------------------------------------------
 
+%check
+make check || :
+
+## ------------------------------------------------------------
+
 %clean
 rm -rf "$RPM_BUILD_ROOT"
 
@@ -707,6 +712,8 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Sun Oct 31 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.4-1500
 - updated to 0.96.4
+- execute 'make check' (#640347) but ignore errors for now because
+  four checks are failing on f13
 
 * Wed Sep 29 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.3-1501
 - lowered stop priority of sysv initscripts (#629435)
