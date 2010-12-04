@@ -32,7 +32,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.96.4
+Version:	0.96.5
 Release:	%release_func 1500
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -710,6 +710,13 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Dec  4 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.5-1500
+- updated to 0.96.5
+- CVE-2010-4260 Multiple errors within the processing of PDF files can
+  be exploited to e.g. cause a crash.
+- CVE-2010-4261 An off-by-one error within the "icon_cb()" function
+  can be exploited to cause a memory corruption.
+
 * Sun Oct 31 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.4-1500
 - updated to 0.96.4
 - execute 'make check' (#640347) but ignore errors for now because
