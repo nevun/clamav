@@ -62,10 +62,10 @@ stop () {
 reload() {
 	rc=0
 	echo -n $"Reloading $prog: "
-	killproc -p ${CLAMD_PIDFILE} $procname -SIGHUP  || rc=$?
+	killproc -p ${CLAMD_PIDFILE} $procname -HUP  || rc=$?
 	echo
 	echo -n $"Loading new virus-database: "
-	killproc -p ${CLAMD_PIDFILE} $procname -SIGUSR2 || rc=$?
+	killproc -p ${CLAMD_PIDFILE} $procname -USR2 || rc=$?
 	echo
 	return $rc
 }

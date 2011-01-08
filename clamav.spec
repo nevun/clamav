@@ -37,7 +37,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96.5
-Release:	%release_func 1501
+Release:	%release_func 1502
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -801,6 +801,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Jan  8 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.5-1502
+- fixed signal specifier in clamd-wrapper (#668131, James Ralston)
+
 * Fri Dec 24 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96.5-1501
 - added systemd init scripts which obsolete to old sysvinit ones
 - added tmpfiles.d/ descriptions
