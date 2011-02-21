@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -212,7 +212,9 @@ EOF
 	--with-dbdir="%{_localstatedir}/clamav" \
 	--with-group="clam" \
 	--with-libcurl \
-	--with-user="clam" 
+	--with-user="clam" \
+        --disable-llvm 
+
 make %{?_smp_mflags}
 
 %install
@@ -375,6 +377,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Feb 17 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-2
+- Disable llvm. 
+
 * Tue Feb 08 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-1
 - Update to 0.97
 - Fix up for current guidelines. 
