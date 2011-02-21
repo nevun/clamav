@@ -1,879 +1,579 @@
-#global snapshot	rc1
+### FIXME: Sysv script does not have condrestart option (redo sysv script)
+### FIXME: amavisd-new requires clamd to run as user vscan, solution needed
+### REMINDER: Look and sync with Petr Kristof's work
 
-## Fedora Extras specific customization below...
-%bcond_without		fedora
-%bcond_without		upstart
-%bcond_with		unrar
-%bcond_without		noarch
-##
+Summary: Anti-virus software
+Name: clamav
+Version: 0.97
+Release: 1%{?dist}
+License: GPLv2
+Group: Applications/System
+URL: http://www.clamav.net/
 
-%global username	clamupdate
-%global homedir		%_var/lib/clamav
-%global freshclamlog	%_var/log/freshclam.log
-%global milteruser	clamilt
-%global milterlog	%_var/log/clamav-milter.log
-%global milterstatedir	%_var/run/clamav-milter
-%global pkgdatadir	%_datadir/%name
+# Upstream source includes libunrar that is not distributable.
+#Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
+Source0: clamav-0.97-clean.tar.bz2
+Source1: clamav.init
+Source2: clamav-milter.init
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%global scanuser	clamscan
-%global scanstatedir	%_var/run/clamd.scan
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel
+%{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
+Requires: clamav-db = %{version}-%{release}
+Requires(pre): shadow-utils
 
-%{?with_noarch:%global noarch	BuildArch:	noarch}
-%{!?release_func:%global release_func() %1%{?dist}}
-
-Summary:	End-user tools for the Clam Antivirus scanner
-Name:		clamav
-Version:	0.95.3
-Release:	%release_func 1200%{?snapshot:.%snapshot}
-
-License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
-Group:		Applications/File
-URL:		http://www.clamav.net
-%if 0%{?with_unrar:1}
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
-Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz.sig
-%else
-# Unfortunately, clamav includes support for RAR v3, derived from GPL
-# incompatible unrar from RARlabs. We have to pull this code out.
-# tarball was created by
-#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
-Source0:	%name-%version%{?snapshot}-norar.tar.bz2
-%endif
-Source1:	clamd-wrapper
-Source2:	clamd.sysconfig
-Source3:	clamd.logrotate
-Source5:	clamd-README
-Source6:	clamav-update.logrotate
-Source7:	clamd.SERVICE.init
-Source8:	clamav-notify-servers
-Patch24:	clamav-0.92-private.patch
-Patch25:	clamav-0.92-open.patch
-Patch26:	clamav-0.95-cliopts.patch
-Patch27:	clamav-0.95.3-umask.patch
-BuildRoot:	%_tmppath/%name-%version-%release-root
-Requires:	clamav-lib = %version-%release
-Requires:	data(clamav)
-BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
-BuildRequires:	ncurses-devel
-BuildRequires:	%_includedir/tcpd.h
-BuildRequires:	bc
-
-%package filesystem
-Summary:	Filesystem structure for clamav
-Group:		Applications/File
-Provides:	user(%username)  = 4
-Provides:	group(%username) = 4
-# Prevent version mix
-Conflicts:	%name < %version-%release
-Conflicts:	%name > %version-%release
-BuildRequires:	fedora-usermgmt-devel
-%{?noarch}
-%{?FE_USERADD_REQ}
-
-%package lib
-Summary:	Dynamic libraries for the Clam Antivirus scanner
-Group:		System Environment/Libraries
-Requires:	data(clamav)
-
-%package devel
-Summary:	Header files and libraries for the Clam Antivirus scanner
-Group:		Development/Libraries
-Source100:	clamd-gen
-Requires:	clamav-lib        = %version-%release
-Requires:	clamav-filesystem = %version-%release
-Requires(pre):	%_libdir/pkgconfig
-Requires:	pkgconfig
-
-%package data
-Summary:	Virus signature data for the Clam Antivirus scanner
-Group:		Applications/File
-Requires(pre):		clamav-filesystem = %version-%release
-Requires(postun):	clamav-filesystem = %version-%release
-Provides:		data(clamav) = full
-Conflicts:		data(clamav) < full
-Conflicts:		data(clamav) > full
-%{?noarch}
-
-%package data-empty
-Summary:	Empty data package for the Clam Antivirus scanner
-Group:		Applications/File
-Provides:	data(clamav) = empty
-Conflicts:	data(clamav) < empty
-Conflicts:	data(clamav) > empty
-%{?noarch}
-
-%package update
-Summary:	Auto-updater for the Clam Antivirus scanner data-files
-Group:		Applications/File
-Source200:	freshclam-sleep
-Source201:	freshclam.sysconfig
-Source202:	clamav-update.cron
-Requires:		clamav-filesystem = %version-%release
-Requires(pre):		/etc/cron.d
-Requires(postun):	/etc/cron.d
-Requires(post):		%__chown %__chmod
-Requires(post):		group(%username)
-
-%package server
-Summary:	Clam Antivirus scanner server
-Group:		System Environment/Daemons
-Requires:	data(clamav)
-Requires:	clamav-filesystem = %version-%release
-Requires:	clamav-lib        = %version-%release
-
-%package server-sysvinit
-Summary:	SysV initscripts for clamav server
-Group:		System Environment/Daemons
-Provides:	init(clamav-server) = sysv
-Requires:	clamav-server = %version-%release
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir
-Provides:	clamav-server-sysv = %version-%release
-Obsoletes:	clamav-server-sysv < %version-%release
-%{?noarch}
-
-
-%package scanner
-Summary:	Clamav scanner daemon
-Group:		System Environment/Daemons
-Requires:	init(clamav-scanner)
-Provides:	user(%scanuser)  = 49
-Provides:	group(%scanuser) = 49
-Requires:	clamav-server = %version-%release
-%{?noarch}
-
-%package scanner-sysvinit
-Summary:	SysV initscripts for clamav scanner daemon
-Group:		System Environment/Daemons
-Provides:	init(clamav-scanner) = sysv
-Requires:	clamav-server-sysvinit = %version-%release
-Requires:	clamav-scanner = %version-%release
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir initscripts
-Requires(post):		chkconfig
-Requires(preun):	chkconfig initscripts
-%{?noarch}
-
-%package scanner-upstart
-Summary:	Upstart initscripts for clamav scanner daemon
-Group:		System Environment/Daemons
-Source410:	clamd.scan.upstart
-Provides:	init(clamav-scanner) = upstart
-Requires:	clamav-scanner = %version-%release
-# implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d
-Requires(post):		/usr/bin/killall
-Requires(postun):	/sbin/initctl
-%{?noarch}
-
-
-%package milter
-Summary:	Milter module for the Clam Antivirus scanner
-Group:		System Environment/Daemons
-Source300:	README.fedora
-Requires:	init(clamav-milter)
-BuildRequires:	sendmail-devel
-BuildRequires:	fedora-usermgmt-devel
-Provides:	user(%milteruser)  = 5
-Provides:	group(%milteruser) = 5
-Requires(post):	coreutils
-%{?FE_USERADD_REQ}
-
-Provides:	milter(clamav) = sendmail
-Provides:	milter(clamav) = postfix
-
-Provides:	clamav-milter-core = %version-%release
-Obsoletes:	clamav-milter-core < %version-%release
-Provides:	clamav-milter-sendmail = %version-%release
-Obsoletes:	clamav-milter-sendmail < %version-%release
-
-%package milter-sysvinit
-Summary:	SysV initscripts for the clamav sendmail-milter
-Group:		System Environment/Daemons
-Source320:	clamav-milter.sysv
-Provides:	init(clamav-milter) = sysvinit
-Requires:	clamav-milter = %version-%release
-Requires(post):		user(%milteruser) clamav-milter
-Requires(preun):	user(%milteruser) clamav-milter
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir initscripts
-Requires(post):		chkconfig
-Requires(preun):	chkconfig initscripts
-Provides:		clamav-milter-sysv = %version-%release
-Obsoletes:		clamav-milter-sysv < %version-%release
-%{?noarch}
-
-%package milter-upstart
-Summary:	Upstart initscripts for the clamav sendmail-milter
-Group:		System Environment/Daemons
-Source310:	clamav-milter.upstart
-Provides:	init(clamav-milter) = upstart
-Requires:	clamav-milter = %version-%release
-# implicates a conflict with upstart 0.5+
-Requires(pre):		/etc/event.d
-Requires(post):		/usr/bin/killall
-Requires(postun):	/sbin/initctl
-%{?noarch}
-
+### Fedora Extras introduced them differently :(
+Obsoletes: libclamav < %{version}-%{release}
+Obsoletes: clamav-lib < %{version}-%{release}
+Obsoletes: clamav-filesystem < %{version}-%{release}
+Provides: libclamav
 
 %description
-Clam AntiVirus is an anti-virus toolkit for UNIX. The main purpose of this
-software is the integration with mail servers (attachment scanning). The
-package provides a flexible and scalable multi-threaded daemon, a command
-line scanner, and a tool for automatic updating via Internet. The programs
-are based on a shared library distributed with the Clam AntiVirus package,
-which you can use with your own software. The virus database is based on
-the virus database from OpenAntiVirus, but contains additional signatures
-(including signatures for popular polymorphic viruses, too) and is KEPT UP
-TO DATE.
+Clam AntiVirus is a GPL anti-virus toolkit for UNIX. The main purpose of
+this software is the integration with mail servers (attachment scanning).
+The package provides a flexible and scalable multi-threaded daemon, a
+command line scanner, and a tool for automatic updating via Internet.
 
-%description filesystem
-This package provides the filesystem structure and contains the
-user-creation scripts required by clamav.
+The programs are based on a shared library distributed with the Clam
+AntiVirus package, which you can use with your own software. Most
+importantly, the virus database is kept up to date
 
-%description lib
-This package contains dynamic libraries shared between applications
-using the Clam Antivirus scanner.
+%package -n clamd
+Summary: The Clam AntiVirus Daemon
+Group: System Environment/Daemons
+Requires: clamav = %{version}-%{release}
 
-%description devel
-This package contains headerfiles and libraries which are needed to
-build applications using clamav.
+### Fedora Extras introduced them differently :(
+Obsoletes: clamav-server <= %{version}-%{release}
+Obsoletes: clamav-server-sysv <= %{version}-%{release}
 
-%description data
-This package contains the virus-database needed by clamav. This
-database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job. This package and the
-'clamav-data-empty' package are mutually exclusive.
+%description -n clamd
+The Clam AntiVirus Daemon
 
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%description data-empty
-This is an empty package to fulfill inter-package dependencies of the
-clamav suite. This package and the 'clamav-data' package are mutually
-exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%description update
-This package contains programs which can be used to update the clamav
-anti-virus database automatically. It uses the freshclam(1) utility for
-this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
-
-%description server
-ATTENTION: most users do not need this package; the main package has
-everything (or depends on it) which is needed to scan for virii on
-workstations.
-
-This package contains files which are needed to execute the clamd-daemon.
-This daemon does not provide a system-wide service. Instead of, an instance
-of this daemon should be started for each service requiring it.
-
-See the README file how this can be done with a minimum of effort.
-
-
-%description server-sysvinit
-SysV initscripts template for the clamav server
-
-
-%description scanner
-This package contains a generic system wide clamd service which is
-e.g. used by the clamav-milter package.
-
-%description scanner-sysvinit
-The SysV initscripts for clamav-scanner.
-
-%description scanner-upstart
-The Upstart initscripts for clamav-scanner.
-
+%package milter
+Summary: The Clam AntiVirus sendmail-milter Daemon
+Group: Applications/System
+Requires: clamd = %{version}-%{release}
+Requires: sendmail
+Obsoletes: clamav-milter-sysv <= %{version}-%{release}
 
 %description milter
-This package contains files which are needed to run the clamav-milter.
+The Clam AntiVirus sendmail-milter Daemon
 
-%description milter-sysvinit
-The SysV initscripts for clamav-milter.
+%package db
+Summary: Virus database for %{name}
+Group: Applications/Databases
+### Remove circular dependency
+#Requires: clamav = %{version}-%{release}
 
-%description milter-upstart
-The Upstart initscripts for clamav-milter.
+### Fedora Extras introduced them differently :(
+Obsoletes: clamav-update <= %{version}-%{release}
+Obsoletes: clamav-data <= %{version}-%{release}
 
-## ------------------------------------------------------------
+%description db
+The actual virus database for %{name}
+
+%package devel
+Summary: Header files, libraries and development documentation for %{name}
+Group: Development/Libraries
+Requires: clamav = %{version}-%{release}
+
+### Fedora Extras introduced them differently :(
+Obsoletes: libclamav-static-devel <= %{version}-%{release}
+Obsoletes: libclamav-devel <= %{version}-%{release}
+Provides: libclamav-static-devel, libclamav-devel
+
+%description devel
+This package contains the header files, static libraries and development
+documentation for %{name}. If you like to develop programs using %{name},
+you will need to install %{name}-devel.
 
 %prep
-%setup -q -n %{name}-%{version}%{?snapshot}
+%setup -q
 
-%patch24 -p1 -b .private
-%patch25 -p1 -b .open
-%patch26 -p1 -b .cliopts
-%patch27 -p1 -b .umask
+%{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' libtool configure
 
-install -p -m0644 %SOURCE300 clamav-milter/
+%{__perl} -pi.orig -e '
+		s|\@DBDIR\@|\$(localstatedir)/clamav|g;
+		s|\@DBINST\@|\$(localstatedir)/clamav|g;
+		s|\@CFGDIR\@|\$(sysconfdir)|g;
+		s|\@CFGINST\@|\$(sysconfdir)|g;
+		s|^\@INSTALL_CLAMAV_CONF_TRUE\@|\t|g;
+		s|^\@INSTALL_FRESHCLAM_CONF_TRUE\@|\t|g;
+	' database/Makefile.in etc/Makefile.in
 
-mkdir -p libclamunrar{,_iface}
-%{!?with_unrar:touch libclamunrar/{Makefile.in,all,install}}
+%{__perl} -pi.orig -e '
+		s|^(Example)|#$1|;
+		s|^#(LogFile) .+$|$1 %{_localstatedir}/log/clamav/clamd.log|;
+		s|^#(LogFileMaxSize) .*|$1 0|;
+		s|^#(LogTime)|$1|;
+		s|^#(LogSyslog)|$1|;
+		s|^#(PidFile) .+$|$1 %{_localstatedir}/run/clamav/clamd.pid|;
+		s|^#(TemporaryDirectory) .+$|$1 %{_localstatedir}/tmp|;
+		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/clamav|;
+		s|^#(LocalSocket) .+$|$1 %{_localstatedir}/run/clamav/clamd.sock|;
+		s|^#(FixStaleSocket)|$1|;
+		s|^#(TCPSocket) .+$|$1 3310|;
+		s|^#(TCPAddr) .+$|$1 127.0.0.1|;
+		s|^#(MaxConnectionQueueLength) .+$|$1 30|;
+		s|^#(StreamSaveToDisk)|$1|;
+		s|^#(MaxThreads) .+$|$1 50|;
+		s|^#(ReadTimeout) .+$|$1 300|;
+		s|^#(User) .+$|$1 clam|;
+		s|^#(AllowSupplementaryGroups).*$|$1 yes|;
+		s|^#(ScanPE) .+$|$1 yes|;
+		s|^#(ScanELF) .+$|$1 yes|;
+		s|^#(DetectBrokenExecutables)|$1|;
+		s|^#(ScanOLE2) .+$|$1 yes|;
+		s|^#(ScanMail)|$1|;
+		s|^#(ScanArchive) .+$|$1 yes|;
+		s|^#(ArchiveMaxCompressionRatio) .+|$1 300|;
+		s|^#(ArchiveBlockEncrypted)|$1|;
+		s|^#(ArchiveBlockMax)|$1|;
+	' etc/clamd.conf
 
-sed -ri \
-    -e 's!^#?(LogFile ).*!#\1/var/log/clamd.<SERVICE>!g' \
-    -e 's!^#?(LocalSocket ).*!#\1/var/run/clamd.<SERVICE>/clamd.sock!g' \
-    -e 's!^(#?PidFile ).*!\1/var/run/clamd.<SERVICE>/clamd.pid!g' \
-    -e 's!^#?(User ).*!\1<USER>!g' \
-    -e 's!^#?(AllowSupplementaryGroups|LogSyslog).*!\1 yes!g' \
-    -e 's! /usr/local/share/clamav,! %homedir,!g' \
-    etc/clamd.conf
+%{__perl} -pi.orig -e '
+		s|^(Example)|#$1|;
+		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/clamav|;
+		s|^#(UpdateLogFile) .+$|$1 %{_localstatedir}/log/clamav/freshclam.log|;
+		s|^#(LogSyslog)|$1|;
+		s|^#(DatabaseOwner) .+$|$1 clam|;
+		s|^(Checks) .+$|$1 24|;
+		s|^#(NotifyClamd) .+$|$1 %{_sysconfdir}/clamd.conf|;
+	' etc/freshclam.conf
 
-sed -ri \
-    -e 's!^#?(UpdateLogFile )!#\1!g;' \
-    -e 's!^#?(LogSyslog).*!\1 yes!g' \
-    -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf
+cat <<EOF >clamd.logrotate
+%{_localstatedir}/log/clamav/clamd.log {
+	missingok
+	notifempty
+	create 644 clam clam
+	postrotate
+		killall -HUP clamd 2>/dev/null || :
+	endscript
+}
+EOF
 
+cat <<EOF >freshclam.logrotate
+%{_localstatedir}/log/clamav/freshclam.log {
+	missingok
+	notifempty
+	create 644 clam clam
+}
+EOF
 
-## ------------------------------------------------------------
+cat <<'EOF' >freshclam.cron
+#!/bin/sh
+
+### A simple update script for the clamav virus database.
+### This could as well be replaced by a SysV script.
+
+### fix log file if needed
+LOG_FILE="%{_localstatedir}/log/clamav/freshclam.log"
+if [ ! -f "$LOG_FILE" ]; then
+    touch "$LOG_FILE"
+    chmod 644 "$LOG_FILE"
+    chown clam.clam "$LOG_FILE"
+fi
+
+%{_bindir}/freshclam \
+    --quiet \
+    --datadir="%{_localstatedir}/clamav" \
+    --log="$LOG_FILE" \
+    --log-verbose \
+    --daemon-notify="%{_sysconfdir}/clamd.conf"
+EOF
+
+%{__cat} <<EOF >clamav-milter.sysconfig
+### Simple config file for clamav-milter, you should
+### read the documentation and tweak it as you wish.
+
+CLAMAV_FLAGS="
+	--config-file=%{_sysconfdir}/clamd.conf
+	--force-scan
+	--local    
+	--max-children=10
+	--noreject
+	--outgoing                                                                                                            
+	--quiet
+"
+SOCKET_ADDRESS="local:%{_localstatedir}/clamav/clmilter.socket"
+EOF
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
-export LDFLAGS='-Wl,--as-needed'
-# HACK: remove me, when configure uses $LIBS instead of $LDFLAGS for milter check
-export LIBS='-lmilter -lpthread'
-# IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
-export have_cv_ipv6=yes
-%configure --disable-clamav --with-dbdir=/var/lib/clamav	\
-	--enable-milter --disable-static			\
-	--disable-rpath						\
-	--with-user=%username		\
-	--with-group=%username		\
-	%{!?with_unrar:--disable-unrar}
-
-# TODO: check periodically that CLAMAVUSER is used for freshclam only
-
-
-# build with --as-needed and disable rpath
-sed -i \
-	-e 's! -shared ! -Wl,--as-needed\0!g'					\
-	-e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!\"\/lib \/usr\/lib !/\"/%_lib /usr/%_lib !g'	\
-	libtool
-
-
+%configure  \
+	--program-prefix="%{?_program_prefix}" \
+%{!?_without_milter:--enable-milter} \
+	--disable-clamav \
+        --disable-static \
+	--disable-zlib-vcheck \
+	--disable-unrar \
+	--enable-id-check \
+	--enable-dns \
+	--with-dbdir="%{_localstatedir}/clamav" \
+	--with-group="clam" \
+	--with-libcurl \
+	--with-user="clam" 
 make %{?_smp_mflags}
 
-
-## ------------------------------------------------------------
-
 %install
-rm -rf "$RPM_BUILD_ROOT" _doc*
-make DESTDIR="$RPM_BUILD_ROOT" install
+rm -rf %{buildroot}
+make install DESTDIR="%{buildroot}"
 
-function smartsubst() {
-	local tmp
-	local regexp=$1
-	shift
+install -Dp -m0755 %{SOURCE1} %{buildroot}%{_initrddir}/clamd
+install -Dp -m0755 freshclam.cron %{buildroot}%{_sysconfdir}/cron.daily/freshclam
+install -Dp -m0644 freshclam.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/freshclam
+install -Dp -m0644 clamd.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/clamav
 
-	tmp=$(mktemp /tmp/%name-subst.XXXXXX)
-	for i; do
-		sed -e "$regexp" "$i" >$tmp
-		cmp -s $tmp "$i" || cat $tmp >"$i"
-		rm -f $tmp
-	done
-}
+%if %{!?_without_milter:1}0
+install -Dp -m0755 %{SOURCE2} %{buildroot}%{_initrddir}/clamav-milter
+install -Dp -m0644 clamav-milter.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/clamav-milter
+%else
+rm %{buildroot}%{_mandir}/man8/clamav-milter.8*
+%endif
 
+install -d -m0755 %{buildroot}%{_localstatedir}/log/clamav/
+touch %{buildroot}%{_localstatedir}/log/clamav/freshclam.log
+touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 
-install -d -m755 \
-	${RPM_BUILD_ROOT}%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,sysconfig,event.d} \
-	${RPM_BUILD_ROOT}%_var/log \
-	${RPM_BUILD_ROOT}%milterstatedir \
-	${RPM_BUILD_ROOT}%pkgdatadir/template \
-	${RPM_BUILD_ROOT}%_initrddir \
-	${RPM_BUILD_ROOT}%homedir \
-	${RPM_BUILD_ROOT}%scanstatedir
+install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 
-rm -f	${RPM_BUILD_ROOT}%_sysconfdir/clamd.conf \
-	${RPM_BUILD_ROOT}%_libdir/*.la
+%post
+/sbin/ldconfig
 
+ZONES="/usr/share/zoneinfo/zone.tab"
+CONFIG="/etc/sysconfig/clock"
 
-touch ${RPM_BUILD_ROOT}%homedir/daily.cld
-touch ${RPM_BUILD_ROOT}%homedir/main.cld
+if [ -r "$CONFIG" -a -r "$ZONES" ]; then
+	source "$CONFIG"
+	export CODE="$(grep -E "\b$ZONE\b" "$ZONES" | head -1 | cut -f1 | tr [A-Z] [a-z])"
+fi
 
+if [ -z "$CODE" ]; then
+	export CODE="local"
+fi
 
-## prepare the server-files
-mkdir _doc_server
-install -m644 -p %SOURCE2	_doc_server/clamd.sysconfig
-install -m644 -p %SOURCE3       _doc_server/clamd.logrotate
-install -m755 -p %SOURCE7	_doc_server/clamd.init
-install -m644 -p %SOURCE5	_doc_server/README
-install -m644 -p etc/clamd.conf _doc_server/clamd.conf
+%{__perl} -pi -e '
+		s|^(DatabaseMirror) database\.clamav\.net$|$1 db.$ENV{"CODE"}.clamav.net\n$1 db.local.clamav.net|;
+		s|^(DatabaseMirror) db\.\.clamav\.net$|$1 db.$ENV{"CODE"}.clamav.net\n$1 db.local.clamav.net|;
+	' %{_sysconfdir}/freshclam.conf{,.rpmnew} &>/dev/null || :
 
-install -m644 -p %SOURCE1	$RPM_BUILD_ROOT%pkgdatadir
-install -m755 -p %SOURCE100     $RPM_BUILD_ROOT%pkgdatadir
-cp -pa _doc_server/*            $RPM_BUILD_ROOT%pkgdatadir/template
-ln -s %pkgdatadir/clamd-wrapper $RPM_BUILD_ROOT%_initrddir/clamd-wrapper
+%postun -p /sbin/ldconfig
 
-smartsubst 's!/usr/share/clamav!%pkgdatadir!g' $RPM_BUILD_ROOT%pkgdatadir/clamd-wrapper
+%pre
+getent group clam >/dev/null || groupadd -r clam
+getent passwd clam >/dev/null || \
+useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+    -c "Clam Anti Virus Checker" clam
+exit 0
 
+%pre -n clamd
+getent group clam >/dev/null || groupadd -r clam
+getent passwd clam >/dev/null || \
+useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+    -c "Clam Anti Virus Checker" clam
+exit 0
 
-## prepare the update-files
-install -m644 -p %SOURCE6	${RPM_BUILD_ROOT}%_sysconfdir/logrotate.d/clamav-update
-install -m755 -p %SOURCE8	${RPM_BUILD_ROOT}%_sbindir/clamav-notify-servers
-touch ${RPM_BUILD_ROOT}%freshclamlog
+%post -n clamd
+/sbin/chkconfig --add clamd
 
-install -p -m0755 %SOURCE200	$RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
-install -p -m0644 %SOURCE201	$RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
-install -p -m0600 %SOURCE202	$RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
+%preun -n clamd
+if [ $1 -eq 0 ]; then
+	/sbin/service clamd stop &>/dev/null || :
+	/sbin/chkconfig --del clamd
+fi
 
-smartsubst 's!webmaster,clamav!webmaster,%username!g;
-	    s!/usr/share/clamav!%pkgdatadir!g;
-	    s!/usr/bin!%_bindir!g;
-            s!/usr/sbin!%_sbindir!g;' \
-   $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
-   $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
-
-
-### The scanner stuff
-sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
-    etc/clamd.conf > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/scan.conf
-
-sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
-    > $RPM_BUILD_ROOT%_initrddir/clamd.scan
-
-install -p -m 644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamd.scan
-
-touch $RPM_BUILD_ROOT%scanstatedir/clamd.sock
-
-
-### The milter stuff
-sed -r \
-    -e 's!^#?(User).*!\1 %milteruser!g' \
-    -e 's!^#?(AllowSupplementaryGroups|LogSyslog) .*!\1 yes!g' \
-    -e 's! /tmp/clamav-milter.socket! %milterstatedir/clamav-milter.socket!g' \
-    -e 's! /var/run/clamav-milter.pid! %milterstatedir/clamav-milter.pid!g' \
-    -e 's! /tmp/clamav-milter.log! %milterlog!g' \
-    etc/clamav-milter.conf > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
-
-install -p -m 644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/event.d/clamav-milter
-install -p -m 755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
-
-
-rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
-touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.socket,%milterlog}
-
-%{!?with_upstart:rm -rf $RPM_BUILD_ROOT%_sysconfdir/event.d}
-
-## ------------------------------------------------------------
-
-%clean
-rm -rf "$RPM_BUILD_ROOT"
-
-## ------------------------------------------------------------
-
-%triggerprein filesystem -- clamav-filesystem < 0.96
-## REMOVE me in F14 or F15 (added in pre F12)
-! /usr/bin/id clamav &>/dev/null || /usr/bin/id %username &>/dev/null || {
-	/usr/sbin/usermod  -l %username clamav || :
-	/usr/sbin/groupmod -n %username clamav || :
-	logger -t rpm/clamav "Renamed clamav user+group to %username" || :
-}
-
-%pre filesystem
-%__fe_groupadd 4 -r %username &>/dev/null || :
-%__fe_useradd  4 -r -s /sbin/nologin -d %homedir -M          \
-                 -c 'Clamav database update user' -g %username %username &>/dev/null || :
-
-%postun filesystem
-%__fe_userdel  %username &>/dev/null || :
-%__fe_groupdel %username &>/dev/null || :
-
-
-%pre scanner
-%__fe_groupadd 49 -r %scanuser &>/dev/null || :
-%__fe_useradd  49 -r -s /sbin/nologin -d / -M \
-                 -g %scanuser %scanuser &>/dev/null || :
-
-%postun scanner
-%__fe_userdel  %scanuser &>/dev/null || :
-%__fe_groupdel %scanuser &>/dev/null || :
-
-
-%post scanner-sysvinit
-/sbin/chkconfig --add clamd.scan
-
-%preun scanner-sysvinit
-test "$1" != 0 || %_initrddir/clamd.scan stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamd.scan
-
-%postun scanner-sysvinit
-test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
-
-
-%post scanner-upstart
-/usr/bin/killall -u %scanuser clamd 2>/dev/null || :
-
-%preun scanner-upstart
-test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
-
-
-
-%post update
-test -e %freshclamlog || {
-	touch %freshclamlog
-	%__chmod 0664 %freshclamlog
-	%__chown root:%username %freshclamlog
-}
-
-
-%triggerin milter -- clamav-scanner
-# Add the milteruser to the scanuser group; this is required when
-# milter and clamd communicate through local sockets
-/usr/sbin/usermod -a -G %scanuser %milteruser &>/dev/null || :
-
-%pre milter
-%__fe_groupadd 5 -r %milteruser &>/dev/null || :
-%__fe_useradd  5 -r -s /sbin/nologin -d %milterstatedir -M \
-                 -c 'Clamav Milter User' -g %milteruser %milteruser &>/dev/null || :
+%postun -n clamd
+/sbin/service clamd condrestart &>/dev/null || :
 
 %post milter
-test -e %milterlog || {
-	touch %milterlog
-	chmod 0620             %milterlog
-	chown root:%milteruser %milterlog
-}
-
-%postun milter
-%__fe_userdel  %milteruser &>/dev/null || :
-%__fe_groupdel %milteruser &>/dev/null || :
-
-
-%post milter-sysvinit
 /sbin/chkconfig --add clamav-milter
 
-%preun milter-sysvinit
-test "$1" != 0 || %_initrddir/clamav-milter stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamav-milter
+%preun milter
+if [ $1 -eq 0 ]; then
+	/sbin/service clamav-milter stop &>/dev/null || :
+	/sbin/chkconfig --del clamav-milter
+fi
 
-%postun milter-sysvinit
-test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
+%postun milter
+/sbin/service clamav-milter condrestart &>/dev/null || :
 
+%pre db
+getent group clam >/dev/null || groupadd -r clam
+getent passwd clam >/dev/null || \
+useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+    -c "Clam Anti Virus Checker" clam
+exit 0
 
-%post milter-upstart
-/usr/bin/killall -u %milteruser clamav-milter 2>/dev/null || :
-
-%preun milter-upstart
-test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
-
-
-%post   lib -p /sbin/ldconfig
-%postun lib -p /sbin/ldconfig
-
+%clean
+rm -rf %{buildroot}
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS README UPGRADE
-%doc docs/*.pdf
-%_bindir/*
-%_mandir/man[15]/*
-%exclude %_bindir/clamav-config
-%exclude %_bindir/freshclam
-%exclude %_mandir/*/freshclam*
+%defattr(-, root, root, 0755)
+%doc AUTHORS BUGS ChangeLog COPYING FAQ INSTALL NEWS README test/
+%doc docs/*.pdf etc/freshclam.conf
+%doc %{_mandir}/man1/sigtool.1*
+%doc %{_mandir}/man1/clamscan.1*
+%doc %{_mandir}/man1/freshclam.1*
+%doc %{_mandir}/man5/freshclam.conf.5*
+%config(noreplace) %{_sysconfdir}/freshclam.conf
+%{_bindir}/clamscan
+%{_bindir}/freshclam
+%{_bindir}/sigtool
+%{_bindir}/clambc
+%{_libdir}/libclamav.so.*
 
-## -----------------------
+%files -n clamd
+%defattr(-, root, root, 0755)
+%doc etc/clamd.conf
+%doc %{_mandir}/man1/clamdscan.1*
+%doc %{_mandir}/man1/clamconf.1*
+%doc %{_mandir}/man1/clamdtop.1*
+%doc %{_mandir}/man5/clamd.conf.5*
+%doc %{_mandir}/man8/clamd.8*
+%config(noreplace) %{_sysconfdir}/clamd.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/clamav
+%config %{_initrddir}/clamd
+%{_sbindir}/clamd
+%{_bindir}/clamconf
+%{_bindir}/clamdscan
 
-%files lib
-%defattr(-,root,root,-)
-%_libdir/*.so.*
+%defattr(0644, clam, clam, 0755)
+%{_localstatedir}/run/clamav/
+%dir %{_localstatedir}/clamav/
+%dir %{_localstatedir}/log/clamav/
+%ghost %{_localstatedir}/log/clamav/clamd.log
+%exclude %{_localstatedir}/clamav/*
 
-## -----------------------
+%if %{!?_without_milter:1}0
+%files milter
+%defattr(-, root, root, 0755)
+%doc %{_mandir}/man5/clamav-milter.conf.5*
+%doc %{_mandir}/man8/clamav-milter.8*
+%config(noreplace) %{_sysconfdir}/sysconfig/clamav-milter
+%config %{_initrddir}/clamav-milter
+%{_sbindir}/clamav-milter
+%config(noreplace) %{_sysconfdir}/clamav-milter.conf
+%endif
+
+%files db
+%defattr(-, root, root, 0755)
+%config(noreplace) %{_sysconfdir}/cron.daily/freshclam
+%config(noreplace) %{_sysconfdir}/logrotate.d/freshclam
+
+%defattr(0644, clam, clam, 0755)
+%config(noreplace) %verify(user group mode) %{_localstatedir}/clamav/
+%dir %{_localstatedir}/log/clamav/
+%ghost %{_localstatedir}/log/clamav/freshclam.log
 
 %files devel
-%defattr(-,root,root,-)
-%_includedir/*
-%_libdir/*.so
-%pkgdatadir/template
-%pkgdatadir/clamd-gen
-%_libdir/pkgconfig/*
-%_bindir/clamav-config
-
-## -----------------------
-
-%files filesystem
-%attr(-,%username,%username) %dir %homedir
-%attr(-,root,root)           %dir %pkgdatadir
-
-## -----------------------
-
-%files data
-%defattr(-,%username,%username,-)
-# use %%config to keep files which were updated by 'freshclam'
-# already. Without this tag, they would be overridden with older
-# versions whenever a new -data package is installed.
-%config %verify(not size md5 mtime) %homedir/*.cvd
-
-
-%files data-empty
-%defattr(-,%username,%username,-)
-%ghost %attr(0664,%username,%username) %homedir/*.cvd
-
-
-## -----------------------
-
-%files update
-%defattr(-,root,root,-)
-%_bindir/freshclam
-%_mandir/*/freshclam*
-%pkgdatadir/freshclam-sleep
-%config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
-%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
-%config(noreplace) %_sysconfdir/cron.d/*
-%config(noreplace) %_sysconfdir/sysconfig/freshclam
-
-%ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
-%ghost %attr(0664,%username,%username) %homedir/*.cld
-
-
-## -----------------------
-
-%files server
-%defattr(-,root,root,-)
-%doc _doc_server/*
-%_mandir/man[58]/clamd*
-%_sbindir/*
-%pkgdatadir/clamd-wrapper
-%dir %_sysconfdir/clamd.d
-
-%exclude %_sbindir/*milter*
-%exclude %_mandir/man8/clamav-milter*
-
-
-%files server-sysvinit
-%defattr(-,root,root,-)
-%_initrddir/clamd-wrapper
-
-
-## -----------------------
-
-%files scanner
-%defattr(-,root,root,-)
-%dir %attr(0710,%scanuser,%scanuser) %scanstatedir
-%config(noreplace) %_sysconfdir/clamd.d/scan.conf
-%ghost %scanstatedir/clamd.sock
-
-%files scanner-sysvinit
-%attr(0755,root,root) %config %_initrddir/clamd.scan
-
-%if 0%{?with_upstart:1}
-%files scanner-upstart
-%defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/event.d/clamd.scan
-%endif
-
-## -----------------------
-
-%files milter
-%defattr(-,root,root,-)
-%doc clamav-milter/README.fedora
-%_sbindir/*milter*
-%_mandir/man8/clamav-milter*
-%config(noreplace) %_sysconfdir/mail/clamav-milter.conf
-%ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
-%attr(0710,%milteruser,%milteruser) %dir %milterstatedir
-%ghost %milterstatedir/*
-
-%files milter-sysvinit
-%defattr(-,root,root,-)
-%config %_initrddir/clamav-milter
-
-%if 0%{?with_upstart:1}
-%files milter-upstart
-%defattr(-,root,root,-)
-%config(noreplace) %_sysconfdir/event.d/clamav-milter
-%endif
-
+%defattr(-, root, root, 0755)
+%{_bindir}/clamav-config
+%{_includedir}/clamav.h
+%{_libdir}/libclamav.so
+%{_libdir}/pkgconfig/libclamav.pc
+#%{_libdir}/libclamav.a
+%exclude %{_libdir}/libclamav.la
 
 %changelog
-* Sat Nov 21 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
-- adjusted chkconfig positions for clamav-milter (#530101)
+* Tue Feb 08 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-1
+- Update to 0.97
+- Fix up for current guidelines. 
 
-* Thu Oct 29 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.3-1200
-- updated to 0.95.3
+* Fri Nov 23 2007 Kevin Fenzi <kevin@tummy.com> - 0.91.2-3
+- Change username to get upgrades from fedora versions working. 
 
-* Sun Sep 13 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
-- conditionalized build of noarch subpackages to ease packaging under RHEL5
+* Thu Nov 22 2007 Kevin Fenzi <kevin@tummy.com> - 0.91.2-2
+- Initial changes for EPEL version. 
 
-* Sun Aug  9 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-5
-- modified freshclam configuration to log by syslog by default
-- disabled LocalSocket option in sample configuration
-- fixed clamav-milter sysv initscript to use bash interpreter and to
-  be disabled by default
+* Tue Aug 21 2007 Dag Wieers <dag@wieers.com> - 0.91.2-1
+- Updated to release 0.91.2.
 
-* Sat Aug  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-4
-- renamed 'clamav' user/group to 'clamupdate'
-- add the '%milteruser' user to the '%scanuser' group when the -scanner
-  subpackage is installed
+* Tue Jul 17 2007 Dag Wieers <dag@wieers.com> - 0.91.1-1
+- Updated to release 0.91.1.
 
-* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.95.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+* Wed Jul 11 2007 Dag Wieers <dag@wieers.com> - 0.91-1
+- Updated to release 0.91.
 
-* Thu Jun 11 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-1
-- updated to 0.95.2
+* Thu May 31 2007 Dag Wieers <dag@wieers.com> - 0.90.3-1
+- Updated to release 0.90.3.
 
-* Sun Apr 19 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.1-3
-- fixed '--without upstart' operation
+* Fri Apr 27 2007 Dag Wieers <dag@wieers.com> - 0.90.2-2
+- Added clamav-milter support for EL2.1 now that it comes with a newer sendmail. (Tom G. Christensen)
 
-* Wed Apr 15 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.1-2
-- added '%%bcond_without upstart' conditional to ease skipping of
-  -upstart subpackage creation e.g. on EL5 systems
-- fixed Provides/Obsoletes: typo in -milter-sysvinit subpackage which
-  broke update path
+* Sun Apr 15 2007 Dag Wieers <dag@wieers.com> - 0.90.2-1
+- Updated to release 0.90.2.
 
-* Fri Apr 10 2009 Robert Scheck <robert@fedoraproject.org> - 0.95.1-1
-- Upgrade to 0.95.1 (#495039)
+* Fri Mar 09 2007 Dag Wieers <dag@wieers.com> - 0.90.1-4
+- Removed circular dependency.
 
-* Wed Mar 25 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95-1
-- updated to final 0.95
-- added ncurses-devel (-> clamdtop) BR
-- enforced IPv6 support
+* Thu Mar 08 2007 Dag Wieers <dag@wieers.com> - 0.90.1-3
+- Cleaned up default options to clamav-milter. (Adam T. Bowen)
+- Removed -b/--bounce as it is no longer recognized. (Gerald Teschl)
 
-* Sun Mar  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95-0.1.rc1
-- updated to 0.95rc1
-- added -upstart subpackages
-- renamed -sysv to -sysvinit to make -upstart win the default dep resolving
-- reworked complete milter stuff
-- added -scanner subpackage which contains a preconfigured daemon
-  (e.g. for use by -milter)
-- moved %%changelog entries from 2006 and before into ChangeLog-rpm.old
+* Mon Mar 05 2007 Dag Wieers <dag@wieers.com> - 0.90.1-2
+- Removed the erroneous --dont-clean-log from the clamav-milter sysconfig. (Gerald Teschl)
 
-* Wed Feb 25 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.94.2-3
-- made some subpackages noarch
-- fixed typo in SysV initscript which removes 'touch' file (#473513)
+* Fri Mar 02 2007 Dag Wieers <dag@wieers.com> - 0.90.1-1
+- Updated to release 0.90.1.
 
-* Mon Feb 23 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.94.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+* Tue Feb 20 2007 Dag Wieers <dag@wieers.com> - 0.90-3
+- Do the right thing...
 
-* Tue Dec 02 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.2-1
-- Upgrade to 0.94.2 (#474002)
+* Mon Feb 19 2007 Dag Wieers <dag@wieers.com> - 0.90-2
+- The tarball was re-rolled before public release. Sigh.
 
-* Wed Nov 05 2008 Robert Scheck <robert@fedoraproject.org> - 0.94.1-1
-- Upgrade to 0.94.1
+* Tue Feb 13 2007 Dag Wieers <dag@wieers.com> - 0.90-1
+- Updated to release 0.90.
 
-* Sun Oct 26 2008 Robert Scheck <robert@fedoraproject.org> - 0.94-1
-- Upgrade to 0.94 (SECURITY), fixes #461461:
-- CVE-2008-1389 Invalid memory access in the CHM unpacker
-- CVE-2008-3912 Out-of-memory NULL pointer dereference in mbox/msg
-- CVE-2008-3913 Memory leak in code path in freshclam's manager.c
-- CVE-2008-3914 Multiple file descriptor leaks on the code paths
+* Tue Dec 12 2006 Dag Wieers <dag@wieers.com> - 0.88.7-1
+- Updated to release 0.88.7.
 
-* Sun Jul 13 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.3-1
-- updated to 0.93.3; another fix for CVE-2008-2713 (out-of-bounds read
-  on petite files)
-- put pid instead of pgrp into pidfile of clamav-milter (bz #452359)
-- rediffed patches
+* Sun Nov 05 2006 Dag Wieers <dag@wieers.com> - 0.88.6-1
+- Updated to release 0.88.6.
+- Added condrestart to sysv scripts. (Tsai Li Ming)
 
-* Tue Jun 17 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93.1-1
-- updated to 0.93.1
-- rediffed -path patch
-- CVE-2008-2713 Invalid Memory Access Denial Of Service Vulnerability
+* Sat Oct 28 2006 Dag Wieers <dag@wieers.com> - 0.88.5-2
+- Added missing clamav dependency to clamav-db.
 
-* Mon Apr 14 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-1
-- updated to final 0.93
-- removed daily.inc + main.inc directories; they are now replaced by
-  *.cld containers
-- trimmed down MAILTO list of cronjob to 'root' again; every well
-  configured system has an alias for this recipient
+* Sun Oct 15 2006 Dag Wieers <dag@wieers.com> - 0.88.5-1
+- Updated to release 0.88.5.
 
-* Wed Mar 12 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.1.rc1
-- moved -milter scriptlets into -milter-core subpackage
-- added a requirement on the milteruser to the -milter-sendmail
-  subpackage (reported by Bruce Jerrick)
+* Mon Aug 07 2006 Dag Wieers <dag@wieers.com> - 0.88.4-1
+- Updated to release 0.88.4.
 
-* Tue Mar  4 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.93-0.0.rc1
-- updated to 0.93rc1
-- fixed rpath issues
+* Mon Aug 07 2006 Dag Wieers <dag@wieers.com> - 0.88.3-2
+- Incorporated UPX heap overflow fix.
 
-* Mon Feb 11 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92.1-1
-- updated to 0.92.1
+* Sat Jul 01 2006 Dag Wieers <dag@wieers.com> - 0.88.3-1
+- Updated to release 0.88.3.
 
-* Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-6
-- redisabled unrar stuff completely by using clean sources
-- splitted -milter subpackage into pieces to allow use without sendmail
-  (#239037)
+* Sun Apr 30 2006 Dag Wieers <dag@wieers.com> - 0.88.2-1
+- Updated to release 0.88.2.
 
-* Tue Jan  1 2008 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-5
-- use a better way to disable RPATH-generation (needed for '--with
-  unrar' builds)
+* Tue Apr 04 2006 Dag Wieers <dag@wieers.com> - 0.88.1-1
+- Updated to release 0.88.1.
 
-* Mon Dec 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.92-4
-- added a README.fedora to the milter package (#240610)
-- ship original sources again; unrar is now licensed correctly (no more
-  stolen code put under GPL). Nevertheless, this license is not GPL
-  compatible, and to allow libclamav to be used by GPL applications,
-  unrar is disabled by a ./configure switch.
-- use pkg-config in clamav-config to emulate --cflags and --libs
-  operations (fixes partly multilib issues)
-- registered some more auto-updated files and marked them as %%ghost
+* Mon Jan 09 2006 Dag Wieers <dag@wieers.com> - 0.88-1
+- Updated to release 0.88.
 
-* Fri Dec 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.92-3
-- updated to 0.92 (SECURITY):
-- CVE-2007-6335 MEW PE File Integer Overflow Vulnerability
+* Sun Nov 13 2005 Dries Verachtert <dries@ulyssis.org> - 0.87.1-1
+- Updated to release 0.87.1.
 
-* Mon Oct 29 2007 Tom "spot" Callaway <tcallawa@redhat.com> - 0.91.2-3
-- remove RAR decompression code from source tarball because of
-  legal problems (resolves 334371)
-- correct license tag
+* Sat Sep 17 2005 Dag Wieers <dag@wieers.com> - 0.87-1
+- Updated to release 0.87.
 
-* Mon Sep 24 2007 Jesse Keating <jkeating@redhat.com> - 0.91.2-2
-- Bump release for upgrade path.
+* Mon Jul 25 2005 Dag Wieers <dag@wieers.com> - 0.86.2-1
+- Updated to release 0.86.2.
 
-* Sat Aug 25 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91.2-1
-- updated to 0.91.2 (SECURITY):
-- CVE-2007-4510 DOS in RTF parser
-- DOS in html normalizer
-- arbitrary command execution by special crafted recipients in
-  clamav-milter's black-hole mode
-- fixed an open(2) issue
+* Mon Jul 11 2005 Dag Wieers <dag@wieers.com> - 0.86.1-1
+- Updated to release 0.86.1.
 
-* Tue Jul 17 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91.1-0
-- updated to 0.91.1
+* Mon May 16 2005 Dag Wieers <dag@wieers.com> - 0.85.1-1
+- Updated to release 0.85.1.
 
-* Thu Jul 12 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.91-1
-- updated to 0.91
+* Fri Apr 29 2005 Dag Wieers <dag@wieers.com> - 0.84-1
+- Updated to release 0.84.
 
-* Thu May 31 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.3-1
-- updated to 0.90.3
-- BR tcpd.h instead of tcp_wrappers(-devel) to make it build both
-  in FC6- and F7+
+* Mon Feb 14 2005 Dag Wieers <dag@wieers.com> - 0.83-1
+- Updated to release 0.83.
 
-* Fri Apr 13 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.2-1
-- [SECURITY] updated to 0.90.2; fixes CVE-2007-1745, CVE-2007-1997
+* Thu Feb 10 2005 Dag Wieers <dag@wieers.com> - 0.82-2
+- Fix for false positive on RIFF files. (Roger Jochem)
 
-* Fri Mar  2 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.1-2
-- BR 'tcp_wrappers-devel' instead of plain 'tcp_wrappers'
+* Mon Feb 07 2005 Dag Wieers <dag@wieers.com> - 0.82-1
+- Updated to release 0.82.
 
-* Fri Mar  2 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90.1-1
-- updated to 0.90.1
-- updated %%doc list
+* Thu Jan 27 2005 Dag Wieers <dag@wieers.com> - 0.81-1
+- Improved logrotate scripts. (Filippo Grassilli)
+- Updated to release 0.81.
 
-* Sun Feb 18 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-1
-- updated to final 0.90
-- removed -visibility patch since fixed upstream
+* Wed Dec 01 2004 Dag Wieers <dag@wieers.com> - 0.80-2
+- Added %%dir /var/clamav/log. (Adam Bowns)
+- Changed logrotate script to use clamd.log. (Stuart Schneider)
+- Added curl dependency. (Petr Kristof)
+- Synchronized some options from Petr. (Petr Kristof)
+- Fixed another clamav.conf reference. (Michael Best)
 
-* Sun Feb  4 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.3.rc3
-- build with -Wl,-as-needed and cleaned up pkgconfig file
-- removed old hack which forced installation of freshclam.conf; related
-  check was removed upstream
-- removed static library
-- removed %%changelog entries from before 2004
+* Mon Nov 01 2004 Dag Wieers <dag@wieers.com> - 0.80-1
+- Updated package description. (Arvin Troels)
+- Incorporated fixes from Jima. (Jima)
+- Config clamav.conf renamed to clamd.conf.
+- Removed obsolete patch.
+- Added macros for building without milter.
+- Updated to release 0.80.
 
-* Sat Feb  3 2007 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.90-0.2.rc3
-- updated to 0.90rc3
-- splitted mandatory parts from the data-file into a separate -filesystem
-  subpackage
-- added a -data-empty subpackage to allow a setup where database is
-  updated per cron-job and user does not want to download the large
-  -data package with outdated virus definitations (#214949)
-- %%ghost'ed the files downloaded by freshclam
+* Fri Jul 30 2004 Dag Wieers <dag@wieers.com> - 0.75.1-1
+- Added obsoletes for fedora.us.
+- Updated to release 0.75.1.
+
+* Mon Jul 26 2004 Dag Wieers <dag@wieers.com> - 0.75-2
+- Fixed a problem where $CODE was empty.
+
+* Fri Jul 23 2004 Dag Wieers <dag@wieers.com> - 0.75-1
+- Updated to release 0.75.
+
+* Wed Jun 30 2004 Dag Wieers <dag@wieers.com> - 0.74-1
+- Updated to release 0.74.
+
+* Tue Jun 15 2004 Dag Wieers <dag@wieers.com> - 0.73-1
+- Updated to release 0.73.
+
+* Thu Jun 03 2004 Dag Wieers <dag@wieers.com> - 0.72-1
+- Updated to release 0.72.
+
+* Thu May 20 2004 Dag Wieers <dag@wieers.com> - 0.71-1
+- Updated to release 0.71.
+
+* Sun May 02 2004 Dag Wieers <dag@wieers.com> - 0.70-2
+- Fixed the installation check for conf files. (Richard Soderberg, Udo Ruecker)
+- Changed the init-order of the sysv scripts. (Will McCutcheon)
+- Changes to the default configuration files.
+
+* Sat Mar 17 2004 Dag Wieers <dag@wieers.com> - 0.70-1
+- Updated to release 0.70.
+
+* Tue Mar 16 2004 Dag Wieers <dag@wieers.com> - 0.68-1
+- Updated to release 0.68.
+
+* Fri Mar 12 2004 Dag Wieers <dag@wieers.com> - 0.67.1-1
+- Updated to release 0.67-1.
+- Added clamdwatch and trashcan to clamd.
+
+* Mon Mar 08 2004 Dag Wieers <dag@wieers.com> - 0.67-1
+- Personalized SPEC file.
+
+* Mon Aug 22 2003 Matthias Saou/Che
+- Added "--without milter" build option. (Matthias Saou)
+- Fixed freshclam cron (Matthias Saou)
+- Built the new package. (Che)
+
+* Tue Jun 24 2003 Che
+- clamav-milter introduced.
+- a few more smaller fixes.
+
+* Sun Jun 22 2003 Che
+- version upgrade
+
+* Mon Jun 16 2003 Che
+- rh9 build
+- various fixes
+- got rid of rpm-helper prereq
+
+* Fri Mar 24 2003 Che
+- some cleanups and fixes
+- new patch added
+
+* Fri Nov 22 2002 Che
+- fixed a config patch issue
+
+* Fri Nov 22 2002 Che
+- version upgrade and some fixes
+
+* Sat Nov 02 2002 Che
+- version upgrade
+
+* Wed Oct 24 2002 Che
+- some important changes for lsb compliance
+
+* Wed Oct 23 2002 Che
+- initial rpm release
