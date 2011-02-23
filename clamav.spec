@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -94,8 +94,8 @@ you will need to install %{name}-devel.
 %{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' libtool configure
 
 %{__perl} -pi.orig -e '
-		s|\@DBDIR\@|\$(localstatedir)/clamav|g;
-		s|\@DBINST\@|\$(localstatedir)/clamav|g;
+		s|\@DBDIR\@|\$(localstatedir)/lib/clamav|g;
+		s|\@DBINST\@|\$(localstatedir)/lib/clamav|g;
 		s|\@CFGDIR\@|\$(sysconfdir)|g;
 		s|\@CFGINST\@|\$(sysconfdir)|g;
 		s|^\@INSTALL_CLAMAV_CONF_TRUE\@|\t|g;
@@ -110,7 +110,7 @@ you will need to install %{name}-devel.
 		s|^#(LogSyslog)|$1|;
 		s|^#(PidFile) .+$|$1 %{_localstatedir}/run/clamav/clamd.pid|;
 		s|^#(TemporaryDirectory) .+$|$1 %{_localstatedir}/tmp|;
-		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/clamav|;
+		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/lib/clamav|;
 		s|^#(LocalSocket) .+$|$1 %{_localstatedir}/run/clamav/clamd.sock|;
 		s|^#(FixStaleSocket)|$1|;
 		s|^#(TCPSocket) .+$|$1 3310|;
@@ -134,7 +134,7 @@ you will need to install %{name}-devel.
 
 %{__perl} -pi.orig -e '
 		s|^(Example)|#$1|;
-		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/clamav|;
+		s|^#(DatabaseDirectory) .+$|$1 %{_localstatedir}/lib/clamav|;
 		s|^#(UpdateLogFile) .+$|$1 %{_localstatedir}/log/clamav/freshclam.log|;
 		s|^#(LogSyslog)|$1|;
 		s|^#(DatabaseOwner) .+$|$1 clam|;
@@ -177,7 +177,7 @@ fi
 
 %{_bindir}/freshclam \
     --quiet \
-    --datadir="%{_localstatedir}/clamav" \
+    --datadir="%{_localstatedir}/lib/clamav" \
     --log="$LOG_FILE" \
     --log-verbose \
     --daemon-notify="%{_sysconfdir}/clamd.conf"
@@ -196,7 +196,7 @@ CLAMAV_FLAGS="
 	--outgoing                                                                                                            
 	--quiet
 "
-SOCKET_ADDRESS="local:%{_localstatedir}/clamav/clmilter.socket"
+SOCKET_ADDRESS="local:%{_localstatedir}/run/clamav/clmilter.socket"
 EOF
 
 %build
@@ -209,7 +209,7 @@ EOF
 	--disable-unrar \
 	--enable-id-check \
 	--enable-dns \
-	--with-dbdir="%{_localstatedir}/clamav" \
+	--with-dbdir="%{_localstatedir}/lib/clamav" \
 	--with-group="clam" \
 	--with-libcurl \
 	--with-user="clam" \
@@ -238,6 +238,7 @@ touch %{buildroot}%{_localstatedir}/log/clamav/freshclam.log
 touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 
 install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
+install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
 %post
 /sbin/ldconfig
@@ -334,6 +335,7 @@ rm -rf %{buildroot}
 %doc %{_mandir}/man8/clamd.8*
 %config(noreplace) %{_sysconfdir}/clamd.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/clamav
+%{_sysconfdir}/clamd.d
 %config %{_initrddir}/clamd
 %{_sbindir}/clamd
 %{_bindir}/clamconf
@@ -341,10 +343,10 @@ rm -rf %{buildroot}
 
 %defattr(0644, clam, clam, 0755)
 %{_localstatedir}/run/clamav/
-%dir %{_localstatedir}/clamav/
+%dir %{_localstatedir}/lib/clamav/
 %dir %{_localstatedir}/log/clamav/
 %ghost %{_localstatedir}/log/clamav/clamd.log
-%exclude %{_localstatedir}/clamav/*
+%exclude %{_localstatedir}/lib/clamav/*
 
 %if %{!?_without_milter:1}0
 %files milter
@@ -363,7 +365,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/logrotate.d/freshclam
 
 %defattr(0644, clam, clam, 0755)
-%config(noreplace) %verify(user group mode) %{_localstatedir}/clamav/
+%config(noreplace) %verify(user group mode) %{_localstatedir}/lib/clamav/
 %dir %{_localstatedir}/log/clamav/
 %ghost %{_localstatedir}/log/clamav/freshclam.log
 
@@ -377,6 +379,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Feb 23 2011 Nick Bebout <nb@fedoraproject.org> - 0.097-3
+- Move db to /var/lib/clamav
+- Ship empty directory /etc/clamd.d for amavisd-new
+
 * Tue Feb 17 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-2
 - Disable llvm. 
 
