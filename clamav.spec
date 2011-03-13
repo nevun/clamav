@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -15,6 +15,7 @@ URL: http://www.clamav.net/
 Source0: clamav-0.97-clean.tar.bz2
 Source1: clamav.init
 Source2: clamav-milter.init
+Source3: clamd-wrapper.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel
@@ -232,6 +233,8 @@ install -Dp -m0644 clamav-milter.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/
 %else
 rm %{buildroot}%{_mandir}/man8/clamav-milter.8*
 %endif
+# Install clamav-wrapper:
+tar xjf %{SOURCE3} -C %{buildroot}/%{_prefix}/share
 
 install -d -m0755 %{buildroot}%{_localstatedir}/log/clamav/
 touch %{buildroot}%{_localstatedir}/log/clamav/freshclam.log
@@ -318,6 +321,8 @@ rm -rf %{buildroot}
 %doc %{_mandir}/man1/clamscan.1*
 %doc %{_mandir}/man1/freshclam.1*
 %doc %{_mandir}/man5/freshclam.conf.5*
+%doc %{_prefix}/share/clamav/README.clamd-wrapper
+%{_prefix}/share/clamav/clamd-wrapper
 %config(noreplace) %{_sysconfdir}/freshclam.conf
 %{_bindir}/clamscan
 %{_bindir}/freshclam
@@ -379,6 +384,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sun Mar 13 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-4
+- Add back clamd-wrapper to stay compatible with users
+  of old packaging (amavisd-new).
+
 * Wed Feb 23 2011 Nick Bebout <nb@fedoraproject.org> - 0.097-3
 - Move db to /var/lib/clamav
 - Ship empty directory /etc/clamd.d for amavisd-new
