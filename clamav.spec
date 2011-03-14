@@ -64,14 +64,13 @@ The Clam AntiVirus sendmail-milter Daemon
 %package db
 Summary: Virus database for %{name}
 Group: Applications/Databases
-Obsoletes: clamav-data <= %{version}-%{release}
-Obsoletes: clamav-data-empty <= %{version}-%{release}
 ### Remove circular dependency
 #Requires: clamav = %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
 Obsoletes: clamav-update <= %{version}-%{release}
 Obsoletes: clamav-data <= %{version}-%{release}
+Obsoletes: clamav-data-empty <= %{version}-%{release}
 
 %description db
 The actual virus database for %{name}
@@ -387,7 +386,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon Mar 14 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-5
-- clam-db obsoletes old clamav-data and clamav-data-empty.
+- clam-db obsoletes old clamav-data-empty.
 
 * Sun Mar 13 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-4
 - Add back clamd-wrapper to stay compatible with users
