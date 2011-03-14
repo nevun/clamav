@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -64,6 +64,8 @@ The Clam AntiVirus sendmail-milter Daemon
 %package db
 Summary: Virus database for %{name}
 Group: Applications/Databases
+Obsoletes: clamav-data <= %{version}-%{release}
+Obsoletes: clamav-data-empty <= %{version}-%{release}
 ### Remove circular dependency
 #Requires: clamav = %{version}-%{release}
 
@@ -384,6 +386,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Mon Mar 14 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-5
+- clam-db obsoletes old clamav-data and clamav-data-empty.
+
 * Sun Mar 13 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-4
 - Add back clamd-wrapper to stay compatible with users
   of old packaging (amavisd-new).
