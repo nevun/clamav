@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -385,7 +385,7 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
-* Mon Mar 14 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-5
+* Mon Mar 14 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-6
 - clam-db obsoletes old clamav-data-empty.
 
 * Sun Mar 13 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-4
