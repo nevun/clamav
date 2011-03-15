@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -197,7 +197,6 @@ fi
     --quiet \
     --datadir="%{_localstatedir}/lib/clamav" \
     --log="$LOG_FILE" \
-    --log-verbose \
     --daemon-notify="%{_sysconfdir}/clamd.conf"
 EOF
 
@@ -207,14 +206,7 @@ EOF
 
 CLAMAV_FLAGS="
 	--config-file=%{_sysconfdir}/clamd.conf
-	--force-scan
-	--local    
-	--max-children=10
-	--noreject
-	--outgoing                                                                                                            
-	--quiet
 "
-SOCKET_ADDRESS="local:%{_localstatedir}/run/clamav/clmilter.socket"
 EOF
 
 %build
