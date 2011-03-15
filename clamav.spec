@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -24,10 +24,12 @@ Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
 
 ### Fedora Extras introduced them differently :(
-Obsoletes: libclamav < %{version}-%{release}
-Obsoletes: clamav-lib < %{version}-%{release}
-Obsoletes: clamav-filesystem < %{version}-%{release}
 Provides: libclamav
+Obsoletes: libclamav < %{version}-%{release}
+Provides: clamav-lib = %{version}-%{release}
+Obsoletes: clamav-lib < %{version}-%{release}
+Provides: clamav-filesystem = %{version}-%{release}
+Obsoletes: clamav-filesystem < %{version}-%{release}
 
 %description
 Clam AntiVirus is a GPL anti-virus toolkit for UNIX. The main purpose of
@@ -45,8 +47,17 @@ Group: System Environment/Daemons
 Requires: clamav = %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
-Obsoletes: clamav-server <= %{version}-%{release}
-Obsoletes: clamav-server-sysv <= %{version}-%{release}
+Provides: clamav-server = %{version}-%{release}
+Obsoletes: clamav-server < %{version}-%{release}
+Provides: clamav-server-sysv = %{version}-%{release}
+Obsoletes: clamav-server-sysv < %{version}-%{release}
+Provides: clamav-scanner = %{version}-%{release}
+Obsoletes: clamav-scanner < %{version}-%{release}
+Provides: clamav-scanner-upstart = %{version}-%{release}
+Obsoletes: clamav-scanner-upstart < %{version}-%{release}
+Provides: clamav-server-sysvinit = %{version}-%{release}
+Obsoletes: clamav-server-sysvinit < %{version}-%{release}
+
 
 %description -n clamd
 The Clam AntiVirus Daemon
@@ -56,7 +67,8 @@ Summary: The Clam AntiVirus sendmail-milter Daemon
 Group: Applications/System
 Requires: clamd = %{version}-%{release}
 Requires: sendmail
-Obsoletes: clamav-milter-sysv <= %{version}-%{release}
+Provides: clamav-milter-sysv = %{version}-%{release}
+Obsoletes: clamav-milter-sysv < %{version}-%{release}
 
 %description milter
 The Clam AntiVirus sendmail-milter Daemon
@@ -68,8 +80,10 @@ Group: Applications/Databases
 #Requires: clamav = %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
-Obsoletes: clamav-update <= %{version}-%{release}
-Obsoletes: clamav-data <= %{version}-%{release}
+Provides: clamav-update = %{version}-%{release}
+Obsoletes: clamav-update < %{version}-%{release}
+Provides: clamav-data = %{version}-%{release}
+Obsoletes: clamav-data < %{version}-%{release}
 Obsoletes: clamav-data-empty <= %{version}-%{release}
 
 %description db
@@ -385,6 +399,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Mar 15 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-7
+- rpm-provide all old package names that are now obsoleted
+
 * Mon Mar 14 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-6
 - clam-db obsoletes old clamav-data-empty.
 
