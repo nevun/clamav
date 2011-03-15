@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -28,8 +28,6 @@ Provides: libclamav
 Obsoletes: libclamav < %{version}-%{release}
 Provides: clamav-lib = %{version}-%{release}
 Obsoletes: clamav-lib < %{version}-%{release}
-Provides: clamav-filesystem = %{version}-%{release}
-Obsoletes: clamav-filesystem < %{version}-%{release}
 
 %description
 Clam AntiVirus is a GPL anti-virus toolkit for UNIX. The main purpose of
@@ -85,6 +83,10 @@ Obsoletes: clamav-update < %{version}-%{release}
 Provides: clamav-data = %{version}-%{release}
 Obsoletes: clamav-data < %{version}-%{release}
 Obsoletes: clamav-data-empty <= %{version}-%{release}
+# Ugly to put these in the db-package, but needed
+# here to handle upgrades on EL5.
+Provides: clamav-filesystem = %{version}-%{release}
+Obsoletes: clamav-filesystem < %{version}-%{release}
 
 %description db
 The actual virus database for %{name}
