@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -252,6 +252,11 @@ touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
+# mirrors.dat might exists with the wrong user on upgrades from pre v0.97,
+# touch it here, and later %ghost it so that the permissions are fixed if needed.
+touch %{buildroot}%{_localstatedir}/lib/clamav/mirrors.dat
+
+
 %post
 /sbin/ldconfig
 
@@ -382,6 +387,7 @@ rm -rf %{buildroot}
 %config(noreplace) %verify(user group mode) %{_localstatedir}/lib/clamav/
 %dir %{_localstatedir}/log/clamav/
 %ghost %{_localstatedir}/log/clamav/freshclam.log
+%ghost %{_localstatedir}/lib/clamav/mirrors.dat
 
 %files devel
 %defattr(-, root, root, 0755)
@@ -393,6 +399,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Mar 16 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-10
+- Make sure /var/lib/clamav/mirrors.dat has owner fixed on upgrade.
+- Don't start clamd or milter service by default.
+
 * Tue Mar 15 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-7
 - rpm-provide all old package names that are now obsoleted
 
