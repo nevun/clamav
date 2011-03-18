@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -160,6 +160,13 @@ you will need to install %{name}-devel.
 		s|^#(NotifyClamd) .+$|$1 %{_sysconfdir}/clamd.conf|;
 	' etc/freshclam.conf
 
+%{__perl} -pi.orig -e '
+		s|^(Example)|#$1|;
+		s|^#(User) .+$|$1 clam|;
+		s|^#(ClamdSocket) .+$|$1 %{_localstatedir}/run/clamav/clamd.sock|;
+	' etc/clamav-milter.conf
+
+
 cat <<EOF >clamd.logrotate
 %{_localstatedir}/log/clamav/clamd.log {
 	missingok
@@ -204,9 +211,7 @@ EOF
 ### Simple config file for clamav-milter, you should
 ### read the documentation and tweak it as you wish.
 
-CLAMAV_FLAGS="
-	--config-file=%{_sysconfdir}/clamd.conf
-"
+CLAMAV_FLAGS=""
 EOF
 
 %build
@@ -252,12 +257,11 @@ touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
-# mirrors.dat might exists with the wrong user on upgrades from pre v0.97,
-# touch it here, and later %ghost it so that the permissions are fixed if needed.
-touch %{buildroot}%{_localstatedir}/lib/clamav/mirrors.dat
-
-
 %post
+# Remove old mirrors.dat, mostly because it will have the wrong
+# owner after upgrading from clamav < 0.97:
+test -f /var/lib/clamav/mirrors.dat && rm -f /var/lib/clamav/mirrors.dat
+
 /sbin/ldconfig
 
 ZONES="/usr/share/zoneinfo/zone.tab"
@@ -387,7 +391,6 @@ rm -rf %{buildroot}
 %config(noreplace) %verify(user group mode) %{_localstatedir}/lib/clamav/
 %dir %{_localstatedir}/log/clamav/
 %ghost %{_localstatedir}/log/clamav/freshclam.log
-%ghost %{_localstatedir}/lib/clamav/mirrors.dat
 
 %files devel
 %defattr(-, root, root, 0755)
@@ -399,6 +402,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Fri Mar 18 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-11
+- Delete /var/lib/clamav/mirrors.dat, it will be recreated on first run.
+- clamav-milter config cleanups.
+
 * Wed Mar 16 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-10
 - Make sure /var/lib/clamav/mirrors.dat has owner fixed on upgrade.
 - Don't start clamd or milter service by default.
