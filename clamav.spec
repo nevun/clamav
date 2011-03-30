@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -157,7 +157,6 @@ you will need to install %{name}-devel.
 		s|^#(LogSyslog)|$1|;
 		s|^#(DatabaseOwner) .+$|$1 clam|;
 		s|^(Checks) .+$|$1 24|;
-		s|^#(NotifyClamd) .+$|$1 %{_sysconfdir}/clamd.conf|;
 	' etc/freshclam.conf
 
 %{__perl} -pi.orig -e '
@@ -203,8 +202,7 @@ fi
 %{_bindir}/freshclam \
     --quiet \
     --datadir="%{_localstatedir}/lib/clamav" \
-    --log="$LOG_FILE" \
-    --daemon-notify="%{_sysconfdir}/clamd.conf"
+    --log="$LOG_FILE" 
 EOF
 
 %{__cat} <<EOF >clamav-milter.sysconfig
@@ -258,10 +256,6 @@ install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
 %post
-# Remove old mirrors.dat, mostly because it will have the wrong
-# owner after upgrading from clamav < 0.97:
-test -f /var/lib/clamav/mirrors.dat && rm -f /var/lib/clamav/mirrors.dat
-
 /sbin/ldconfig
 
 ZONES="/usr/share/zoneinfo/zone.tab"
@@ -326,6 +320,12 @@ getent group clam >/dev/null || groupadd -r clam
 getent passwd clam >/dev/null || \
 useradd -r -g clam -d /var/clamav -s /sbin/nologin \
     -c "Clam Anti Virus Checker" clam
+exit 0
+
+%post db
+# Remove old mirrors.dat, mostly because it will have the wrong
+# owner after upgrading from clamav < 0.97:
+test -f /var/lib/clamav/mirrors.dat && rm -f /var/lib/clamav/mirrors.dat
 exit 0
 
 %clean
@@ -402,6 +402,12 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Mar 30 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-12
+- Move deletion of /var/lib/clamav/mirrors.dat to db package.
+- Don't enable NotifyClamd in freshclam config and cronjob, as not
+  everybody is running clamd. Running clamd's will anyway notice
+  when db is updated.
+
 * Fri Mar 18 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-11
 - Delete /var/lib/clamav/mirrors.dat, it will be recreated on first run.
 - clamav-milter config cleanups.
