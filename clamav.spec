@@ -37,7 +37,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97
-Release:	%release_func 1600
+Release:	%release_func 1601
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -508,7 +508,7 @@ install -D -p -m 0644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.con
 install -D -p -m 0644 %SOURCE430 $RPM_BUILD_ROOT%_unitdir/clamd.scan.service
 
 cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamd.scan.conf
--d %scanstatedir 0710 %scanuser %scanuser
+d %scanstatedir 0710 %scanuser %scanuser
 EOF
 
 touch $RPM_BUILD_ROOT%scanstatedir/clamd.{sock,pid}
@@ -528,7 +528,7 @@ install -D -p -m 0755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 install -D -p -m 0644 %SOURCE330 $RPM_BUILD_ROOT%_unitdir/clamav-milter.service
 
 cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamav-milter.conf
--d %milterstatedir 0710 %milteruser %milteruser
+d %milterstatedir 0710 %milteruser %milteruser
 EOF
 
 rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
@@ -801,6 +801,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Apr 23 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97-1601
+- fixed tmpfiles.d syntax (#696812)
+
 * Sun Feb 20 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97-1600
 - updated to 0.97
 - rediffed some patches
