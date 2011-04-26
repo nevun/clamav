@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -67,6 +67,8 @@ Requires: clamd = %{version}-%{release}
 Requires: sendmail
 Provides: clamav-milter-sysv = %{version}-%{release}
 Obsoletes: clamav-milter-sysv < %{version}-%{release}
+Provides: clamav-milter-sysvinit = %{version}-%{release}
+Obsoletes: clamav-milter-sysvinit < %{version}-%{release}
 
 %description milter
 The Clam AntiVirus sendmail-milter Daemon
@@ -402,6 +404,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Apr 26 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-13
+- Obsolete and provide clamav-milter-sysvinit (bz#696856)
+
 * Wed Mar 30 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-12
 - Move deletion of /var/lib/clamav/mirrors.dat to db package.
 - Don't enable NotifyClamd in freshclam config and cronjob, as not
