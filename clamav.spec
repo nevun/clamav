@@ -178,7 +178,7 @@ Provides:	init(clamav-scanner) = upstart
 Requires:	clamav-scanner = %version-%release
 Requires(pre):		/etc/init
 Requires(post):		/usr/bin/killall
-Requires(postun):	/sbin/initctl
+Requires(preun):	/sbin/initctl
 %{?noarch}
 
 %package scanner-systemd
@@ -244,7 +244,7 @@ Provides:	init(clamav-milter) = upstart
 Requires:	clamav-milter = %version-%release
 Requires(pre):		/etc/init
 Requires(post):		/usr/bin/killall
-Requires(postun):	/sbin/initctl
+Requires(preun):	/sbin/initctl
 %{?noarch}
 
 %package milter-systemd
@@ -803,6 +803,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Thu Jun  9 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.1-1600
 - updated to 0.97.1
+- fixed Requires(preun) vs. Requires(postun) inconsistency
 
 * Sat Apr 23 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97-1601
 - fixed tmpfiles.d syntax (#696812)
