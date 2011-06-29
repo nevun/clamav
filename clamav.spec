@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -64,7 +64,7 @@ The Clam AntiVirus Daemon
 Summary: The Clam AntiVirus sendmail-milter Daemon
 Group: Applications/System
 Requires: clamd = %{version}-%{release}
-Requires: sendmail
+Requires: /usr/sbin/sendmail
 Provides: clamav-milter-sysv = %{version}-%{release}
 Obsoletes: clamav-milter-sysv < %{version}-%{release}
 Provides: clamav-milter-sysvinit = %{version}-%{release}
@@ -404,6 +404,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Jun 29 2011 Nick Bebout <nb@fedoraproject.org> - 0.97-14
+- Require /usr/sbin/sendmail instead of sendmail
+
 * Tue Apr 26 2011 Jan-Frode Myklebust <janfrode@tanso.net> - 0.97-13
 - Obsolete and provide clamav-milter-sysvinit (bz#696856)
 
