@@ -1,7 +1,7 @@
 [Unit]
 Description = Generic clamav scanner daemon
 After = syslog.target
-Before = clamav-milter
+Before = clamav-milter.service
 
 [Service]
 Type = simple

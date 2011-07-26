@@ -1,8 +1,8 @@
 [Unit]
 Description = Milter module for the Clam Antivirus scanner
 After = syslog.target
-Before = sendmail
-Before = postfix
+Before = sendmail.service
+Before = postfix.service
 
 [Service]
 Type = simple
