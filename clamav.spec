@@ -820,7 +820,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
 - updated to 0.97.2
-- CVE-2011-???? Off-by-one error by scanning message hashes (#725694)
+- CVE-2011-2721 Off-by-one error by scanning message hashes (#725694)
 - fixed systemd scripts and their installation
 
 * Thu Jun  9 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.1-1600
