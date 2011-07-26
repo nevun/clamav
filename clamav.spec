@@ -36,7 +36,7 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.1
+Version:	0.97.2
 Release:	%release_func 1600
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -801,6 +801,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
+- updated to 0.97.2
+- CVE-2011-???? Off-by-one error by scanning message hashes (#725694)
+
 * Thu Jun  9 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.1-1600
 - updated to 0.97.1
 - fixed Requires(preun) vs. Requires(postun) inconsistency
