@@ -33,6 +33,22 @@
 %{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
+%{!?systemd_reqs:%global systemd_reqs \
+Requires(post):		 /bin/systemctl\
+Requires(preun):	 /bin/systemctl\
+Requires(postun):	 /bin/systemctl\
+%nil}
+%{!?systemd_install:%global systemd_install()\
+%post %1\
+test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :\
+%preun %1\
+test "$1" != "0" || /bin/systemctl --no-reload disable %2 >/dev/null 2>&1 || :\
+test "$1" != "0" || /bin/systemctl stop %2 >/dev/null 2>&1 || :\
+%postun %1\
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :\
+test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
+%nil}
+
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
@@ -187,9 +203,7 @@ Group:		System Environment/Daemons
 Source430:	clamd.scan.systemd
 Provides:	init(clamav-scanner) = systemd
 Requires:	clamav-scanner = %version-%release
-Requires(post):		/bin/systemctl
-Requires(preun):	/bin/systemctl
-Requires(postun):	/bin/systemctl
+%{?systemd_reqs}
 %{?noarch}
 
 # Remove me after F17
@@ -253,9 +267,7 @@ Group:		System Environment/Daemons
 Source330:	clamav-milter.systemd
 Provides:	init(clamav-milter) = systemd
 Requires:	clamav-milter = %version-%release
-Requires(post):		/bin/systemctl
-Requires(preun):	/bin/systemctl
-Requires(postun):	/bin/systemctl
+%{?systemd_reqs}
 %{?noarch}
 
 # Remove me after F17
@@ -594,6 +606,8 @@ test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
 test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 
 
+%systemd_install scanner-systemd clamd.scan.service
+
 
 %post update
 test -e %freshclamlog || {
@@ -641,6 +655,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %preun milter-upstart
 test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
+
+
+%systemd_install milter-systemd clamav-milter.service
 
 
 %post   lib -p /sbin/ldconfig
@@ -804,6 +821,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
 - updated to 0.97.2
 - CVE-2011-???? Off-by-one error by scanning message hashes (#725694)
+- fixed systemd scripts and their installation
 
 * Thu Jun  9 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.1-1600
 - updated to 0.97.1
