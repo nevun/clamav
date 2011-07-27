@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -405,6 +405,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-2
+- include updated clamd-wrapper which get the PidFile setting from the
+  service configuration file. 
+
 * Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-1
 - updated to 0.97.2
 - Build-require xz
