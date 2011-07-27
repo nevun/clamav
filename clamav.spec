@@ -4,21 +4,21 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97
-Release: 14%{?dist}
+Version: 0.97.2
+Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
 
 # Upstream source includes libunrar that is not distributable.
 #Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
-Source0: clamav-0.97-clean.tar.bz2
+Source0: clamav-0.97.2-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
 Source3: clamd-wrapper.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
@@ -356,6 +356,7 @@ rm -rf %{buildroot}
 %doc %{_mandir}/man1/clamdscan.1*
 %doc %{_mandir}/man1/clamconf.1*
 %doc %{_mandir}/man1/clamdtop.1*
+%doc %{_mandir}/man1/clambc.1*
 %doc %{_mandir}/man5/clamd.conf.5*
 %doc %{_mandir}/man8/clamd.8*
 %config(noreplace) %{_sysconfdir}/clamd.conf
@@ -404,6 +405,11 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-1
+- updated to 0.97.2
+- Build-require xz
+- CVE-2011-2721 Off-by-one error by scanning message hashes (#725694)
+
 * Wed Jun 29 2011 Nick Bebout <nb@fedoraproject.org> - 0.97-14
 - Require /usr/sbin/sendmail instead of sendmail
 
