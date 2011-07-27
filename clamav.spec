@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -109,7 +109,9 @@ documentation for %{name}. If you like to develop programs using %{name},
 you will need to install %{name}-devel.
 
 %prep
-%setup -q
+# Handle that rpmbuild in RHEL < 6 doesn't handle xz archives automatically.
+%setup -q -T -c
+xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 
 %{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' libtool configure
 
@@ -405,11 +407,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
-* Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-2
+* Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-3
 - include updated clamd-wrapper which get the PidFile setting from the
   service configuration file. 
-
-* Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-1
 - updated to 0.97.2
 - Build-require xz
 - CVE-2011-2721 Off-by-one error by scanning message hashes (#725694)
