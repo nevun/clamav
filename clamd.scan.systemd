@@ -1,6 +1,6 @@
 [Unit]
 Description = Generic clamav scanner daemon
-After = syslog.target
+After = syslog.target nss-lookup.target network.target
 Before = clamav-milter.service
 
 [Service]

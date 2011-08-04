@@ -822,6 +822,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - updated to 0.97.3
 - CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
 
+* Thu Aug  4 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1700
+- start systemd services after network.target and nss-lookup.target
+
 * Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
 - updated to 0.97.2
 - CVE-2011-2721 Off-by-one error by scanning message hashes (#725694)
