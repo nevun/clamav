@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -166,7 +166,9 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 %{__perl} -pi.orig -e '
 		s|^(Example)|#$1|;
 		s|^#(User) .+$|$1 clam|;
-		s|^#(ClamdSocket) .+$|$1 %{_localstatedir}/run/clamav/clamd.sock|;
+		s|#MilterSocket inet.+$|MilterSocket /var/run/clamav/clamav-milter.sock|;
+		s|#PidFile .+$|PidFile /var/run/clamav/clamav-milter.pid|;
+		s|^#(ClamdSocket) .+$|$1 unix:%{_localstatedir}/run/clamav/clamd.sock|;
 	' etc/clamav-milter.conf
 
 
@@ -407,6 +409,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Thu Aug  4 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-4
+- Configure MilterSocket, PidFile and MilterSocket in clamav-milter.conf.
+  (bz#727894)
+
 * Wed Jul 27 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-3
 - include updated clamd-wrapper which get the PidFile setting from the
   service configuration file. 
