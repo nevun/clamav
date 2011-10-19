@@ -4,15 +4,15 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97.2
-Release: 5%{?dist}
+Version: 0.97.3
+Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
 
 # Upstream source includes libunrar that is not distributable.
 #Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
-Source0: clamav-0.97.2-norar.tar.xz
+Source0: clamav-0.97.3-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
 Source3: clamd-wrapper.tar.bz2
@@ -409,6 +409,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1
+- Update to 0.97.3
+- Fix CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
+
 * Thu Aug  4 2011 Jan-Frode Myklebuust <janfrode@tanso.net> - 0.97.2-5
 - Configure MilterSocket, PidFile and MilterSocket in clamav-milter.conf.
   (bz#727894)
