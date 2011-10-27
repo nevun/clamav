@@ -52,8 +52,8 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.2
-Release:	%release_func 1600
+Version:	0.97.3
+Release:	%release_func 1700
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -818,6 +818,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1700
+- updated to 0.97.3
+- CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
+
 * Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
 - updated to 0.97.2
 - CVE-2011-2721 Off-by-one error by scanning message hashes (#725694)
