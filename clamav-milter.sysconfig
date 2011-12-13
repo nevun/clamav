@@ -1,0 +1,8 @@
+### Simple config file for clamav-milter, you should
+### read the documentation and tweak it as you wish.
+
+CLAMAV_FLAGS=""
+### Simple config file for clamav-milter, you should
+### read the documentation and tweak it as you wish.
+
+CLAMAV_FLAGS=""

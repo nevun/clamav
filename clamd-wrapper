@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# chkconfig: - 75 25
+# description: The clamd daemon listens for incoming connections on \
+#              Unix or TCP socket and scans files or directories on demand.
+
+[ -n "$CLAMD_SERVICE" ] || {
+    echo $"*** $0 can not be called in this way"
+    echo $"*** Please see /usr/share/doc/clamav-server-*/README how"
+    echo $"*** the clamav-server can be configured"
+    exit 6
+}
+
+# Source function library.
+. /etc/init.d/functions
+
+# Get config.
+[ -r /etc/sysconfig/network ] && . /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" != "no" ] || exit 6
+
+lockfile=/var/lock/subsys/clamd.${CLAMD_SERVICE}
+sysconffile=/etc/sysconfig/clamd.${CLAMD_SERVICE}
+procname=clamd.${CLAMD_SERVICE}
+
+CLAMD_CONFIGFILE=/etc/clamd.d/${CLAMD_SERVICE}.conf
+CLAMD_OPTIONS=
+[ -f "$sysconffile" ] && . "$sysconffile"
+CLAMD_PIDFILE=`grep ^PidFile ${CLAMD_CONFIGFILE} | awk '{print $2}'`
+
+# make sure that config file contains a PidFile setting
+[ -n "$CLAMD_PIDFILE" ] || exit 6
+
+RETVAL=0
+prog="clamd.${CLAMD_SERVICE}"
+
+start () {
+	echo -n $"Starting $prog: "
+	daemon --pidfile=${CLAMD_PIDFILE} \
+	    exec -a $procname /usr/sbin/clamd \
+	    ${CLAMD_CONFIGFILE:+-c $CLAMD_CONFIGFILE} ${CLAMD_OPTIONS} --pid ${CLAMD_PIDFILE}
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch $lockfile
+	return $RETVAL
+}
+
+stop () {
+	echo -n $"Stopping $prog: "
+	killproc -p ${CLAMD_PIDFILE} $procname
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && rm -f $lockfile
+	return $RETVAL
+}
+
+reload() {
+	rc=0
+	echo -n $"Reloading $prog: "
+	killproc -p ${CLAMD_PIDFILE} $procname -SIGHUP  || rc=$?
+	echo
+	echo -n $"Loading new virus-database: "
+	killproc -p ${CLAMD_PIDFILE} $procname -SIGUSR2 || rc=$?
+	echo
+	return $rc
+}
+
+restart () {
+	stop
+	start
+}
+
+# See how we were called.
+case "$1" in
+  start|stop|restart|reload)
+	$1 ;;
+  status)
+	status -p ${CLAMD_PIDFILE} $procname ;;
+  condrestart)
+	[ ! -f $lockfile ] || restart
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|condrestart}"
+	exit 2
+esac

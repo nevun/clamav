@@ -1,0 +1,10 @@
+%{_localstatedir}/log/clamav/freshclam.log {
+        missingok
+        notifempty
+        create 644 clam clam
+}
+%{_localstatedir}/log/clamav/freshclam.log {
+        missingok
+        notifempty
+        create 644 clam clam
+}
