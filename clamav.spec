@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97.3
-Release: 1%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -409,6 +409,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sun Jan 1 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.3-3
+- Revert patch from 0.97.3-2
+
 * Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1
 - Update to 0.97.3
 - Fix CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
