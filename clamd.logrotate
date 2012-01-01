@@ -1,8 +1,0 @@
-%{_localstatedir}/log/clamav/clamd.log {
-        missingok
-        notifempty
-        create 644 clam clam
-        postrotate
-                killall -HUP clamd 2>/dev/null || :
-        endscript
-}

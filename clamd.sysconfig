@@ -1,5 +1,0 @@
-#CLAMD_CONFIGFILE=/etc/clamd.d/${CLAMD_SERVICE}.conf
-#CLAMD_OPTIONS=
-## the values below should only ever be specified in the above .conf file!
-#CLAMD_SOCKET=/var/run/clamd.${CLAMD_SERVICE}/clamd.sock
-#CLAMD_PIDFILE=/var/run/clamd.${CLAMD_SERVICE}/clamd.pid
