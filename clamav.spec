@@ -735,7 +735,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %doc _doc_server/*
 %_mandir/man[58]/clamd*
 %_sbindir/*
-%pkgdatadir/clamd-wrapper
 %dir %_sysconfdir/clamd.d
 
 %exclude %_sbindir/*milter*
@@ -745,6 +744,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %files server-sysvinit
 %defattr(-,root,root,-)
 %_initrddir/clamd-wrapper
+%pkgdatadir/clamd-wrapper
 
 
 ## -----------------------
@@ -823,6 +823,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
 
 * Thu Aug  4 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1700
+- moved sysv wrapper script into -sysv subpackage
 - start systemd services after network.target and nss-lookup.target
 
 * Tue Jul 26 2011 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.2-1600
