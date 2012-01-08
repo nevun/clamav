@@ -67,7 +67,6 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
-Source1:	clamd-wrapper
 Source2:	clamd.sysconfig
 Source3:	clamd.logrotate
 Source5:	clamd-README
@@ -161,6 +160,7 @@ Requires(pre):		%_initrddir
 Requires(postun):	%_initrddir
 Provides:	clamav-server-sysv = %version-%release
 Obsoletes:	clamav-server-sysv < %version-%release
+Source520:	clamd-wrapper
 %{?noarch}
 
 %package server-systemd
@@ -498,7 +498,7 @@ install -D -m 0755 -p %SOURCE7		_doc_server/clamd.init
 install -D -m 0644 -p %SOURCE5		_doc_server/README
 install -D -m 0644 -p etc/clamd.conf	_doc_server/clamd.conf
 
-install -m 0644 -p %SOURCE1		$RPM_BUILD_ROOT%pkgdatadir/
+install -m 0644 -p %SOURCE520		$RPM_BUILD_ROOT%pkgdatadir/
 install -m 0755 -p %SOURCE100		$RPM_BUILD_ROOT%pkgdatadir/
 cp -pa _doc_server/*			$RPM_BUILD_ROOT%pkgdatadir/template
 
