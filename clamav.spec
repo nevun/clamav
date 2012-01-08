@@ -53,7 +53,7 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97.3
-Release:	%release_func 1700
+Release:	%release_func 1702
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -851,7 +851,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
-* Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+* Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1702
 - set correct SELinux context for logfiles generated in %%post (#754555)
 - create systemd tmpfiles in %%post
 - created -server-systemd subpackage providing a clamd@.service template
