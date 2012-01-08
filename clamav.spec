@@ -614,6 +614,7 @@ test -e %freshclamlog || {
 	touch %freshclamlog
 	%__chmod 0664 %freshclamlog
 	%__chown root:%username %freshclamlog
+	! -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
 
@@ -632,6 +633,7 @@ test -e %milterlog || {
 	touch %milterlog
 	chmod 0620             %milterlog
 	chown root:%milteruser %milterlog
+	! -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
 
 %postun milter
@@ -818,6 +820,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- set correct SELinux context for logfiles generated in %%post (#754555)
+
 * Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1700
 - updated to 0.97.3
 - CVE-2011-3627 clamav: Recursion level crash fixed in v0.97.3
