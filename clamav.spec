@@ -209,9 +209,10 @@ Requires(preun):	/sbin/initctl
 %package scanner-systemd
 Summary:	Systemd initscripts for clamav scanner daemon
 Group:		System Environment/Daemons
-Source430:	clamd.scan.systemd
+Source430:	clamd@scan.service
 Provides:	init(clamav-scanner) = systemd
 Requires:	clamav-scanner = %version-%release
+Requires:	clamav-server-systemd = %version-%release
 %{?systemd_reqs}
 %{?noarch}
 
@@ -530,7 +531,7 @@ sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
 
 install -D -p -m 0644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.conf
-install -D -p -m 0644 %SOURCE430 $RPM_BUILD_ROOT%_unitdir/clamd.scan.service
+install -D -p -m 0644 %SOURCE430 $RPM_BUILD_ROOT%_unitdir/clamd@scan.service
 
 cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamd.scan.conf
 d %scanstatedir 0710 %scanuser %scanuser
@@ -630,7 +631,7 @@ test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
 test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 
 
-%systemd_install scanner-systemd clamd.scan.service
+%systemd_install scanner-systemd clamd@scan.service
 
 
 %post update
@@ -808,7 +809,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %if 0%{?with_systemd:1}
 %files scanner-systemd
   %defattr(-,root,root,-)
-  %_unitdir/clamd.scan.service
+  %_unitdir/clamd@scan.service
 %endif
 
 ## -----------------------
@@ -854,6 +855,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - set correct SELinux context for logfiles generated in %%post (#754555)
 - create systemd tmpfiles in %%post
 - created -server-systemd subpackage providing a clamd@.service template
+- made script in -scanner-systemd an instance of clamd@.service
 
 * Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1700
 - updated to 0.97.3
