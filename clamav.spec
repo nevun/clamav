@@ -583,6 +583,10 @@ rm -rf "$RPM_BUILD_ROOT"
 %__fe_useradd  49 -r -s /sbin/nologin -d / -M \
                  -g %scanuser %scanuser &>/dev/null || :
 
+%{?with_tmpfiles:
+%post scanner
+%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamd.scan.conf || :}}
+
 %postun scanner
 %__fe_userdel  %scanuser &>/dev/null || :
 %__fe_groupdel %scanuser &>/dev/null || :
@@ -635,6 +639,7 @@ test -e %milterlog || {
 	chown root:%milteruser %milterlog
 	! -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
+%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}}
 
 %postun milter
 %__fe_userdel  %milteruser &>/dev/null || :
@@ -822,6 +827,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - set correct SELinux context for logfiles generated in %%post (#754555)
+- create systemd tmpfiles in %%post
 
 * Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1700
 - updated to 0.97.3
