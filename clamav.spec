@@ -163,6 +163,15 @@ Provides:	clamav-server-sysv = %version-%release
 Obsoletes:	clamav-server-sysv < %version-%release
 %{?noarch}
 
+%package server-systemd
+Summary:	SysV initscripts for clamav server
+Group:		System Environment/Daemons
+Provides:	init(clamav-server) = systemd
+Requires:	clamav-server = %version-%release
+Source530:	clamd@.service
+%{?systemd_reqs}
+%{?noarch}
+
 
 %package scanner
 Summary:	Clamav scanner daemon
@@ -347,6 +356,9 @@ See the README file how this can be done with a minimum of effort.
 %description server-sysvinit
 SysV initscripts template for the clamav server
 
+%description server-systemd
+Systemd template for the clamav server
+
 
 %description scanner
 This package contains a generic system wide clamd service which is
@@ -490,6 +502,7 @@ install -m 0755 -p %SOURCE100		$RPM_BUILD_ROOT%pkgdatadir/
 cp -pa _doc_server/*			$RPM_BUILD_ROOT%pkgdatadir/template
 
 smartsubst 's!/usr/share/clamav!%pkgdatadir!g' $RPM_BUILD_ROOT%pkgdatadir/clamd-wrapper
+install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 
 ## prepare the update-files
@@ -590,6 +603,13 @@ rm -rf "$RPM_BUILD_ROOT"
 %postun scanner
 %__fe_userdel  %scanuser &>/dev/null || :
 %__fe_groupdel %scanuser &>/dev/null || :
+
+
+%post server-systemd
+test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+
+%postun server-systemd
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 
 
 %post scanner-sysvinit
@@ -753,6 +773,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %_initrddir/clamd-wrapper
 %pkgdatadir/clamd-wrapper
 
+%if 0%{?with_systemd:1}
+%files server-systemd
+ %defattr(-,root,root,-)
+ %_unitdir/clamd@.service
+%endif
 
 ## -----------------------
 
@@ -828,6 +853,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - set correct SELinux context for logfiles generated in %%post (#754555)
 - create systemd tmpfiles in %%post
+- created -server-systemd subpackage providing a clamd@.service template
 
 * Tue Oct 18 2011 Nick Bebout <nb@fedoraproject.org> - 0.97.3-1700
 - updated to 0.97.3
