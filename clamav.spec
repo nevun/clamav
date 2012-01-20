@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.97.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -16,6 +16,12 @@ Source0: clamav-0.97.3-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
 Source3: clamd-wrapper.tar.bz2
+
+Source7: freshclam.cron
+Source8: freshclam.logrotate
+Source9: clamd.logrotate
+Source10: clamav-milter.sysconfig
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz
@@ -171,53 +177,6 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 		s|^#(ClamdSocket) .+$|$1 unix:%{_localstatedir}/run/clamav/clamd.sock|;
 	' etc/clamav-milter.conf
 
-
-cat <<EOF >clamd.logrotate
-%{_localstatedir}/log/clamav/clamd.log {
-	missingok
-	notifempty
-	create 644 clam clam
-	postrotate
-		killall -HUP clamd 2>/dev/null || :
-	endscript
-}
-EOF
-
-cat <<EOF >freshclam.logrotate
-%{_localstatedir}/log/clamav/freshclam.log {
-	missingok
-	notifempty
-	create 644 clam clam
-}
-EOF
-
-cat <<'EOF' >freshclam.cron
-#!/bin/sh
-
-### A simple update script for the clamav virus database.
-### This could as well be replaced by a SysV script.
-
-### fix log file if needed
-LOG_FILE="%{_localstatedir}/log/clamav/freshclam.log"
-if [ ! -f "$LOG_FILE" ]; then
-    touch "$LOG_FILE"
-    chmod 644 "$LOG_FILE"
-    chown clam.clam "$LOG_FILE"
-fi
-
-%{_bindir}/freshclam \
-    --quiet \
-    --datadir="%{_localstatedir}/lib/clamav" \
-    --log="$LOG_FILE" 
-EOF
-
-%{__cat} <<EOF >clamav-milter.sysconfig
-### Simple config file for clamav-milter, you should
-### read the documentation and tweak it as you wish.
-
-CLAMAV_FLAGS=""
-EOF
-
 %build
 %configure  \
 	--program-prefix="%{?_program_prefix}" \
@@ -241,13 +200,21 @@ rm -rf %{buildroot}
 make install DESTDIR="%{buildroot}"
 
 install -Dp -m0755 %{SOURCE1} %{buildroot}%{_initrddir}/clamd
-install -Dp -m0755 freshclam.cron %{buildroot}%{_sysconfdir}/cron.daily/freshclam
-install -Dp -m0644 freshclam.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/freshclam
-install -Dp -m0644 clamd.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/clamav
+install -Dp -m0755 %{SOURCE7} %{buildroot}%{_sysconfdir}/cron.daily/freshclam
+install -Dp -m0644 %{SOURCE8} %{buildroot}%{_sysconfdir}/logrotate.d/freshclam
+install -Dp -m0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/logrotate.d/clamav
+
+# now rewrite scripts and config files in-place
+sed -i \
+	-e 's!%%{_sbindir}!%{_sbindir}!g' \
+	-e 's!%%{_bindir}!%{_bindir}!g' \
+	-e 's!%%{_localstatedir}!%{_localstatedir}!g' \
+	%{buildroot}%{_sysconfdir}/cron.daily/freshclam \
+	%{buildroot}%{_sysconfdir}/logrotate.d/*
 
 %if %{!?_without_milter:1}0
 install -Dp -m0755 %{SOURCE2} %{buildroot}%{_initrddir}/clamav-milter
-install -Dp -m0644 clamav-milter.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/clamav-milter
+install -Dp -m0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/sysconfig/clamav-milter
 %else
 rm %{buildroot}%{_mandir}/man8/clamav-milter.8*
 %endif
@@ -409,6 +376,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Thu Jan 19 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.3-4
+- Split files out into SCM instead of in the spec
+
 * Sun Jan 1 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.3-3
 - Revert patch from 0.97.3-2
 
