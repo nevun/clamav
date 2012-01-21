@@ -150,6 +150,7 @@ Group:		System Environment/Daemons
 Requires:	data(clamav)
 Requires:	clamav-filesystem = %version-%release
 Requires:	clamav-lib        = %version-%release
+Requires:	nc coreutils
 
 %package server-sysvinit
 Summary:	SysV initscripts for clamav server
@@ -851,6 +852,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Jan 21 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- rewrote clamav-notify-servers to be init system neutral
+
 * Sun Jan  8 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1702
 - set correct SELinux context for logfiles generated in %%post (#754555)
 - create systemd tmpfiles in %%post
