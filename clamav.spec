@@ -196,6 +196,7 @@ Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
 %{?noarch}
 
+# Remove me after EOL of RHEL6
 %package scanner-upstart
 Summary:	Upstart initscripts for clamav scanner daemon
 Group:		System Environment/Daemons
@@ -261,6 +262,7 @@ Provides:		clamav-milter-sysv = %version-%release
 Obsoletes:		clamav-milter-sysv < %version-%release
 %{?noarch}
 
+# Remove me after EOL of RHEL6
 %package milter-upstart
 Summary:	Upstart initscripts for the clamav sendmail-milter
 Group:		System Environment/Daemons
