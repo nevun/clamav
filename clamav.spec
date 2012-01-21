@@ -67,12 +67,6 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
-Source2:	clamd.sysconfig
-Source3:	clamd.logrotate
-Source5:	clamd-README
-Source6:	clamav-update.logrotate
-Source7:	clamd.SERVICE.init
-Source8:	clamav-notify-servers
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
@@ -138,6 +132,7 @@ Group:		Applications/File
 Source200:	freshclam-sleep
 Source201:	freshclam.sysconfig
 Source202:	clamav-update.cron
+Source203:	clamav-update.logrotate
 Requires:		clamav-filesystem = %version-%release
 Requires(pre):		/etc/cron.d
 Requires(postun):	/etc/cron.d
@@ -147,6 +142,11 @@ Requires(post):		group(%username)
 %package server
 Summary:	Clam Antivirus scanner server
 Group:		System Environment/Daemons
+Source2:	clamd.sysconfig
+Source3:	clamd.logrotate
+Source5:	clamd-README
+Source7:	clamd.SERVICE.init
+Source8:	clamav-notify-servers
 Requires:	data(clamav)
 Requires:	clamav-filesystem = %version-%release
 Requires:	clamav-lib        = %version-%release
@@ -508,7 +508,7 @@ install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 
 ## prepare the update-files
-install -D -m 0644 -p %SOURCE6		$RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
+install -D -m 0644 -p %SOURCE203	$RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
 install -D -m 0755 -p %SOURCE8		$RPM_BUILD_ROOT%_sbindir/clamav-notify-servers
 touch $RPM_BUILD_ROOT%freshclamlog
 
