@@ -23,6 +23,9 @@ NC=nc
 TIMEOUT_TERM=30
 TIMEOUT_KILL=60
 
+K_OPT=1
+LANG=C timeout --help | grep -q -- '--kill-after' || unset K_OPT
+
 get_sockets() {
     (
 	cd /etc/clamd.d
@@ -66,7 +69,7 @@ op_nc() {
 		continue
 	esac
 
-	resp=`printf 'zRELOAD\0' | timeout -k $TIMEOUT_KILL $TIMEOUT_TERM "${CMD[@]}"`
+	resp=`printf 'zRELOAD\0' | timeout ${K_OPT:+-k $TIMEOUT_KILL} $TIMEOUT_TERM "${CMD[@]}"`
 	case $resp in
 	  (RELOADING)
 		;;
