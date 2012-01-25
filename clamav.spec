@@ -663,7 +663,7 @@ test -e %milterlog || {
 	chown root:%milteruser %milterlog
 	! test -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
-%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}}
+%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}
 
 %postun milter
 %__fe_userdel  %milteruser &>/dev/null || :
