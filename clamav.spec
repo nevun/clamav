@@ -642,7 +642,7 @@ test -e %freshclamlog || {
 	touch %freshclamlog
 	%__chmod 0664 %freshclamlog
 	%__chown root:%username %freshclamlog
-	! -x /sbin/restorecon || /sbin/restorecon %freshclamlog
+	! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
 
@@ -661,7 +661,7 @@ test -e %milterlog || {
 	touch %milterlog
 	chmod 0620             %milterlog
 	chown root:%milteruser %milterlog
-	! -x /sbin/restorecon || /sbin/restorecon %milterlog
+	! test -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
 %{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}}
 
@@ -854,6 +854,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Jan 25 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+- fixed SELinux restorecon invocation
+
 * Sat Jan 21 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1703
 - rewrote clamav-notify-servers to be init system neutral
 - set PrivateTmp systemd option (#782488)
