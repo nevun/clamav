@@ -645,6 +645,10 @@ test -e %freshclamlog || {
 	! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
+%triggerin update -- %name-update < 0.97.3.1704
+# remove me after F19
+! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog &>/dev/null || :
+
 
 %triggerin milter -- clamav-scanner
 # Add the milteruser to the scanuser group; this is required when
@@ -668,6 +672,10 @@ test -e %milterlog || {
 %postun milter
 %__fe_userdel  %milteruser &>/dev/null || :
 %__fe_groupdel %milteruser &>/dev/null || :
+
+%triggerin milter -- %name-milter < 0.97.3.1704
+# remove me after F19
+! test -x /sbin/restorecon || /sbin/restorecon %milterlog &>/dev/null || :
 
 
 %post milter-sysvinit
@@ -856,6 +864,8 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Wed Jan 25 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 - fixed SELinux restorecon invocation
+- added trigger to fix SELinux contexts of logfiles created by old
+  packages
 
 * Sat Jan 21 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1703
 - rewrote clamav-notify-servers to be init system neutral
