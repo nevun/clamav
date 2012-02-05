@@ -865,7 +865,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
-* Wed Jan 25 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+* Sun Feb  5 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1703
 - fixed SELinux restorecon invocation
 - added trigger to fix SELinux contexts of logfiles created by old
   packages
