@@ -645,7 +645,7 @@ test -e %freshclamlog || {
 	! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
-%triggerin update -- %name-update < 0.97.3.1704
+%triggerin update -- %name-update < 0.97.3-1704
 # remove me after F19
 ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog &>/dev/null || :
 
@@ -673,7 +673,7 @@ test -e %milterlog || {
 %__fe_userdel  %milteruser &>/dev/null || :
 %__fe_groupdel %milteruser &>/dev/null || :
 
-%triggerin milter -- %name-milter < 0.97.3.1704
+%triggerin milter -- %name-milter < 0.97.3-1704
 # remove me after F19
 ! test -x /sbin/restorecon || /sbin/restorecon %milterlog &>/dev/null || :
 
