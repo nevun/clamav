@@ -73,6 +73,8 @@ Patch26:	clamav-0.95-cliopts.patch
 Patch27:	clamav-0.95.3-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
 Patch29:	clamav-0.96.2-jitoff.patch
+# https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
+Patch30:	llvm-glibc.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -400,6 +402,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
+%apply -n30 -p1
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -866,6 +869,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - fixed SELinux restorecon invocation
 - added trigger to fix SELinux contexts of logfiles created by old
   packages
+- fixed build with recent gcc/glibc toolchain
 
 * Sat Jan 21 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.3-1703
 - rewrote clamav-notify-servers to be init system neutral
