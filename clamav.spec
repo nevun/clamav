@@ -11,6 +11,8 @@
 %bcond_without		bytecode
 ##
 
+%global _hardened_build	1
+
 %ifnarch s390 s390x
 %global have_ocaml	1
 %else
@@ -53,7 +55,7 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97.4
-Release:	%release_func 1800
+Release:	%release_func 1801
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -865,6 +867,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Fri Apr 13 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.4-1801
+- build with -fPIE
+
 * Fri Mar 16 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.4-1800
 - updated to 0.97.4
 
