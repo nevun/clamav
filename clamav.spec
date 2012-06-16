@@ -54,8 +54,8 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.4
-Release:	%release_func 1801
+Version:	0.97.5
+Release:	%release_func 1800
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -867,6 +867,16 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Jun 16 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.5-1800
+- updated to 0.97.5
+- CVE-2012-1457: allows to bypass malware detection via a TAR archive
+  entry with a length field that exceeds the total TAR file size
+- CVE-2012-1458: allows to bypass malware detection via a crafted
+  reset interval in the LZXC header of a CHM file
+- CVE-2012-1459: allows to bypass malware detection via a TAR archive
+  entry with a length field corresponding to that entire entry, plus
+  part of the header of the next entry
+
 * Fri Apr 13 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.4-1801
 - build with -fPIE
 
