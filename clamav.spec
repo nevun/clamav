@@ -69,6 +69,9 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
+Source10:	http://db.local.clamav.net/main-54.cvd
+Source11:	http://db.local.clamav.net/daily-15050.cvd
+
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
 Patch26:	clamav-0.95-cliopts.patch
@@ -498,6 +501,8 @@ rm -f	$RPM_BUILD_ROOT%_sysconfdir/clamd.conf \
 touch $RPM_BUILD_ROOT%homedir/daily.cld
 touch $RPM_BUILD_ROOT%homedir/main.cld
 
+install -D -m 0644 -p %SOURCE10		$RPM_BUILD_ROOT%homedir/main.cvd
+install -D -m 0644 -p %SOURCE11		$RPM_BUILD_ROOT%homedir/daily.cvd
 
 ## prepare the server-files
 install -D -m 0644 -p %SOURCE2		_doc_server/clamd.sysconfig
@@ -876,6 +881,8 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - CVE-2012-1459: allows to bypass malware detection via a TAR archive
   entry with a length field corresponding to that entire entry, plus
   part of the header of the next entry
+- ship local copy of virus database; it was removed by accident from
+  0.97.5 tarball
 
 * Fri Apr 13 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.4-1801
 - build with -fPIE
