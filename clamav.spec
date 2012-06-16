@@ -225,13 +225,6 @@ Requires:	clamav-server-systemd = %version-%release
 %{?systemd_reqs}
 %{?noarch}
 
-# Remove me after F17
-%if 0%{!?with_sysv:1}
-Provides:	%name-scanner-sysvinit = %version-%release
-Obsoletes:	%name-scanner-sysvinit < %version-%release
-%endif
-
-
 %package milter
 Summary:	Milter module for the Clam Antivirus scanner
 Group:		System Environment/Daemons
@@ -289,12 +282,6 @@ Provides:	init(clamav-milter) = systemd
 Requires:	clamav-milter = %version-%release
 %{?systemd_reqs}
 %{?noarch}
-
-# Remove me after F17
-%if 0%{!?with_sysv:1}
-Provides:	%name-milter-sysvinit = %version-%release
-Obsoletes:	%name-milter-sysvinit < %version-%release
-%endif
 
 
 %description
@@ -883,6 +870,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
   part of the header of the next entry
 - ship local copy of virus database; it was removed by accident from
   0.97.5 tarball
+- removed sysv compat stuff
 
 * Fri Apr 13 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.4-1801
 - build with -fPIE
