@@ -4,15 +4,15 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97.3
-Release: 4%{?dist}
+Version: 0.97.5
+Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
 
 # Upstream source includes libunrar that is not distributable.
 #Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
-Source0: clamav-0.97.3-norar.tar.xz
+Source0: clamav-0.97.5-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
 Source3: clamd-wrapper.tar.bz2
@@ -376,6 +376,14 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Jun 20 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.5-1
+- Upgrade to 0.97.5
+- Fix CVE-2012-1419 clamav: specially-crafted POSIX tar files evade detection
+- Fix CVE-2012-1457 clamav: overly long length field in tar files evade detection
+- Fix CVE-2012-1443 clamav: specially-crafted RAR files evade detection
+- Fix CVE-2012-1458 clamav: specially-crafted CHM files evade detection
+- Fix CVE-2012-1459 clamav: specially-crafted length field in tar files evade detection
+
 * Thu Jan 19 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.3-4
 - Split files out into SCM instead of in the spec
 
