@@ -253,14 +253,14 @@ fi
 %pre
 getent group clam >/dev/null || groupadd -r clam
 getent passwd clam >/dev/null || \
-useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+useradd -r -g clam -d /var/lib/clamav -s /sbin/nologin \
     -c "Clam Anti Virus Checker" clam
 exit 0
 
 %pre -n clamd
 getent group clam >/dev/null || groupadd -r clam
 getent passwd clam >/dev/null || \
-useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+useradd -r -g clam -d /var/lib/clamav -s /sbin/nologin \
     -c "Clam Anti Virus Checker" clam
 exit 0
 
@@ -291,7 +291,7 @@ fi
 %pre db
 getent group clam >/dev/null || groupadd -r clam
 getent passwd clam >/dev/null || \
-useradd -r -g clam -d /var/clamav -s /sbin/nologin \
+useradd -r -g clam -d /var/lib/clamav -s /sbin/nologin \
     -c "Clam Anti Virus Checker" clam
 exit 0
 
