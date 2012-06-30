@@ -24,7 +24,7 @@ Source10: clamav-milter.sysconfig
 
 # Temporary workaround for broken 0.97.5 tarball
 Source11: http://db.local.clamav.net/main-54.cvd
-Source12: http://db.local.clamav.net/daily-15050.cvd
+Source12: http://db.local.clamav.net/daily-15103.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
