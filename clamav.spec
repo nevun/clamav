@@ -55,7 +55,7 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97.5
-Release:	%release_func 1800
+Release:	%release_func 1801
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -859,6 +859,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.97.5-1801
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Sat Jun 16 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.5-1800
 - updated to 0.97.5
 - CVE-2012-1457: allows to bypass malware detection via a TAR archive
