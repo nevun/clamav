@@ -232,8 +232,8 @@ touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
-install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
-install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
+#install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
+#install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
 
 %post
 /sbin/ldconfig
