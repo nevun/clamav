@@ -54,7 +54,7 @@ test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.5
+Version:	0.97.6
 Release:	%release_func 1900
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -70,7 +70,7 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
 Source10:	http://db.local.clamav.net/main-54.cvd
-Source11:	http://db.local.clamav.net/daily-15050.cvd
+Source11:	http://db.local.clamav.net/daily-15389.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
@@ -859,6 +859,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Sep 22 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.6-1900
+- updated to 0.97.6
+
 * Tue Aug 14 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.5-1900
 - disabled upstart support
 
