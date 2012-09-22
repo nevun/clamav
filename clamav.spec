@@ -42,13 +42,11 @@ Requires(postun):	 /bin/systemctl\
 %nil}
 %{!?systemd_install:%global systemd_install()\
 %post %1\
-test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :\
+%systemd_post %2 \
 %preun %1\
-test "$1" != "0" || /bin/systemctl --no-reload disable %2 >/dev/null 2>&1 || :\
-test "$1" != "0" || /bin/systemctl stop %2 >/dev/null 2>&1 || :\
+%systemd_preun %2 \
 %postun %1\
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :\
-test "$1" = "0" || /bin/systemctl try-restart %2 >/dev/null 2>&1 || :\
+%systemd_postun_with_restart %2 \
 %nil}
 
 
@@ -861,6 +859,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Sat Sep 22 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.6-1900
 - updated to 0.97.6
+- use %%systemd macros
 
 * Tue Aug 14 2012 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.97.5-1900
 - disabled upstart support
