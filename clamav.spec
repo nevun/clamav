@@ -22,9 +22,9 @@ Source8: freshclam.logrotate
 Source9: clamd.logrotate
 Source10: clamav-milter.sysconfig
 
-# Temporary workaround for broken 0.97.5 tarball
-#Source11: http://db.local.clamav.net/main-54.cvd
-#Source12: http://db.local.clamav.net/daily-15103.cvd
+# Temporary workaround for broken 0.97.6 tarball
+Source11: http://db.local.clamav.net/main-54.cvd
+Source12: http://db.local.clamav.net/daily-15408.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -232,8 +232,8 @@ touch %{buildroot}%{_localstatedir}/log/clamav/clamd.log
 install -d -m0755 %{buildroot}%{_localstatedir}/run/clamav/
 install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
-#install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
-#install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
+install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
+install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
 
 %post
 /sbin/ldconfig
