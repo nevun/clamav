@@ -4,7 +4,7 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97.6
+Version: 0.97.7
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -12,7 +12,7 @@ URL: http://www.clamav.net/
 
 # Upstream source includes libunrar that is not distributable.
 #Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
-Source0: clamav-0.97.6-norar.tar.xz
+Source0: clamav-%{version}-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
 Source3: clamd-wrapper.tar.bz2
@@ -22,9 +22,8 @@ Source8: freshclam.logrotate
 Source9: clamd.logrotate
 Source10: clamav-milter.sysconfig
 
-# Temporary workaround for broken 0.97.6 tarball
-Source11: http://db.local.clamav.net/main-54.cvd
-Source12: http://db.local.clamav.net/daily-15408.cvd
+Source11: http://db.local.clamav.net/main.cvd
+Source12: http://db.local.clamav.net/daily.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -383,6 +382,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Mon Mar 18 2013 Orion Poplawski <orion@cora.nwra.com> - 0.97.7-1
+- Upgrade to 0.97.7
+
 * Tue Sep 18 2012 Nick Bebout <nb@fedoraproject.org> - 0.97.6-1
 - Upgrade to 0.97.6
 
