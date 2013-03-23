@@ -52,8 +52,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.6
-Release:	%release_func 1901
+Version:	0.97.7
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -67,8 +67,8 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
-Source10:	http://db.local.clamav.net/main-54.cvd
-Source11:	http://db.local.clamav.net/daily-15389.cvd
+Source10:	http://db.local.clamav.net/main.cvd
+Source11:	http://db.local.clamav.net/daily.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
@@ -857,6 +857,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat Mar 23 2013 Nick Bebout <nb@fedoraproject.org> - 0.97.7-1
+- Update to 0.97.7
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.97.6-1901
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
