@@ -67,8 +67,9 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
-Source10:	http://db.local.clamav.net/main.cvd
-Source11:	http://db.local.clamav.net/daily.cvd
+#To download the .cvd, go to http://www.clamav.net and use the links there (I renamed the files to add the -version suffix)
+Source10:	http://db.local.clamav.net/main-54.cvd
+Source11:	http://db.local.clamav.net/daily-16898.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
