@@ -53,7 +53,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97.7
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -98,9 +98,8 @@ Provides:	group(%username) = 4
 # Prevent version mix
 Conflicts:	%name < %version-%release
 Conflicts:	%name > %version-%release
-BuildRequires:	fedora-usermgmt-devel
+Requires(pre):  shadow-utils
 %{?noarch}
-%{?FE_USERADD_REQ}
 
 %package lib
 Summary:	Dynamic libraries for the Clam Antivirus scanner
@@ -230,11 +229,10 @@ Group:		System Environment/Daemons
 Source300:	README.fedora
 Requires:	init(clamav-milter)
 BuildRequires:	sendmail-devel
-BuildRequires:	fedora-usermgmt-devel
 Provides:	user(%milteruser)  = 5
 Provides:	group(%milteruser) = 5
 Requires(post):	coreutils
-%{?FE_USERADD_REQ}
+Requires(pre):  shadow-utils
 
 Provides:	milter(clamav) = sendmail
 Provides:	milter(clamav) = postfix
@@ -582,27 +580,24 @@ rm -rf "$RPM_BUILD_ROOT"
 ## ------------------------------------------------------------
 
 %pre filesystem
-%__fe_groupadd 4 -r %username &>/dev/null || :
-%__fe_useradd  4 -r -s /sbin/nologin -d %homedir -M          \
-                 -c 'Clamav database update user' -g %username %username &>/dev/null || :
-
-%postun filesystem
-%__fe_userdel  %username &>/dev/null || :
-%__fe_groupdel %username &>/dev/null || :
+getent group %{username} >/dev/null || groupadd -r ${username} -g 4
+getent passwd %{username} >/dev/null || \
+    useradd -r -g %{username} -d %{homedir} -s /sbin/nologin -u 4 \
+    -c "Clamav database update user" %{username}
+exit 0
 
 
 %pre scanner
-%__fe_groupadd 49 -r %scanuser &>/dev/null || :
-%__fe_useradd  49 -r -s /sbin/nologin -d / -M \
-                 -g %scanuser %scanuser &>/dev/null || :
+getent group %{scanuser} >/dev/null || groupadd -r ${scanuser} -g 49
+getent passwd %{scanuser} >/dev/null || \
+    useradd -r -g %{scanuser} -d / -s /sbin/nologin -u 49 \
+    -c "Clamav scanner user" %{scanuser}
+exit 0
+
 
 %{?with_tmpfiles:
 %post scanner
 %{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamd.scan.conf || :}}
-
-%postun scanner
-%__fe_userdel  %scanuser &>/dev/null || :
-%__fe_groupdel %scanuser &>/dev/null || :
 
 
 %post server-systemd
@@ -652,9 +647,12 @@ test -e %freshclamlog || {
 /usr/sbin/groupmems -g %scanuser -a %milteruser &>/dev/null || :
 
 %pre milter
-%__fe_groupadd 5 -r %milteruser &>/dev/null || :
-%__fe_useradd  5 -r -s /sbin/nologin -d %milterstatedir -M \
-                 -c 'Clamav Milter User' -g %milteruser %milteruser &>/dev/null || :
+getent group %{milteruser} >/dev/null || groupadd -r ${milteruser} -g 5
+getent passwd %{milteruser} >/dev/null || \
+    useradd -r -g %{milteruser} -d %{milterstatedir} -s /sbin/nologin -u 5 \
+    -c "Clamav Milter user" %{milteruser}
+exit 0
+
 
 %post milter
 test -e %milterlog || {
@@ -665,9 +663,6 @@ test -e %milterlog || {
 }
 %{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}
 
-%postun milter
-%__fe_userdel  %milteruser &>/dev/null || :
-%__fe_groupdel %milteruser &>/dev/null || :
 
 %triggerin milter -- %name-milter < 0.97.3-1704
 # remove me after F19
@@ -858,6 +853,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Apr 10 2013 Jon Ciesla <limburgher@gmail.com> - 0.97.7-2
+- Migrate from fedora-usermgmt to guideline scriptlets.
+
 * Sat Mar 23 2013 Nick Bebout <nb@fedoraproject.org> - 0.97.7-1
 - Update to 0.97.7
 
