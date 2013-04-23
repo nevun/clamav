@@ -4,13 +4,14 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97.7
+Version: 0.97.8
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
 
 # Upstream source includes libunrar that is not distributable.
+# rm -r libclamunrar
 #Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
 Source0: clamav-%{version}-norar.tar.xz
 Source1: clamav.init
@@ -382,6 +383,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Apr 23 2013 Orion Poplawski <orion@cora.nwra.com> - 0.97.8-1
+- Upgrade to 0.97.8
+- Updated daily.cvd
+
 * Mon Mar 18 2013 Orion Poplawski <orion@cora.nwra.com> - 0.97.7-1
 - Upgrade to 0.97.7
 
