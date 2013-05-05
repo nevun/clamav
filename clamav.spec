@@ -52,8 +52,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.7
-Release:	2%{?dist}
+Version:	0.97.8
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -69,7 +69,7 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
 #To download the .cvd, go to http://www.clamav.net and use the links there (I renamed the files to add the -version suffix)
 Source10:	http://db.local.clamav.net/main-54.cvd
-Source11:	http://db.local.clamav.net/daily-16898.cvd
+Source11:	http://db.local.clamav.net/daily-17144.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch25:	clamav-0.92-open.patch
@@ -136,7 +136,7 @@ Summary:	Auto-updater for the Clam Antivirus scanner data-files
 Group:		Applications/File
 Source200:	freshclam-sleep
 Source201:	freshclam.sysconfig
-Source202:	clamav-update.cron
+Source202:	clamav-update.crond
 Source203:	clamav-update.logrotate
 Requires:		clamav-filesystem = %version-%release
 Requires(pre):		/etc/cron.d
@@ -470,7 +470,7 @@ function smartsubst() {
 
 
 install -d -m 0755 \
-	$RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,cron.d,logrotate.d,tmpfiles.d} \
+	$RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d,tmpfiles.d} \
 	$RPM_BUILD_ROOT%_var/{log,run} \
 	$RPM_BUILD_ROOT%milterstatedir \
 	$RPM_BUILD_ROOT%pkgdatadir/template \
@@ -751,7 +751,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %pkgdatadir/freshclam-sleep
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
 %config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
-%config(noreplace) %_sysconfdir/cron.d/*
+%config(noreplace) %_sysconfdir/cron.d/clamav-update
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
@@ -853,6 +853,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu May 2 2013 Nick Bebout <nb@fedoraproject.org> - 0.97.8-1
+- Update to 0.97.8
+
 * Wed Apr 10 2013 Jon Ciesla <limburgher@gmail.com> - 0.97.7-2
 - Migrate from fedora-usermgmt to guideline scriptlets.
 
