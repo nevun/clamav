@@ -580,17 +580,17 @@ rm -rf "$RPM_BUILD_ROOT"
 ## ------------------------------------------------------------
 
 %pre filesystem
-getent group %{username} >/dev/null || groupadd -r ${username} -g 4
+getent group %{username} >/dev/null || groupadd -r %{username}
 getent passwd %{username} >/dev/null || \
-    useradd -r -g %{username} -d %{homedir} -s /sbin/nologin -u 4 \
+    useradd -r -g %{username} -d %{homedir} -s /sbin/nologin \
     -c "Clamav database update user" %{username}
 exit 0
 
 
 %pre scanner
-getent group %{scanuser} >/dev/null || groupadd -r ${scanuser} -g 49
+getent group %{scanuser} >/dev/null || groupadd -r %{scanuser}
 getent passwd %{scanuser} >/dev/null || \
-    useradd -r -g %{scanuser} -d / -s /sbin/nologin -u 49 \
+    useradd -r -g %{scanuser} -d / -s /sbin/nologin \
     -c "Clamav scanner user" %{scanuser}
 exit 0
 
@@ -647,9 +647,9 @@ test -e %freshclamlog || {
 /usr/sbin/groupmems -g %scanuser -a %milteruser &>/dev/null || :
 
 %pre milter
-getent group %{milteruser} >/dev/null || groupadd -r ${milteruser} -g 5
+getent group %{milteruser} >/dev/null || groupadd -r %{milteruser}
 getent passwd %{milteruser} >/dev/null || \
-    useradd -r -g %{milteruser} -d %{milterstatedir} -s /sbin/nologin -u 5 \
+    useradd -r -g %{milteruser} -d %{milterstatedir} -s /sbin/nologin \
     -c "Clamav Milter user" %{milteruser}
 exit 0
 
