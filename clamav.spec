@@ -52,8 +52,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.8
-Release:	4%{?dist}
+Version:	0.98
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -67,16 +67,16 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 #   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
-#To download the .cvd, go to http://www.clamav.net and use the links there (I renamed the files to add the -version suffix)
-Source10:	http://db.local.clamav.net/main-54.cvd
-Source11:	http://db.local.clamav.net/daily-17144.cvd
+# To download the *.cvd, go to http://www.clamav.net and use the links
+# there (I renamed the files to add the -version suffix for verifying).
+Source10:	http://db.local.clamav.net/main-55.cvd
+Source11:	http://db.local.clamav.net/daily-17940.cvd
 
 Patch24:	clamav-0.92-private.patch
-Patch25:	clamav-0.92-open.patch
-Patch26:	clamav-0.95-cliopts.patch
-Patch27:	clamav-0.95.3-umask.patch
+Patch26:	clamav-0.98-cliopts.patch
+Patch27:	clamav-0.98-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch29:	clamav-0.96.2-jitoff.patch
+Patch29:	clamav-0.98-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
@@ -388,7 +388,6 @@ The systemd initscripts for clamav-scanner.
 %setup -q -n %{name}-%{version}%{?prerelease}
 
 %apply -n24 -p1 -b .private
-%apply -n25 -p1 -b .open
 %apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
@@ -407,12 +406,12 @@ sed -ri \
     -e 's!^#?(User ).*!\1<USER>!g' \
     -e 's!^#?(AllowSupplementaryGroups|LogSyslog).*!\1 yes!g' \
     -e 's! /usr/local/share/clamav,! %homedir,!g' \
-    etc/clamd.conf
+    etc/clamd.conf.sample
 
 sed -ri \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
     -e 's!^#?(LogSyslog).*!\1 yes!g' \
-    -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf
+    -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf.sample
 
 
 ## ------------------------------------------------------------
@@ -479,7 +478,7 @@ install -d -m 0755 \
 	$RPM_BUILD_ROOT%homedir \
 	$RPM_BUILD_ROOT%scanstatedir
 
-rm -f	$RPM_BUILD_ROOT%_sysconfdir/clamd.conf \
+rm -f	$RPM_BUILD_ROOT%_sysconfdir/clamd.conf.sample \
 	$RPM_BUILD_ROOT%_libdir/*.la
 
 
@@ -494,7 +493,7 @@ install -D -m 0644 -p %SOURCE2		_doc_server/clamd.sysconfig
 install -D -m 0644 -p %SOURCE3		_doc_server/clamd.logrotate
 install -D -m 0755 -p %SOURCE7		_doc_server/clamd.init
 install -D -m 0644 -p %SOURCE5		_doc_server/README
-install -D -m 0644 -p etc/clamd.conf	_doc_server/clamd.conf
+install -D -m 0644 -p etc/clamd.conf.sample	_doc_server/clamd.conf
 
 install -m 0644 -p %SOURCE520		$RPM_BUILD_ROOT%pkgdatadir/
 install -m 0755 -p %SOURCE100		$RPM_BUILD_ROOT%pkgdatadir/
@@ -512,6 +511,7 @@ touch $RPM_BUILD_ROOT%freshclamlog
 install -D -p -m 0755 %SOURCE200	$RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 install -D -p -m 0644 %SOURCE201	$RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202	$RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
+mv -f $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
 
 smartsubst 's!webmaster,clamav!webmaster,%username!g;
 	    s!/usr/share/clamav!%pkgdatadir!g;
@@ -523,7 +523,7 @@ smartsubst 's!webmaster,clamav!webmaster,%username!g;
 
 ### The scanner stuff
 sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
-    etc/clamd.conf > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/scan.conf
+    etc/clamd.conf.sample > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/scan.conf
 
 sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
@@ -545,7 +545,7 @@ sed -r \
     -e 's! /tmp/clamav-milter.socket! %milterstatedir/clamav-milter.socket!g' \
     -e 's! /var/run/clamav-milter.pid! %milterstatedir/clamav-milter.pid!g' \
     -e 's! /tmp/clamav-milter.log! %milterlog!g' \
-    etc/clamav-milter.conf > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
+    etc/clamav-milter.conf.sample > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
 
 install -D -p -m 0644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/init/clamav-milter.conf
 install -D -p -m 0755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
@@ -555,7 +555,7 @@ cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamav-milter.conf
 d %milterstatedir 0710 %milteruser %milteruser
 EOF
 
-rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf
+rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf.sample
 touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.{socket,pid},%milterlog}
 
 %{!?with_upstart:  rm -rf $RPM_BUILD_ROOT%_sysconfdir/init}
@@ -854,6 +854,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
+- Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)
+
 * Wed Aug 07 2013 Pierre-Yves Chibon <pingou@pingoured.fr> - 0.97.8-4
 - Add a missing requirement on crontabs to spec file
 - Fix RHBZ#988605
@@ -990,7 +993,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 - updated to 0.96.1
 - rediffed patches
 
-* Sat May 19 2010 Rakesh Pandit <rakesh@fedoraproject.org> - 0.96.1403
+* Sat May 29 2010 Rakesh Pandit <rakesh@fedoraproject.org> - 0.96.1403
 - CVE-2010-1639 Clam AntiVirus: Heap-based overflow, when processing malicious PDF file(s)
 
 * Wed Apr 21 2010 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.96-1402

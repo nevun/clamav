@@ -1,0 +1,30 @@
+--- clamav-0.98/etc/clamd.conf.sample		2013-09-16 21:28:14.000000000 +0200
++++ clamav-0.98/etc/clamd.conf.sample.jitoff	2013-10-06 20:46:59.000000000 +0200
+@@ -543,6 +543,16 @@
+ # Default: yes
+ #Bytecode yes
+ 
++# Bytecode mode
++#
++# This option has been set to 'ForceInterpreter' in Fedora due to
++# security concerns by default.  You might need to enable the
++# 'clamd_use_jit' SELinux boolean after setting this option to the
++# more efficient 'ForceJIT' value.
++#
++# Default: ForceInterpreter
++#ByteCodeMode ForceInterpreter
++
+ # Set bytecode security level.
+ # Possible values:
+ #       None - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS
+--- clamav-0.98/shared/optparser.c		2013-09-16 21:28:14.000000000 +0200
++++ clamav-0.98/shared/optparser.c.jitoff	2013-10-06 20:46:12.000000000 +0200
+@@ -277,7 +277,7 @@
+     { "BytecodeUnsigned", "bytecode-unsigned", 0, TYPE_BOOL, MATCH_BOOL, 0, NULL, 0, OPT_CLAMD | OPT_CLAMSCAN, 
+ 	"Allow loading bytecode from outside digitally signed .c[lv]d files.","no"},
+ 
+-    { "BytecodeMode", "bytecode-mode", 0, TYPE_STRING, "^(Auto|ForceJIT|ForceInterpreter|Test)$", -1, "Auto", FLAG_REQUIRED, OPT_CLAMD | OPT_CLAMSCAN,
++    { "BytecodeMode", "bytecode-mode", 0, TYPE_STRING, "^(Auto|ForceJIT|ForceInterpreter|Test)$", -1, "ForceInterpreter", FLAG_REQUIRED, OPT_CLAMD | OPT_CLAMSCAN,
+ 	"Set bytecode execution mode.\nPossible values:\n\tAuto - automatically choose JIT if possible, fallback to interpreter\nForceJIT - always choose JIT, fail if not possible\nForceIntepreter - always choose interpreter\nTest - run with both JIT and interpreter and compare results. Make all failures fatal.","Auto"},
+ 
+     { "BytecodeStatistics", "bytecode-statistics", 0, TYPE_BOOL, MATCH_BOOL, 0, NULL, 0, OPT_CLAMSCAN, "Collect and print bytecode execution statistics.", "no" },
