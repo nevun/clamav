@@ -4,15 +4,17 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.97.8
+Version: 0.98
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
 
-# Upstream source includes libunrar that is not distributable.
-# rm -r libclamunrar
-#Source: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
+# Unfortunately, clamav includes support for RAR v3, derived from GPL
+# incompatible unrar from RARlabs. We have to pull this code out. This
+# tarball was created by
+#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
+# Upstream: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
 Source0: clamav-%{version}-norar.tar.xz
 Source1: clamav.init
 Source2: clamav-milter.init
@@ -23,12 +25,14 @@ Source8: freshclam.logrotate
 Source9: clamd.logrotate
 Source10: clamav-milter.sysconfig
 
-Source11: http://db.local.clamav.net/main.cvd
-Source12: http://db.local.clamav.net/daily.cvd
+# To download the *.cvd, go to http://www.clamav.net and use the links
+# there (I renamed the files to add the -version suffix for verifying).
+Source11: http://db.local.clamav.net/main-55.cvd
+Source12: http://db.local.clamav.net/daily-17940.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
@@ -123,7 +127,7 @@ you will need to install %{name}-devel.
 %setup -q -T -c
 xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 
-%{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' libtool configure
+%{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' configure
 
 %{__perl} -pi.orig -e '
 		s|\@DBDIR\@|\$(localstatedir)/lib/clamav|g;
@@ -162,7 +166,7 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 		s|^#(ArchiveMaxCompressionRatio) .+|$1 300|;
 		s|^#(ArchiveBlockEncrypted)|$1|;
 		s|^#(ArchiveBlockMax)|$1|;
-	' etc/clamd.conf
+	' etc/clamd.conf.sample
 
 %{__perl} -pi.orig -e '
 		s|^(Example)|#$1|;
@@ -171,7 +175,7 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 		s|^#(LogSyslog)|$1|;
 		s|^#(DatabaseOwner) .+$|$1 clam|;
 		s|^(Checks) .+$|$1 24|;
-	' etc/freshclam.conf
+	' etc/freshclam.conf.sample
 
 %{__perl} -pi.orig -e '
 		s|^(Example)|#$1|;
@@ -179,14 +183,14 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 		s|^#(MilterSocket) inet.+$|$1 /var/run/clamav/clamav-milter.sock|;
 		s|^#(PidFile) .+$|$1 /var/run/clamav/clamav-milter.pid|;
 		s|^#(ClamdSocket) .+$|$1 unix:%{_localstatedir}/run/clamav/clamd.sock|;
-	' etc/clamav-milter.conf
+	' etc/clamav-milter.conf.sample
 
 %build
 %configure  \
 	--program-prefix="%{?_program_prefix}" \
 %{!?_without_milter:--enable-milter} \
 	--disable-clamav \
-        --disable-static \
+	--disable-static \
 	--disable-zlib-vcheck \
 	--disable-unrar \
 	--enable-id-check \
@@ -195,7 +199,7 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 	--with-group="clam" \
 	--with-libcurl \
 	--with-user="clam" \
-        --disable-llvm 
+	--disable-llvm 
 
 make %{?_smp_mflags}
 
@@ -208,6 +212,9 @@ install -Dp -m0755 %{SOURCE7} %{buildroot}%{_sysconfdir}/cron.daily/freshclam
 install -Dp -m0644 %{SOURCE8} %{buildroot}%{_sysconfdir}/logrotate.d/freshclam
 install -Dp -m0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/logrotate.d/clamav
 
+mv -f %{buildroot}%{_sysconfdir}/clamd.conf{.sample,}
+mv -f %{buildroot}%{_sysconfdir}/freshclam.conf{.sample,}
+
 # now rewrite scripts and config files in-place
 sed -i \
 	-e 's!%%{_sbindir}!%{_sbindir}!g' \
@@ -219,6 +226,7 @@ sed -i \
 %if %{!?_without_milter:1}0
 install -Dp -m0755 %{SOURCE2} %{buildroot}%{_initrddir}/clamav-milter
 install -Dp -m0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/sysconfig/clamav-milter
+mv -f %{buildroot}%{_sysconfdir}/clamav-milter.conf{.sample,}
 %else
 rm %{buildroot}%{_mandir}/man8/clamav-milter.8*
 %endif
@@ -234,6 +242,9 @@ install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
 install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
 install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
+
+# Clean up for later usage in documentation
+for conf in etc/*.sample; do mv ${conf} ${conf%%.sample}; done
 
 %post
 /sbin/ldconfig
@@ -313,14 +324,12 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root, 0755)
-%doc AUTHORS BUGS ChangeLog COPYING FAQ INSTALL NEWS README test/
+%doc AUTHORS BUGS ChangeLog COPYING FAQ INSTALL NEWS README
 %doc docs/*.pdf etc/freshclam.conf
 %doc %{_mandir}/man1/sigtool.1*
 %doc %{_mandir}/man1/clamscan.1*
 %doc %{_mandir}/man1/freshclam.1*
 %doc %{_mandir}/man5/freshclam.conf.5*
-%doc %{_prefix}/share/clamav/README.clamd-wrapper
-%{_prefix}/share/clamav/clamd-wrapper
 %config(noreplace) %{_sysconfdir}/freshclam.conf
 %{_bindir}/clamscan
 %{_bindir}/freshclam
@@ -337,6 +346,8 @@ rm -rf %{buildroot}
 %doc %{_mandir}/man1/clambc.1*
 %doc %{_mandir}/man5/clamd.conf.5*
 %doc %{_mandir}/man8/clamd.8*
+%doc %{_prefix}/share/clamav/README.clamd-wrapper
+%{_prefix}/share/clamav/clamd-wrapper
 %config(noreplace) %{_sysconfdir}/clamd.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/clamav
 %{_sysconfdir}/clamd.d
@@ -344,6 +355,7 @@ rm -rf %{buildroot}
 %{_sbindir}/clamd
 %{_bindir}/clamconf
 %{_bindir}/clamdscan
+%{_bindir}/clamdtop
 
 %defattr(0644, clam, clam, 0755)
 %{_localstatedir}/run/clamav/
@@ -383,6 +395,14 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
+- Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)
+- Fixed discrepancies between clamd initscript and clamd config
+  file (#960923, thanks to John Horne)
+- Added build requirement to ncurses-devel for clamdtop (again)
+- Moved clamd wrapper script and documentation into correct sub-
+  package (#782596, thanks to Philip Prindeville)
+
 * Tue Apr 23 2013 Orion Poplawski <orion@cora.nwra.com> - 0.97.8-1
 - Upgrade to 0.97.8
 - Updated daily.cvd

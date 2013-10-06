@@ -7,7 +7,7 @@
 #              server.
 # processname: clamd
 # pidfile: /var/run/clamav/clamd.pid
-# config: /etc/clamav.conf
+# config: /etc/clamd.conf
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -29,7 +29,7 @@ case "$1" in
   stop)
 	echo -n "Stopping Clam AntiVirus Daemon: "
 	killproc clamd
-	rm -f /var/clamav/clamd.socket
+	rm -f /var/run/clamav/clamd.sock
 	rm -f /var/run/clamav/clamav.pid
 	RETVAL=$?
 	echo
