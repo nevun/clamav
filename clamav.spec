@@ -79,6 +79,7 @@ Patch27:	clamav-0.98-umask.patch
 Patch29:	clamav-0.98-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
+Patch31:	clamav-0.98-arm-fanotify.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -392,6 +393,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
+%apply -n31 -p1 -b .arm-fanotify
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
