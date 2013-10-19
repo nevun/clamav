@@ -30,7 +30,7 @@ case "$1" in
 	echo -n "Stopping Clam AntiVirus Daemon: "
 	killproc clamd
 	rm -f /var/run/clamav/clamd.sock
-	rm -f /var/run/clamav/clamav.pid
+	rm -f /var/run/clamav/clamd.pid
 	RETVAL=$?
 	echo
 ### heres the fix... we gotta remove the stale files on restart

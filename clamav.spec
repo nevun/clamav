@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.98
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -395,6 +395,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sat Oct 19 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-2
+- Really fix all discrepancies between clamd initscript and clamd
+  config file (#960923, thanks to John Horne)
+
 * Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
 - Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)
 - Fixed discrepancies between clamd initscript and clamd config
