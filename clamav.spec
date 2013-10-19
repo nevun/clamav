@@ -398,6 +398,8 @@ rm -rf %{buildroot}
 * Sat Oct 19 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-2
 - Really fix all discrepancies between clamd initscript and clamd
   config file (#960923, thanks to John Horne)
+- Ensure that a clamd and clamav-milter condrestart via initscript
+  works (#1018312, thanks to Filippo Carletti)
 
 * Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
 - Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)

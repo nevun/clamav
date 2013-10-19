@@ -47,7 +47,7 @@ case "$1" in
 	RETVAL=$?
 	;;
   condrestart)
-	[ -e /var/lock/subsys/clamd ] && restart
+	[ -e /var/lock/subsys/clamav-milter ] && $0 restart
 	RETVAL=$?
 	;;
   *)

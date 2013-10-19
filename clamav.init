@@ -46,7 +46,7 @@ case "$1" in
 	RETVAL=$?
 	;;
   condrestart)
-	[ -e /var/lock/subsys/clamd ] && restart
+	[ -e /var/lock/subsys/clamd ] && $0 restart
 	RETVAL=$?
 	;;
   *)
@@ -55,4 +55,3 @@ case "$1" in
 esac
 
 exit $RETVAL
-
