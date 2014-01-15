@@ -79,7 +79,9 @@ Patch27:	clamav-0.98-umask.patch
 Patch29:	clamav-0.98-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
-Patch31:	clamav-0.98-arm-fanotify.patch
+# use glibc fanotify instead of limited hand-crafted support
+# https://bugzilla.clamav.net/show_bug.cgi?id=9156
+Patch31:	clamav-0.98-glibc-fanotify.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -393,7 +395,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
-%apply -n31 -p1 -b .arm-fanotify
+%apply -n31 -p1 -b .glibc-fanotify
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -858,6 +860,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Wed Jan 15 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.1-1
 - Upgrade to 0.98.1 and updated daily.cvd (#1053400)
+
+* Wed Oct 09 2013 Dan Horák <dan[at]danny.cz> - 0.98-2
+- Use fanotify from glibc instead of the limited hand-crafted version
 
 * Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
 - Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)
