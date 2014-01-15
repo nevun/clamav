@@ -52,7 +52,7 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.98
+Version:	0.98.1
 Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -70,7 +70,7 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:	http://db.local.clamav.net/main-55.cvd
-Source11:	http://db.local.clamav.net/daily-17940.cvd
+Source11:	http://db.local.clamav.net/daily-18353.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch26:	clamav-0.98-cliopts.patch
@@ -856,6 +856,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Jan 15 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.1-1
+- Upgrade to 0.98.1 and updated daily.cvd (#1053400)
+
 * Sun Oct 06 2013 Robert Scheck <robert@fedoraproject.org> - 0.98-1
 - Upgrade to 0.98 and updated main.cvd and daily.cvd (#1010168)
 
