@@ -3,13 +3,13 @@ modify/copy them in the suggested way:
 
 clamd.conf:
   * set LocalSocket (or better: TCPSocket) and User to suitable values;
-    avoid PidFile unless it required by system monitoring or something
-    else. Logging through syslog is usually better than an indidual
+    avoid PidFile unless it is required by system monitoring or something
+    else. Logging through syslog is usually better than an individual
     Logfile.
   * place this file into /etc/clamd.d with an unique service-name;
     e.g. as /etc/clamd.d/<SERVICE>.conf
 
-  When using TCPSocket, create iptables rules which are limitting the
+  When using TCPSocket, create iptables rules which are limiting the
   access by source and/or by using '-m owner'.
 
   When LogFile feature is wanted, it must be writable for the assigned
