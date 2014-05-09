@@ -4,7 +4,7 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.98.1
+Version: 0.98.3
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -13,7 +13,7 @@ URL: http://www.clamav.net/
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out. This
 # tarball was created by
-#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
+#  make clean-sources NAME=clamav VERSION=<version> TARBALL=clamav-<version>.tar.gz TARBALL_CLEAN=clamav-<version>-norar.tar.xz
 # Upstream: http://downloads.sourceforge.net/clamav/clamav-%{version}.tar.gz
 Source0: clamav-%{version}-norar.tar.xz
 Source1: clamav.init
@@ -32,7 +32,7 @@ Source12: http://db.local.clamav.net/daily-18353.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
@@ -197,7 +197,7 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 	--enable-dns \
 	--with-dbdir="%{_localstatedir}/lib/clamav" \
 	--with-group="clam" \
-	--with-libcurl \
+	--with-libcurl=%{_prefix} \
 	--with-user="clam" \
 	--disable-llvm 
 
@@ -329,12 +329,14 @@ rm -rf %{buildroot}
 %doc %{_mandir}/man1/sigtool.1*
 %doc %{_mandir}/man1/clamscan.1*
 %doc %{_mandir}/man1/freshclam.1*
+%doc %{_mandir}/man1/clamsubmit.1*
 %doc %{_mandir}/man5/freshclam.conf.5*
 %config(noreplace) %{_sysconfdir}/freshclam.conf
 %{_bindir}/clamscan
 %{_bindir}/freshclam
 %{_bindir}/sigtool
 %{_bindir}/clambc
+%{_bindir}/clamsubmit
 %{_libdir}/libclamav.so.*
 
 %files -n clamd
@@ -395,6 +397,14 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Fri May 09 2014 Paul Wouters <pwouters@redhat.com> - 0.98.3-1
+- Upgrade to 0.98.3
+- Fix --with-libcurl parameter to avoid automatic path detection breakage
+- openssl-devel is now required for hashing code.
+- Added clamsubmit to main package
+- Re-enabled --with-llvm as this speeds up deployment a lot.
+- Fixed older changelog dates
+
 * Wed Jan 15 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.1-1
 - Upgrade to 0.98.1 and updated daily.cvd (#1053400)
 
@@ -486,7 +496,7 @@ rm -rf %{buildroot}
 - Move db to /var/lib/clamav
 - Ship empty directory /etc/clamd.d for amavisd-new
 
-* Tue Feb 17 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-2
+* Thu Feb 17 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-2
 - Disable llvm. 
 
 * Tue Feb 08 2011 Kevin Fenzi <kevin@tummy.com> - 0.97-1
@@ -643,7 +653,7 @@ rm -rf %{buildroot}
 - Changed the init-order of the sysv scripts. (Will McCutcheon)
 - Changes to the default configuration files.
 
-* Sat Mar 17 2004 Dag Wieers <dag@wieers.com> - 0.70-1
+* Wed Mar 17 2004 Dag Wieers <dag@wieers.com> - 0.70-1
 - Updated to release 0.70.
 
 * Tue Mar 16 2004 Dag Wieers <dag@wieers.com> - 0.68-1
@@ -656,7 +666,7 @@ rm -rf %{buildroot}
 * Mon Mar 08 2004 Dag Wieers <dag@wieers.com> - 0.67-1
 - Personalized SPEC file.
 
-* Mon Aug 22 2003 Matthias Saou/Che
+* Fri Aug 22 2003 Matthias Saou/Che
 - Added "--without milter" build option. (Matthias Saou)
 - Fixed freshclam cron (Matthias Saou)
 - Built the new package. (Che)
@@ -673,7 +683,7 @@ rm -rf %{buildroot}
 - various fixes
 - got rid of rpm-helper prereq
 
-* Fri Mar 24 2003 Che
+* Mon Mar 24 2003 Che
 - some cleanups and fixes
 - new patch added
 
@@ -686,7 +696,7 @@ rm -rf %{buildroot}
 * Sat Nov 02 2002 Che
 - version upgrade
 
-* Wed Oct 24 2002 Che
+* Thu Oct 24 2002 Che
 - some important changes for lsb compliance
 
 * Wed Oct 23 2002 Che
