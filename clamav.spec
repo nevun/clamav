@@ -52,7 +52,7 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.98.1
+Version:	0.98.3
 Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -64,29 +64,26 @@ Source999:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?p
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created by
-#   make clean-sources [TARBALL=<original-tarball>] [VERSION=<version>]
+#  make clean-sources NAME=clamav VERSION=<version> TARBALL=clamav-<version>.tar.gz TARBALL_CLEAN=clamav-<version>-norar.tar.xz
 Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:	http://db.local.clamav.net/main-55.cvd
-Source11:	http://db.local.clamav.net/daily-18353.cvd
+Source11:	http://db.local.clamav.net/daily-18354.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch26:	clamav-0.98-cliopts.patch
 Patch27:	clamav-0.98-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch29:	clamav-0.98-jitoff.patch
+Patch29:	clamav-0.98.3-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
-# use glibc fanotify instead of limited hand-crafted support
-# https://bugzilla.clamav.net/show_bug.cgi?id=9156
-Patch31:	clamav-0.98-glibc-fanotify.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
-BuildRequires:	ncurses-devel
+BuildRequires:	ncurses-devel openssl-devel
 BuildRequires:	%_includedir/tcpd.h
 %{?with_bytecode:BuildRequires:	bc tcl groff graphviz}
 %if %{have_ocaml}
@@ -395,7 +392,6 @@ The systemd initscripts for clamav-scanner.
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
-%apply -n31 -p1 -b .glibc-fanotify
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -434,6 +430,7 @@ export have_cv_ipv6=yes
 	--disable-clamav \
 	--with-user=%username \
 	--with-group=%username \
+	--with-libcurl=%{_prefix} \
 	--with-dbdir=/var/lib/clamav \
 	--enable-milter \
 	--enable-clamdtop \
@@ -858,6 +855,12 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sat May 10 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.3-1
+- Upgrade to 0.98.3 and updated daily.cvd (#1095614)
+- Avoid automatic path detection breakage regarding curl
+- Added build requirement to openssl-devel for hasing code
+- Added clamsubmit to main package
+
 * Wed Jan 15 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.1-1
 - Upgrade to 0.98.1 and updated daily.cvd (#1053400)
 
