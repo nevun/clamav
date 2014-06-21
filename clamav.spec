@@ -32,6 +32,7 @@
 
 %{?with_noarch:%global noarch	BuildArch:	noarch}
 %{!?_unitdir:%global _unitdir /lib/systemd/system}
+%{!?_initrddir:%global _initrddir /etc/rc.d/init.d}
 %{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
