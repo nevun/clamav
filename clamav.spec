@@ -32,7 +32,7 @@ Source12: http://db.local.clamav.net/daily-19120.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel, libxml2-devel
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
@@ -399,6 +399,7 @@ rm -rf %{buildroot}
 %changelog
 * Sat Jun 21 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.4-1
 - Upgrade to 0.98.4 and updated daily.cvd (#1111811)
+- Add build requirement to libxml2 for DMG, OpenIOC and XAR
 
 * Fri May 09 2014 Paul Wouters <pwouters@redhat.com> - 0.98.3-1
 - Upgrade to 0.98.3
