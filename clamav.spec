@@ -859,6 +859,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-1
 - Upgrade to 0.98.5 and updated daily.cvd (#1138101)
 
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.98.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Sat Jun 21 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.4-1
 - Upgrade to 0.98.4 and updated daily.cvd (#1111811)
 - Add build requirement to libxml2 for DMG, OpenIOC and XAR
