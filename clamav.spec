@@ -4,7 +4,7 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.98.4
+Version: 0.98.5
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -28,7 +28,7 @@ Source10: clamav-milter.sysconfig
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source11: http://db.local.clamav.net/main-55.cvd
-Source12: http://db.local.clamav.net/daily-19120.cvd
+Source12: http://db.local.clamav.net/daily-19651.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -397,6 +397,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-1
+- Upgrade to 0.98.5 and updated daily.cvd (#1138101)
+
 * Sat Jun 21 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.4-1
 - Upgrade to 0.98.4 and updated daily.cvd (#1111811)
 - Add build requirement to libxml2 for DMG, OpenIOC and XAR
