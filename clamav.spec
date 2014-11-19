@@ -54,7 +54,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.98.5
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -172,7 +172,7 @@ Source520:	clamd-wrapper
 %{?noarch}
 
 %package server-systemd
-Summary:	SysV initscripts for clamav server
+Summary:	Systemd initscripts for clamav server
 Group:		System Environment/Daemons
 Provides:	init(clamav-server) = systemd
 Requires:	clamav-server = %version-%release
@@ -856,6 +856,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-2
+- Corrected summary of clamav-server-systemd package (#1165672)
+
 * Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-1
 - Upgrade to 0.98.5 and updated daily.cvd (#1138101)
 
