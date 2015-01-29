@@ -4,7 +4,7 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.98.5
+Version: 0.98.6
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -397,6 +397,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Thu Jan 29 2015 Robert Scheck <robert@fedoraproject.org> - 0.98.6-1
+- Upgrade to 0.98.6 and updated daily.cvd (#1187050)
+
 * Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-1
 - Upgrade to 0.98.5 and updated daily.cvd (#1138101)
 
