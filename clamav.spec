@@ -53,8 +53,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.98.5
-Release:	2%{?dist}
+Version:	0.98.6
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -71,13 +71,13 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:	http://db.local.clamav.net/main-55.cvd
-Source11:	http://db.local.clamav.net/daily-19651.cvd
+Source11:	http://db.local.clamav.net/daily-19995.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch26:	clamav-0.98.5-cliopts.patch
 Patch27:	clamav-0.98-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch29:	clamav-0.98.5-jitoff.patch
+Patch29:	clamav-0.98.6-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
@@ -856,6 +856,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu Jan 29 2015 Robert Scheck <robert@fedoraproject.org> - 0.98.6-1
+- Upgrade to 0.98.6 and updated daily.cvd (#1187050)
+
 * Wed Nov 19 2014 Robert Scheck <robert@fedoraproject.org> - 0.98.5-2
 - Corrected summary of clamav-server-systemd package (#1165672)
 
