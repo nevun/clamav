@@ -28,7 +28,7 @@ Source10: clamav-milter.sysconfig
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source11: http://db.local.clamav.net/main-55.cvd
-Source12: http://db.local.clamav.net/daily-19651.cvd
+Source12: http://db.local.clamav.net/daily-19995.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
