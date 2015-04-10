@@ -17,6 +17,9 @@
 
 [ -x /usr/sbin/clamd ] || exit 0
 
+# Local clamd config
+test -f /etc/sysconfig/clamd && . /etc/sysconfig/clamd
+
 # See how we were called.
 case "$1" in
   start)
