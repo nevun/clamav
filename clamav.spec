@@ -57,8 +57,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.98.6
-Release:	2%{?dist}
+Version:	0.98.7
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -75,7 +75,7 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:	http://db.local.clamav.net/main-55.cvd
-Source11:	http://db.local.clamav.net/daily-19995.cvd
+Source11:	http://db.local.clamav.net/daily-20394.cvd
 
 Patch24:	clamav-0.92-private.patch
 Patch26:	clamav-0.98.5-cliopts.patch
@@ -890,6 +890,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Apr 29 2015 heck <robert@fedoraproject.org> - 0.98.7-1
+- Upgrade to 0.98.7 and updated daily.cvd (#1217014)
+
 * Tue Mar 10 2015 Adam Jackson <ajax@redhat.com> 0.98.6-2
 - Drop sysvinit subpackages in F23+
 
