@@ -890,7 +890,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
-* Wed Apr 29 2015 heck <robert@fedoraproject.org> - 0.98.7-1
+* Wed Apr 29 2015 Robert Scheck <robert@fedoraproject.org> - 0.98.7-1
 - Upgrade to 0.98.7 and updated daily.cvd (#1217014)
 
 * Tue Mar 10 2015 Adam Jackson <ajax@redhat.com> 0.98.6-2
