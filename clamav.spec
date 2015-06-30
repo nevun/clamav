@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.98.7
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -488,7 +488,8 @@ function smartsubst() {
 
 
 install -d -m 0755 \
-	$RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d,tmpfiles.d} \
+	$RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d} \
+	$RPM_BUILD_ROOT%_tmpfilesdir \
 	$RPM_BUILD_ROOT%_var/{log,run} \
 	$RPM_BUILD_ROOT%milterstatedir \
 	$RPM_BUILD_ROOT%pkgdatadir/template \
@@ -557,7 +558,7 @@ sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
 install -D -p -m 0644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.conf
 install -D -p -m 0644 %SOURCE430 $RPM_BUILD_ROOT%_unitdir/clamd@scan.service
 
-cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamd.scan.conf
+cat << EOF > $RPM_BUILD_ROOT%_tmpfilesdir/clamd.scan.conf
 d %scanstatedir 0710 %scanuser %scanuser
 EOF
 
@@ -579,7 +580,7 @@ install -D -p -m 0755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 %endif
 install -D -p -m 0644 %SOURCE330 $RPM_BUILD_ROOT%_unitdir/clamav-milter.service
 
-cat << EOF > $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d/clamav-milter.conf
+cat << EOF > $RPM_BUILD_ROOT%_tmpfilesdir/clamav-milter.conf
 d %milterstatedir 0710 %milteruser %milteruser
 EOF
 
@@ -590,7 +591,7 @@ touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.{socket,pid},%milterlog}
 %{!?with_systemd:  rm -rf $RPM_BUILD_ROOT%_unitdir}
 %{!?with_sysv:     rm -f  $RPM_BUILD_ROOT%_initrddir/*}
 %{!?with_sysv:     rm -rf $RPM_BUILD_ROOT%_var/run/*/*.pid}
-%{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_sysconfdir/tmpfiles.d}
+%{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_tmpfilesdir}
 
 %if 0%{?with_sysv:1}
 # keep clamd-wrapper in every case because it might be needed by other
@@ -628,7 +629,7 @@ exit 0
 
 %{?with_tmpfiles:
 %post scanner
-%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamd.scan.conf || :}}
+%{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}}
 
 
 %post server-systemd
@@ -694,7 +695,7 @@ test -e %milterlog || {
 	chown root:%milteruser %milterlog
 	! test -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
-%{?with_systemd:/bin/systemd-tmpfiles --create %_sysconfdir/tmpfiles.d/clamav-milter.conf || :}
+%{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :}
 
 
 %triggerin milter -- %name-milter < 0.97.3-1704
@@ -827,7 +828,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %ghost %scanstatedir/clamd.sock
 
 %if 0%{?with_tmpfiles:1}
-  %_sysconfdir/tmpfiles.d/clamd.scan.conf
+  %_tmpfilesdir/clamd.scan.conf
   %ghost %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
 %else
   %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
@@ -863,7 +864,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %ghost %milterstatedir/clamav-milter.socket
 
 %if 0%{?with_tmpfiles:1}
-  %_sysconfdir/tmpfiles.d/clamav-milter.conf
+  %_tmpfilesdir/clamav-milter.conf
   %ghost %dir %attr(0710,%milteruser,%milteruser) %milterstatedir
 %else
   %dir %attr(0710,%milteruser,%milteruser) %milterstatedir
@@ -890,6 +891,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Jun 30 2015 Robert Scheck <robert@fedoraproject.org> - 0.98.7-3
+- Move /etc/tmpfiles.d/ to /usr/lib/tmpfiles.d/ (#1126595)
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.98.7-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
