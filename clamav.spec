@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.99
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -110,7 +110,7 @@ The actual virus database for %{name}
 %package devel
 Summary: Header files, libraries and development documentation for %{name}
 Group: Development/Libraries
-Requires: clamav = %{version}-%{release}
+Requires: clamav = %{version}-%{release}, openssl-devel
 
 ### Fedora Extras introduced them differently :(
 Obsoletes: libclamav-static-devel <= %{version}-%{release}
@@ -397,6 +397,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sun Dec 06 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-2
+- Require openssl-devel for clamav-devel
+
 * Wed Dec 02 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-1
 - Upgrade to 0.99 and updated daily.cvd (#1287327)
 
