@@ -9,5 +9,17 @@ Type = simple
 ExecStart = /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --nofork=yes
 Restart = on-failure
 
+User=clamilt
+Group=clamilt
+
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_KILL
+
+ReadOnlyDirectories=/etc
+ReadOnlyDirectories=/usr
+ReadOnlyDirectories=/var/lib
+
 [Install]
 WantedBy = multi-user.target

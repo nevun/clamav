@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -117,6 +117,7 @@ Group:		Development/Libraries
 Source100:	clamd-gen
 Requires:	clamav-lib        = %version-%release
 Requires:	clamav-filesystem = %version-%release
+Requires:	openssl-devel
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -891,6 +892,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Dec 06 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-2
+- Require openssl-devel for clamav-devel
+- Change clamav-milter unit for upstream changes (#1287795)
+
 * Wed Dec 02 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-1
 - Upgrade to 0.99 and updated daily.cvd (#1287327)
 
