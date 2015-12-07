@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.99
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -32,7 +32,7 @@ Source12: http://db.local.clamav.net/daily-21123.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel, libxml2-devel
+BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel, libxml2-devel, pcre-devel
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
@@ -397,6 +397,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Mon Dec 07 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-3
+- Added missing build-time requirement to pcre-devel
+
 * Sun Dec 06 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-2
 - Require openssl-devel for clamav-devel
 
