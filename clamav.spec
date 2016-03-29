@@ -437,7 +437,7 @@ sed -ri \
 %build
 CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
 CXXFLAGS="$RPM_OPT_FLAGS -std=gnu++98"
-export LDFLAGS='-Wl,--as-needed'
+export LDFLAGS='%{?__global_ldflags} -Wl,--as-needed'
 # HACK: remove me...
 export FRESHCLAM_LIBS='-lz'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
@@ -894,6 +894,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %changelog
 * Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99-4
+- Link using %%{?__global_ldflags} for hardened builds (#1321173)
 - Build using -std=gnu++98 (#1307378, thanks to Yaakov Selkowitz)
 
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.99-3
