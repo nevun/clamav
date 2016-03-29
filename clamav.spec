@@ -4,8 +4,8 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.99
-Release: 3%{?dist}
+Version: 0.99.1
+Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -27,8 +27,8 @@ Source10: clamav-milter.sysconfig
 
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
-Source11: http://db.local.clamav.net/main-55.cvd
-Source12: http://db.local.clamav.net/daily-21123.cvd
+Source11: http://db.local.clamav.net/main-57.cvd
+Source12: http://db.local.clamav.net/daily-21478.cvd
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -397,6 +397,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99.1-1
+- Upgrade to 0.99.1 and updated main.cvd and daily.cvd (#1314115)
+
 * Mon Dec 07 2015 Robert Scheck <robert@fedoraproject.org> - 0.99-3
 - Added missing build-time requirement to pcre-devel
 
