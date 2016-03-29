@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -436,6 +436,7 @@ sed -ri \
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
+CXXFLAGS="$RPM_OPT_FLAGS -std=gnu++98"
 export LDFLAGS='-Wl,--as-needed'
 # HACK: remove me...
 export FRESHCLAM_LIBS='-lz'
@@ -892,6 +893,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99-4
+- Build using -std=gnu++98 (#1307378, thanks to Yaakov Selkowitz)
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.99-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
