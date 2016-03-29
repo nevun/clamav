@@ -8,8 +8,8 @@
 +#
 +# This option has been set to 'ForceInterpreter' in Fedora due to
 +# security concerns by default.  You might need to enable the
-+# 'clamd_use_jit' SELinux boolean after setting this option to the
-+# more efficient 'ForceJIT' value.
++# 'antivirus_use_jit' SELinux boolean after setting this option to
++# the more efficient 'ForceJIT' value.
 +#
 +# Default: ForceInterpreter
 +#ByteCodeMode ForceInterpreter

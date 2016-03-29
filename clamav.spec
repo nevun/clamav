@@ -57,8 +57,8 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.99
-Release:	4%{?dist}
+Version:	0.99.1
+Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -74,16 +74,17 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 %endif
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
-Source10:	http://db.local.clamav.net/main-55.cvd
-Source11:	http://db.local.clamav.net/daily-21123.cvd
+Source10:	http://db.local.clamav.net/main-57.cvd
+Source11:	http://db.local.clamav.net/daily-21478.cvd
 
 Patch24:	clamav-0.99-private.patch
 Patch26:	clamav-0.98.5-cliopts.patch
 Patch27:	clamav-0.98-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch29:	clamav-0.99-jitoff.patch
+Patch29:	clamav-0.99.1-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
+Patch31:	clamav-0.99.1-setsebool.patch
 BuildRoot:	%_tmppath/%name-%version-%release-root
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
@@ -410,6 +411,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
+%apply -n31 -p1 -b .setsebool
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -893,6 +895,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99.1-1
+- Upgrade to 0.99.1 and updated main.cvd and daily.cvd (#1314115)
+- Complain about antivirus_use_jit rather clamd_use_jit (#1295473)
+
 * Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99-4
 - Link using %%{?__global_ldflags} for hardened builds (#1321173)
 - Build using -std=gnu++98 (#1307378, thanks to Yaakov Selkowitz)
