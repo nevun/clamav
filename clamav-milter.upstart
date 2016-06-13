@@ -11,4 +11,4 @@
 stop  on runlevel [!345]
 
 respawn
-exec /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --nofork=yes
+exec /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --foreground=yes

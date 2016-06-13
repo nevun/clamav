@@ -6,7 +6,7 @@ Before = postfix.service
 
 [Service]
 Type = simple
-ExecStart = /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --nofork=yes
+ExecStart = /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --foreground=yes
 Restart = on-failure
 
 User=clamilt

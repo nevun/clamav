@@ -11,4 +11,4 @@
 stop  on runlevel [!345]
 
 respawn
-exec /usr/sbin/clamd -c /etc/clamd.d/scan.conf --nofork=yes
+exec /usr/sbin/clamd -c /etc/clamd.d/scan.conf --foreground=yes

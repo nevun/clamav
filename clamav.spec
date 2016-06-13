@@ -57,7 +57,7 @@ Requires(postun):	 /bin/systemctl\
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.99.1
+Version:	0.99.2
 Release:	1%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
@@ -75,10 +75,10 @@ Source0:	%name-%version%{?prerelease}-norar.tar.xz
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:	http://db.local.clamav.net/main-57.cvd
-Source11:	http://db.local.clamav.net/daily-21478.cvd
+Source11:	http://db.local.clamav.net/daily-21723.cvd
+%{?with_bytecode:Source12:	http://db.local.clamav.net/bytecode-278.cvd}
 
 Patch24:	clamav-0.99-private.patch
-Patch26:	clamav-0.98.5-cliopts.patch
 Patch27:	clamav-0.98-umask.patch
 # https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
 Patch29:	clamav-0.99.1-jitoff.patch
@@ -104,7 +104,7 @@ Provides:	group(%username) = 4
 # Prevent version mix
 Conflicts:	%name < %version-%release
 Conflicts:	%name > %version-%release
-Requires(pre):  shadow-utils
+Requires(pre):	shadow-utils
 %{?noarch}
 
 %package lib
@@ -123,8 +123,8 @@ Requires:	openssl-devel
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
 Group:		Applications/File
-Requires(pre):		clamav-filesystem = %version-%release
-Requires(postun):	clamav-filesystem = %version-%release
+Requires:	clamav-filesystem = %version-%release
+Requires:	clamav-filesystem = %version-%release
 Provides:		data(clamav) = full
 Conflicts:		data(clamav) < full
 Conflicts:		data(clamav) > full
@@ -147,8 +147,7 @@ Source202:	clamav-update.crond
 Source203:	clamav-update.logrotate
 Requires:	clamav-filesystem = %version-%release
 Requires:	crontabs
-Requires(pre):		/etc/cron.d
-Requires(postun):	/etc/cron.d
+Requires:	/etc/cron.d
 Requires(post):		%__chown %__chmod
 Requires(post):		group(%username)
 
@@ -171,8 +170,7 @@ Summary:	SysV initscripts for clamav server
 Group:		System Environment/Daemons
 Provides:	init(clamav-server) = sysv
 Requires:	clamav-server = %version-%release
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir
+Requires:	%_initrddir
 Provides:	clamav-server-sysv = %version-%release
 Obsoletes:	clamav-server-sysv < %version-%release
 Source520:	clamd-wrapper
@@ -206,8 +204,8 @@ Group:		System Environment/Daemons
 Provides:	init(clamav-scanner) = sysv
 Requires:	clamav-server-sysvinit = %version-%release
 Requires:	clamav-scanner = %version-%release
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir initscripts
+Requires:	%_initrddir
+Requires(postun):	initscripts
 Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
 %{?noarch}
@@ -220,7 +218,7 @@ Group:		System Environment/Daemons
 Source410:	clamd.scan.upstart
 Provides:	init(clamav-scanner) = upstart
 Requires:	clamav-scanner = %version-%release
-Requires(pre):		/etc/init
+Requires:	/etc/init
 Requires(post):		/usr/bin/killall
 Requires(preun):	/sbin/initctl
 %{?noarch}
@@ -244,7 +242,7 @@ BuildRequires:	sendmail-devel
 Provides:	user(%milteruser)  = 5
 Provides:	group(%milteruser) = 5
 Requires(post):	coreutils
-Requires(pre):  shadow-utils
+Requires(pre):	shadow-utils
 
 Provides:	milter(clamav) = sendmail
 Provides:	milter(clamav) = postfix
@@ -264,8 +262,8 @@ Provides:	init(clamav-milter) = sysvinit
 Requires:	clamav-milter = %version-%release
 Requires(post):		user(%milteruser) clamav-milter
 Requires(preun):	user(%milteruser) clamav-milter
-Requires(pre):		%_initrddir
-Requires(postun):	%_initrddir initscripts
+Requires:		%_initrddir
+Requires(postun):	initscripts
 Requires(post):		chkconfig
 Requires(preun):	chkconfig initscripts
 Provides:		clamav-milter-sysv = %version-%release
@@ -280,7 +278,7 @@ Group:		System Environment/Daemons
 Source310:	clamav-milter.upstart
 Provides:	init(clamav-milter) = upstart
 Requires:	clamav-milter = %version-%release
-Requires(pre):		/etc/init
+Requires:	/etc/init
 Requires(post):		/usr/bin/killall
 Requires(preun):	/sbin/initctl
 %{?noarch}
@@ -407,7 +405,6 @@ The systemd initscripts for clamav-scanner.
 %setup -q -n %{name}-%{version}%{?prerelease}
 
 %apply -n24 -p1 -b .private
-%apply -n26 -p1 -b .cliopts
 %apply -n27 -p1 -b .umask
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
@@ -505,11 +502,13 @@ rm -f	$RPM_BUILD_ROOT%_sysconfdir/clamd.conf.sample \
 	$RPM_BUILD_ROOT%_libdir/*.la
 
 
-touch $RPM_BUILD_ROOT%homedir/daily.cld
-touch $RPM_BUILD_ROOT%homedir/main.cld
+%{?with_bytecode:touch $RPM_BUILD_ROOT%homedir/bytecode.cld}
+touch $RPM_BUILD_ROOT%homedir/{daily,main}.cld
+touch $RPM_BUILD_ROOT%homedir/mirrors.dat
 
 install -D -m 0644 -p %SOURCE10		$RPM_BUILD_ROOT%homedir/main.cvd
 install -D -m 0644 -p %SOURCE11		$RPM_BUILD_ROOT%homedir/daily.cvd
+%{?with_bytecode:install -D -m 0644 -p %SOURCE12		$RPM_BUILD_ROOT%homedir/bytecode.cvd}
 
 ## prepare the server-files
 install -D -m 0644 -p %SOURCE2		_doc_server/clamd.sysconfig
@@ -596,6 +595,11 @@ touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.{socket,pid},%milterlog}
 %{!?with_sysv:     rm -f  $RPM_BUILD_ROOT%_initrddir/*}
 %{!?with_sysv:     rm -rf $RPM_BUILD_ROOT%_var/run/*/*.pid}
 %{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_tmpfilesdir}
+
+%if 0%{?with_systemd:1}
+# TODO: Evaluate using upstream's unit files
+rm $RPM_BUILD_ROOT%_unitdir/clamav-{daemon,freshclam}.*
+%endif
 
 %if 0%{?with_sysv:1}
 # keep clamd-wrapper in every case because it might be needed by other
@@ -792,6 +796,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
 %ghost %attr(0664,%username,%username) %homedir/*.cld
+%ghost %attr(0664,%username,%username) %homedir/mirrors.dat
 
 
 ## -----------------------
@@ -881,6 +886,14 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Mon Jun 13 2016 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-1
+- Update to 0.99.2
+- Drop cliopts patch fixed upstream, use upstream's "--forground" option name
+- Fix main.cvd (fedora #1325482, epel #1325717)
+- Own bytecode.cld (#1176252) and mirrors.dat, ship bytecode.cvd
+- Update daily.cvd
+- Fixup Requires(pre) usage (#1319151)
+
 * Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99.1-1
 - Upgrade to 0.99.1 and updated main.cvd and daily.cvd (#1314115)
 - Complain about antivirus_use_jit rather clamd_use_jit (#1295473)
