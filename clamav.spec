@@ -4,7 +4,7 @@
 
 Summary: Anti-virus software
 Name: clamav
-Version: 0.99.1
+Version: 0.99.2
 Release: 1%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -28,12 +28,16 @@ Source10: clamav-milter.sysconfig
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source11: http://db.local.clamav.net/main-57.cvd
-Source12: http://db.local.clamav.net/daily-21478.cvd
+Source12: http://db.local.clamav.net/daily-21723.cvd
+Source13: http://db.local.clamav.net/bytecode-278.cvd
+
+Patch31:       clamav-0.99.1-setsebool.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, zlib-devel, gmp-devel, curl-devel, xz, ncurses-devel, openssl-devel, libxml2-devel, pcre-devel
 %{!?_without_milter:BuildRequires: sendmail-devel >= 8.12}
+
 Requires: clamav-db = %{version}-%{release}
 Requires(pre): shadow-utils
 
@@ -126,6 +130,7 @@ you will need to install %{name}-devel.
 # Handle that rpmbuild in RHEL < 6 doesn't handle xz archives automatically.
 %setup -q -T -c
 xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
+%patch31 -p1 -b .setsebool
 
 %{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' configure
 
@@ -199,7 +204,7 @@ xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 	--with-group="clam" \
 	--with-libcurl=%{_prefix} \
 	--with-user="clam" \
-	--disable-llvm 
+#	--disable-llvm 
 
 make %{?_smp_mflags}
 
@@ -242,6 +247,11 @@ install -d -m0755 %{buildroot}%{_sysconfdir}/clamd.d/
 
 install -Dp -m0644 %{SOURCE11} %{buildroot}%{_localstatedir}/lib/clamav/main.cvd
 install -Dp -m0644 %{SOURCE12} %{buildroot}%{_localstatedir}/lib/clamav/daily.cvd
+install -Dp -m0644 %{SOURCE13} %{buildroot}%{_localstatedir}/lib/clamav/bytecode.cvd
+touch $RPM_BUILD_ROOT%{_localstatedir}/lib/clamav/bytecode.cld
+touch $RPM_BUILD_ROOT%{_localstatedir}/lib/clamav/{daily,main}.cld
+touch $RPM_BUILD_ROOT%{_localstatedir}/lib/clamav/mirrors.dat
+
 
 # Clean up for later usage in documentation
 for conf in etc/*.sample; do mv ${conf} ${conf%%.sample}; done
@@ -387,6 +397,9 @@ rm -rf %{buildroot}
 %dir %{_localstatedir}/log/clamav/
 %ghost %{_localstatedir}/log/clamav/freshclam.log
 
+%ghost %attr(0664,%username,%username) %{_localstatedir}/lib/clamav/*.cld
+%ghost %attr(0664,%username,%username) %{_localstatedir}/lib/clamav/mirrors.dat
+
 %files devel
 %defattr(-, root, root, 0755)
 %{_bindir}/clamav-config
@@ -397,6 +410,15 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Mon Jun 13 2016 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-1
+- Update to 0.99.2
+- Enable llvm
+- Drop cliopts patch fixed upstream, use upstream's "--forground" option name
+- Fix main.cvd (fedora #1325482, epel #1325717)
+- Own bytecode.cld (#1176252) and mirrors.dat, ship bytecode.cvd
+- Update daily.cvd
+- Fixup Requires(pre) usage (#1319151)
+
 * Tue Mar 29 2016 Robert Scheck <robert@fedoraproject.org> - 0.99.1-1
 - Upgrade to 0.99.1 and updated main.cvd and daily.cvd (#1314115)
 
