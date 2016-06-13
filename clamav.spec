@@ -859,7 +859,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 ## -----------------------
 
 %files milter
-%defattr(-,root,root,-)
 %doc clamav-milter/README.fedora
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
@@ -876,20 +875,17 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %if 0%{?with_sysv:1}
 %files milter-sysvinit
-  %defattr(-,root,root,-)
   %config %_initrddir/clamav-milter
   %ghost %milterstatedir/clamav-milter.pid
 %endif
 
 %if 0%{?with_upstart:1}
 %files milter-upstart
-  %defattr(-,root,root,-)
   %config(noreplace) %_sysconfdir/init/clamav-milter*
 %endif
 
 %if 0%{?with_systemd:1}
 %files milter-systemd
-  %defattr(-,root,root,-)
   %_unitdir/clamav-milter.service
 %endif
 
