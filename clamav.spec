@@ -735,7 +735,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %files
-%defattr(-,root,root,-)
 %doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS README UPGRADE
 %doc docs/*.pdf
 %_bindir/*
@@ -747,13 +746,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 ## -----------------------
 
 %files lib
-%defattr(-,root,root,-)
 %_libdir/*.so.*
 
 ## -----------------------
 
 %files devel
-%defattr(-,root,root,-)
 %_includedir/*
 %_libdir/*.so
 %pkgdatadir/template
@@ -785,7 +782,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 ## -----------------------
 
 %files update
-%defattr(-,root,root,-)
 %_bindir/freshclam
 %_mandir/*/freshclam*
 %pkgdatadir/freshclam-sleep
@@ -801,7 +797,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 ## -----------------------
 
 %files server
-%defattr(-,root,root,-)
 %doc _doc_server/*
 %_mandir/man[58]/clamd*
 %_sbindir/*
@@ -813,21 +808,18 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %if 0%{?with_sysv:1}
 %files server-sysvinit
-%defattr(-,root,root,-)
 %_initrddir/clamd-wrapper
 %pkgdatadir/clamd-wrapper
 %endif
 
 %if 0%{?with_systemd:1}
 %files server-systemd
- %defattr(-,root,root,-)
  %_unitdir/clamd@.service
 %endif
 
 ## -----------------------
 
 %files scanner
-%defattr(-,root,root,-)
 %config(noreplace) %_sysconfdir/clamd.d/scan.conf
 %ghost %scanstatedir/clamd.sock
 
@@ -846,13 +838,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %if 0%{?with_upstart:1}
 %files scanner-upstart
-  %defattr(-,root,root,-)
   %config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
 
 %if 0%{?with_systemd:1}
 %files scanner-systemd
-  %defattr(-,root,root,-)
   %_unitdir/clamd@scan.service
 %endif
 
