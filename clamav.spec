@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -886,6 +886,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Oct 18 2016 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-2
+- Also send logrotate script stdout to /dev/null (bug #1376815)
+
 * Mon Jun 13 2016 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-1
 - Update to 0.99.2
 - Drop cliopts patch fixed upstream, use upstream's "--forground" option name

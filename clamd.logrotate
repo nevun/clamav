@@ -4,6 +4,6 @@
 	missingok
 
 	postrotate
-		killall -HUP clamd.<SERVICE> 2>/dev/null || :
+		killall -HUP clamd.<SERVICE> >/dev/null 2>&1 || :
 	endscript
 }
