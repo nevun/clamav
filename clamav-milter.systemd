@@ -15,7 +15,6 @@ Group=clamilt
 
 PrivateTmp=yes
 PrivateDevices=yes
-NoNewPrivileges=yes
 CapabilityBoundingSet=CAP_KILL
 
 ReadOnlyDirectories=/etc
