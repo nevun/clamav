@@ -858,6 +858,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %doc clamav-milter/README.fedora
 %_sbindir/*milter*
 %_mandir/man8/clamav-milter*
+%dir %_sysconfdir/mail
 %config(noreplace) %_sysconfdir/mail/clamav-milter.conf
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 %ghost %milterstatedir/clamav-milter.socket
@@ -890,6 +891,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-7
 - Fix clamav-milter startup under selinux (bug #1434176)
 - Move /etc/clam.d to clamav-filesystem (bug #1275630)
+- Make clamav-milter own /etc/mail (bug #1175473)
 
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-6
 - Start clamav-milter after clamd@scan (bug #1356507))
