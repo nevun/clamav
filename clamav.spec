@@ -768,6 +768,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %files filesystem
 %attr(-,%username,%username) %dir %homedir
 %attr(-,root,root)           %dir %pkgdatadir
+%dir %_sysconfdir/clamd.d
 
 ## -----------------------
 
@@ -806,7 +807,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %doc _doc_server/*
 %_mandir/man[58]/clamd*
 %_sbindir/*
-%dir %_sysconfdir/clamd.d
 
 %exclude %_sbindir/*milter*
 %exclude %_mandir/man8/clamav-milter*
@@ -889,6 +889,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-7
 - Fix clamav-milter startup under selinux (bug #1434176)
+- Move /etc/clam.d to clamav-filesystem (bug #1275630)
 
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-6
 - Start clamav-milter after clamd@scan (bug #1356507))
