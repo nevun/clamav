@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	4%{?dist}
+Release:	5%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -426,6 +426,7 @@ sed -ri \
     etc/clamd.conf.sample
 
 sed -ri \
+    -e 's!^Example!#Example!' \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
     -e 's!^#?(LogSyslog).*!\1 yes!g' \
     -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf.sample
@@ -886,6 +887,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-5
+- Allow freshclam to run automatically on install (bug #1408649)
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.99.2-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

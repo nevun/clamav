@@ -16,9 +16,3 @@
 ##                         gives out a warning
 ## 'disabled'       ...  disables the automatic freshclam silently
 # FRESHCLAM_DELAY=
-
-
-### !!!!! REMOVE ME !!!!!!
-### REMOVE ME: By default, the freshclam update is disabled to avoid
-### REMOVE ME: network access without prior activation
-FRESHCLAM_DELAY=disabled-warn	# REMOVE ME
