@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	5%{?dist}
+Release:	6%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -887,6 +887,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-6
+- Start clamav-milter after clamd@scan (bug #1356507))
+
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-5
 - Allow freshclam to run automatically on install (bug #1408649)
 
