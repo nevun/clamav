@@ -23,7 +23,7 @@
 %global have_ocaml	0
 %endif
 
-%global username	clamupdate
+%global updateuser	clamupdate
 %global homedir		%_var/lib/clamav
 %global freshclamlog	%_var/log/freshclam.log
 %global milteruser	clamilt
@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	7%{?dist}
+Release:	8%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -99,8 +99,9 @@ BuildRequires:	%_includedir/tcpd.h
 %package filesystem
 Summary:	Filesystem structure for clamav
 Group:		Applications/File
-Provides:	user(%username)  = 4
-Provides:	group(%username) = 4
+Provides:	user(%updateuser)  = 4
+Provides:	group(%updateuser) = 4
+Provides:	group(virusgroup)
 # Prevent version mix
 Conflicts:	%name < %version-%release
 Conflicts:	%name > %version-%release
@@ -149,7 +150,7 @@ Requires:	clamav-filesystem = %version-%release
 Requires:	crontabs
 Requires:	/etc/cron.d
 Requires(post):		%__chown %__chmod
-Requires(post):		group(%username)
+Requires(post):		group(%updateuser)
 
 %package server
 Summary:	Clam Antivirus scanner server
@@ -194,6 +195,8 @@ Requires:	init(clamav-scanner)
 Provides:	user(%scanuser)  = 49
 Provides:	group(%scanuser) = 49
 Requires:	clamav-server = %version-%release
+Requires(pre):	shadow-utils
+Requires(pre):	group(virusgroup)
 %{?noarch}
 
 # Remove me after EOL of RHEL5
@@ -243,6 +246,7 @@ Provides:	user(%milteruser)  = 5
 Provides:	group(%milteruser) = 5
 Requires(post):	coreutils
 Requires(pre):	shadow-utils
+Requires(pre):	group(virusgroup)
 
 Provides:	milter(clamav) = sendmail
 Provides:	milter(clamav) = postfix
@@ -429,7 +433,7 @@ sed -ri \
     -e 's!^Example!#Example!' \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
     -e 's!^#?(LogSyslog).*!\1 yes!g' \
-    -e 's!(DatabaseOwner *)clamav$!\1%username!g' etc/freshclam.conf.sample
+    -e 's!(DatabaseOwner *)clamav$!\1%updateuser!g' etc/freshclam.conf.sample
 
 
 ## ------------------------------------------------------------
@@ -447,8 +451,8 @@ export have_cv_ipv6=yes
 	--disable-rpath \
 	--disable-silent-rules \
 	--disable-clamav \
-	--with-user=%username \
-	--with-group=%username \
+	--with-user=%updateuser \
+	--with-group=%updateuser \
 	--with-libcurl=%{_prefix} \
 	--with-dbdir=/var/lib/clamav \
 	--enable-milter \
@@ -542,7 +546,7 @@ install -D -p -m 0644 %SOURCE201	$RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202	$RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 mv -f $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
 
-smartsubst 's!webmaster,clamav!webmaster,%username!g;
+smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
 	    s!/usr/share/clamav!%pkgdatadir!g;
 	    s!/usr/bin!%_bindir!g;
             s!/usr/sbin!%_sbindir!g;' \
@@ -575,6 +579,7 @@ sed -r \
     -e 's!^#?(AllowSupplementaryGroups|LogSyslog) .*!\1 yes!g' \
     -e 's! /tmp/clamav-milter.socket! %milterstatedir/clamav-milter.socket!g' \
     -e 's! /var/run/clamav-milter.pid! %milterstatedir/clamav-milter.pid!g' \
+    -e 's! /var/run/clamd/clamd.socket! %scanstatedir/clamd.sock!g' \
     -e 's! /tmp/clamav-milter.log! %milterlog!g' \
     etc/clamav-milter.conf.sample > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
 
@@ -621,10 +626,12 @@ rm -rf "$RPM_BUILD_ROOT"
 ## ------------------------------------------------------------
 
 %pre filesystem
-getent group %{username} >/dev/null || groupadd -r %{username}
-getent passwd %{username} >/dev/null || \
-    useradd -r -g %{username} -d %{homedir} -s /sbin/nologin \
-    -c "Clamav database update user" %{username}
+getent group %{updateuser} >/dev/null || groupadd -r %{updateuser}
+getent passwd %{updateuser} >/dev/null || \
+    useradd -r -g %{updateuser} -d %{homedir} -s /sbin/nologin \
+    -c "Clamav database update user" %{updateuser}
+getent group virusgroup >/dev/null || groupadd -r virusgroup
+usermod %{updateuser} -a -G virusgroup
 exit 0
 
 
@@ -633,6 +640,7 @@ getent group %{scanuser} >/dev/null || groupadd -r %{scanuser}
 getent passwd %{scanuser} >/dev/null || \
     useradd -r -g %{scanuser} -d / -s /sbin/nologin \
     -c "Clamav scanner user" %{scanuser}
+usermod %{scanuser} -a -G virusgroup
 exit 0
 
 
@@ -675,7 +683,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 test -e %freshclamlog || {
 	touch %freshclamlog
 	%__chmod 0664 %freshclamlog
-	%__chown root:%username %freshclamlog
+	%__chown root:%updateuser %freshclamlog
 	! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
@@ -694,6 +702,7 @@ getent group %{milteruser} >/dev/null || groupadd -r %{milteruser}
 getent passwd %{milteruser} >/dev/null || \
     useradd -r -g %{milteruser} -d %{milterstatedir} -s /sbin/nologin \
     -c "Clamav Milter user" %{milteruser}
+usermod %{milteruser} -a -G virusgroup
 exit 0
 
 
@@ -766,14 +775,14 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 ## -----------------------
 
 %files filesystem
-%attr(-,%username,%username) %dir %homedir
+%attr(-,%updateuser,%updateuser) %dir %homedir
 %attr(-,root,root)           %dir %pkgdatadir
 %dir %_sysconfdir/clamd.d
 
 ## -----------------------
 
 %files data
-%defattr(-,%username,%username,-)
+%defattr(-,%updateuser,%updateuser,-)
 # use %%config to keep files which were updated by 'freshclam'
 # already. Without this tag, they would be overridden with older
 # versions whenever a new -data package is installed.
@@ -781,8 +790,8 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %files data-empty
-%defattr(-,%username,%username,-)
-%ghost %attr(0664,%username,%username) %homedir/*.cvd
+%defattr(-,%updateuser,%updateuser,-)
+%ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cvd
 
 
 ## -----------------------
@@ -796,9 +805,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %config(noreplace) %_sysconfdir/cron.d/clamav-update
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 
-%ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
-%ghost %attr(0664,%username,%username) %homedir/*.cld
-%ghost %attr(0664,%username,%username) %homedir/mirrors.dat
+%ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
+%ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
+%ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
 
 ## -----------------------
@@ -888,6 +897,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Mon Mar 27 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-8
+- Create virusgroup group and add the various clam* users to it
+
 * Sun Mar 26 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-7
 - Fix clamav-milter startup under selinux (bug #1434176)
 - Move /etc/clam.d to clamav-filesystem (bug #1275630)
