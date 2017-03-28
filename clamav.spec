@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.99.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -262,9 +262,9 @@ for conf in etc/*.sample; do mv ${conf} ${conf%%.sample}; done
 ZONES="/usr/share/zoneinfo/zone.tab"
 CONFIG="/etc/sysconfig/clock"
 
-if [ -r "$CONFIG" -a -r "$ZONES" ]; then
+if [ -r "$CONFIG" -a -r "$ZONES" -a -n "$ZONE" ]; then
 	source "$CONFIG"
-	export CODE="$(grep -E "\b$ZONE\b" "$ZONES" | head -1 | cut -f1 | tr [A-Z] [a-z])"
+	export CODE="$(grep -E "\b$ZONE\b" "$ZONES" | grep -v ^# | head -1 | cut -f1 | tr [A-Z] [a-z])"
 fi
 
 if [ -z "$CODE" ]; then
@@ -410,6 +410,10 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Tue Mar 28 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-2
+- Ensure that missing or invalid timezone configuration does not
+  mangle /etc/freshclam.conf in %%post (#1154756)
+
 * Mon Jun 13 2016 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-1
 - Update to 0.99.2
 - Enable llvm
