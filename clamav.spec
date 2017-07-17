@@ -58,7 +58,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	8%{?dist}
+Release:	9%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -85,9 +85,9 @@ Patch29:	clamav-0.99.1-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:	llvm-glibc.patch
 Patch31:	clamav-0.99.1-setsebool.patch
-BuildRoot:	%_tmppath/%name-%version-%release-root
-Requires:	clamav-lib = %version-%release
-Requires:	data(clamav)
+Patch32:	fa15aa98c7d5e1d8fc22e818ebd089f2e53ebe1d.diff
+
+BuildRequires:	autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:	ncurses-devel openssl-devel libxml2-devel
 BuildRequires:	%_includedir/tcpd.h
@@ -95,6 +95,9 @@ BuildRequires:	%_includedir/tcpd.h
 %if %{have_ocaml}
 %{?with_bytecode:BuildRequires:	ocaml}
 %endif
+
+Requires:	clamav-lib = %version-%release
+Requires:	data(clamav)
 
 %package filesystem
 Summary:	Filesystem structure for clamav
@@ -413,6 +416,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
 %apply -n31 -p1 -b .setsebool
+%apply -n32 -p1 -b .openssl_1.1.0
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -446,6 +450,8 @@ export LDFLAGS='%{?__global_ldflags} -Wl,--as-needed'
 export FRESHCLAM_LIBS='-lz'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
+
+autoreconf -ivf
 %configure \
 	--disable-static \
 	--disable-rpath \
@@ -457,6 +463,7 @@ export have_cv_ipv6=yes
 	--with-dbdir=/var/lib/clamav \
 	--enable-milter \
 	--enable-clamdtop \
+    --disable-zlib-vcheck \
 	%{!?with_bytecode:--disable-llvm} \
 	%{!?with_unrar:--disable-unrar}
 
@@ -617,11 +624,6 @@ ln -s %pkgdatadir/clamd-wrapper		$RPM_BUILD_ROOT%_initrddir/clamd-wrapper
 
 %check
 make check
-
-## ------------------------------------------------------------
-
-%clean
-rm -rf "$RPM_BUILD_ROOT"
 
 ## ------------------------------------------------------------
 
@@ -897,6 +899,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Mon Jul 17 2017 Sérgio Basto <sergio@serjux.com> - 0.99.2-9
+- Add patch for openssl-1.1
+
 * Mon Mar 27 2017 Orion Poplawski <orion@cora.nwra.com> - 0.99.2-8
 - Create virusgroup group and add the various clam* users to it
 
