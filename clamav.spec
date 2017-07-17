@@ -41,6 +41,7 @@
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
 %{!?systemd_reqs:%global systemd_reqs \
+BuildRequires: systemd\
 Requires(post):		 /bin/systemctl\
 Requires(preun):	 /bin/systemctl\
 Requires(postun):	 /bin/systemctl\
