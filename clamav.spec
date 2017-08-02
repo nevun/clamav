@@ -59,7 +59,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	10%{?dist}
+Release:	11%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -900,6 +900,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.99.2-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
 * Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.99.2-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
