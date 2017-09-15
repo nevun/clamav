@@ -68,8 +68,7 @@ op_nc() {
 		echo "unsupported socket name '$i'" >&2
 		continue
 	esac
-
-	resp=`printf 'zRELOAD\0' | timeout ${K_OPT:+-k $TIMEOUT_KILL} $TIMEOUT_TERM "${CMD[@]}"`
+	printf 'zRELOAD\0' |  timeout ${K_OPT:+-k $TIMEOUT_KILL} $TIMEOUT_TERM "${CMD[@]}" | { read resp
 	case $resp in
 	  (RELOADING)
 		;;
@@ -78,6 +77,7 @@ op_nc() {
 		let ++fail
 		;;
 	esac
+	}
     done
     cd - &>/dev/null
 }
