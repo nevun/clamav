@@ -59,7 +59,7 @@ Requires(postun):	 /bin/systemctl\
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:	12%{?dist}
+Release:	13%{?dist}
 License:	%{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:		Applications/File
 URL:		http://www.clamav.net
@@ -87,6 +87,7 @@ Patch29:	clamav-0.99.1-jitoff.patch
 Patch30:	llvm-glibc.patch
 Patch31:	clamav-0.99.1-setsebool.patch
 Patch32:	fa15aa98c7d5e1d8fc22e818ebd089f2e53ebe1d.diff
+Patch33:	clamav-0.99.2-temp-cleanup.patch
 
 BuildRequires:	autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:	zlib-devel bzip2-devel gmp-devel curl-devel
@@ -418,6 +419,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n30 -p1
 %apply -n31 -p1 -b .setsebool
 %apply -n32 -p1 -b .openssl_1.1.0
+%apply -n33 -p1 -b .temp-cleanup
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -900,6 +902,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Sun Nov 26 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-13
+- Backported upstream patch to unbreak e2guardian vs. temp files
+
 * Fri Sep 15 2017 Sérgio Basto <sergio@serjux.com> - 0.99.2-12
 - Try fix rhbz #1473642
 
