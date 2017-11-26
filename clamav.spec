@@ -5,7 +5,7 @@
 Summary: Anti-virus software
 Name: clamav
 Version: 0.99.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: Applications/System
 URL: http://www.clamav.net/
@@ -32,6 +32,7 @@ Source12: http://db.local.clamav.net/daily-21723.cvd
 Source13: http://db.local.clamav.net/bytecode-278.cvd
 
 Patch31:       clamav-0.99.1-setsebool.patch
+Patch32: clamav-0.99.2-temp-cleanup.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -131,6 +132,7 @@ you will need to install %{name}-devel.
 %setup -q -T -c
 xz -dc %{SOURCE0} | (cd .. ; tar xvvf -)
 %patch31 -p1 -b .setsebool
+%patch32 -p1 -b .temp-cleanup
 
 %{__perl} -pi.orig -e 's|/lib\b|/%{_lib}|g;' configure
 
@@ -410,6 +412,9 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/libclamav.la
 
 %changelog
+* Sun Nov 26 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-3
+- Backported upstream patch to unbreak e2guardian vs. temp files
+
 * Tue Mar 28 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-2
 - Ensure that missing or invalid timezone configuration does not
   mangle /etc/freshclam.conf in %%post (#1154756)
