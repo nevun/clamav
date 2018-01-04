@@ -59,7 +59,7 @@ Requires(postun):    /bin/systemctl\
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.2
-Release:    13%{?dist}
+Release:    14%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -81,8 +81,6 @@ Source11:   http://db.local.clamav.net/daily-21723.cvd
 
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.98-umask.patch
-# https://bugzilla.redhat.com/attachment.cgi?id=403775&action=diff&context=patch&collapsed=&headers=1&format=raw
-Patch29:    clamav-0.99.1-jitoff.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:    llvm-glibc.patch
 Patch31:    clamav-0.99.1-setsebool.patch
@@ -417,7 +415,6 @@ The systemd initscripts for clamav-scanner.
 
 %apply -n24 -p1 -b .private
 %apply -n27 -p1 -b .umask
-%apply -n29 -p1 -b .jitoff
 %apply -n30 -p1
 %apply -n31 -p1 -b .setsebool
 %apply -n32 -p1 -b .openssl_1.1.0
@@ -904,6 +901,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu Jan 04 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-14
+- Fix rhbz #1530678
+- Fix rhbz #1518016
+
 * Sun Nov 26 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-13
 - Backported upstream patch to unbreak e2guardian vs. temp files
 
