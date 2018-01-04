@@ -97,6 +97,8 @@ BuildRequires:  %_includedir/tcpd.h
 %if %{have_ocaml}
 %{?with_bytecode:BuildRequires: ocaml}
 %endif
+# nc reuqired for tests
+BuildRequires: nc
 
 Requires:   clamav-lib = %version-%release
 Requires:   data(clamav)
@@ -168,7 +170,7 @@ Source8:    clamav-notify-servers
 Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
-Requires:   nc coreutils
+Requires:   coreutils
 
 %if 0%{?with_sysv:1}
 %package server-sysvinit
