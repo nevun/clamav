@@ -1,18 +1,18 @@
 #global prerelease  rc1
 
 ## Fedora Extras specific customization below...
-%bcond_without      fedora
+%bcond_without  fedora
 %bcond_with     upstart
-%bcond_without      systemd
+%bcond_without  systemd
 %if 0%{?fedora} < 23
-%bcond_without      sysv
+%bcond_without  sysv
 %else
 %bcond_with     sysv
 %endif
-%bcond_without      tmpfiles
+%bcond_without  tmpfiles
 %bcond_with     unrar
-%bcond_without      noarch
-%bcond_without      bytecode
+%bcond_without  noarch
+%bcond_without  bytecode
 ##
 
 %global _hardened_build 1
@@ -63,7 +63,7 @@ Release:    14%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
-%if 0%{?with_unrar:1}
+%if %{with unrar}
 Source0:    http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz
 Source999:  http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz.sig
 %else
@@ -170,7 +170,7 @@ Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %package server-sysvinit
 Summary:    SysV initscripts for clamav server
 Group:      System Environment/Daemons
@@ -205,7 +205,7 @@ Requires(pre):  group(virusgroup)
 %{?noarch}
 
 # Remove me after EOL of RHEL5
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %package scanner-sysvinit
 Summary:    SysV initscripts for clamav scanner daemon
 Group:      System Environment/Daemons
@@ -262,7 +262,7 @@ Provides:   clamav-milter-sendmail = %version-%release
 Obsoletes:  clamav-milter-sendmail < %version-%release
 
 # Remove me after EOL of RHEL5
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %package milter-sysvinit
 Summary:    SysV initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
@@ -369,7 +369,7 @@ of this daemon should be started for each service requiring it.
 See the README file how this can be done with a minimum of effort.
 
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %description server-sysvinit
 SysV initscripts template for the clamav server
 %endif
@@ -382,7 +382,7 @@ Systemd template for the clamav server
 This package contains a generic system wide clamd service which is
 e.g. used by the clamav-milter package.
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %description scanner-sysvinit
 The SysV initscripts for clamav-scanner.
 %endif
@@ -397,7 +397,7 @@ The systemd initscripts for clamav-scanner.
 %description milter
 This package contains files which are needed to run the clamav-milter.
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %description milter-sysvinit
 The SysV initscripts for clamav-milter.
 %endif
@@ -479,14 +479,14 @@ sed -i \
     libtool
 
 
-make %{?_smp_mflags}
+%make_build
 
 
 ## ------------------------------------------------------------
 
 %install
 rm -rf "$RPM_BUILD_ROOT" _doc*
-make DESTDIR="$RPM_BUILD_ROOT" install
+%make_install
 
 function smartsubst() {
     local tmp
@@ -527,19 +527,19 @@ install -D -m 0644 -p %SOURCE11     $RPM_BUILD_ROOT%homedir/daily.cvd
 ## prepare the server-files
 install -D -m 0644 -p %SOURCE2      _doc_server/clamd.sysconfig
 install -D -m 0644 -p %SOURCE3      _doc_server/clamd.logrotate
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 install -D -m 0755 -p %SOURCE7      _doc_server/clamd.init
 %endif
 install -D -m 0644 -p %SOURCE5      _doc_server/README
 install -D -m 0644 -p etc/clamd.conf.sample _doc_server/clamd.conf
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 install -m 0644 -p %SOURCE520       $RPM_BUILD_ROOT%pkgdatadir/
 %endif
 install -m 0755 -p %SOURCE100       $RPM_BUILD_ROOT%pkgdatadir/
 cp -pa _doc_server/*            $RPM_BUILD_ROOT%pkgdatadir/template
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 smartsubst 's!/usr/share/clamav!%pkgdatadir!g' $RPM_BUILD_ROOT%pkgdatadir/clamd-wrapper
 %endif
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
@@ -567,7 +567,7 @@ smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
 sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
     etc/clamd.conf.sample > $RPM_BUILD_ROOT%_sysconfdir/clamd.d/scan.conf
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 sed -e 's!<SERVICE>!scan!g;' $RPM_BUILD_ROOT%pkgdatadir/template/clamd.init \
     > $RPM_BUILD_ROOT%_initrddir/clamd.scan
 %endif
@@ -593,7 +593,7 @@ sed -r \
     etc/clamav-milter.conf.sample > $RPM_BUILD_ROOT%_sysconfdir/mail/clamav-milter.conf
 
 install -D -p -m 0644 %SOURCE310 $RPM_BUILD_ROOT%_sysconfdir/init/clamav-milter.conf
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 install -D -p -m 0755 %SOURCE320 $RPM_BUILD_ROOT%_initrddir/clamav-milter
 %endif
 install -D -p -m 0644 %SOURCE330 $RPM_BUILD_ROOT%_unitdir/clamav-milter.service
@@ -611,12 +611,12 @@ touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.{socket,pid},%milterlog}
 %{!?with_sysv:     rm -rf $RPM_BUILD_ROOT%_var/run/*/*.pid}
 %{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_tmpfilesdir}
 
-%if 0%{?with_systemd:1}
+%if %{with systemd}
 # TODO: Evaluate using upstream's unit files
 rm $RPM_BUILD_ROOT%_unitdir/clamav-{daemon,freshclam}.*
 %endif
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 # keep clamd-wrapper in every case because it might be needed by other
 # packages
 ln -s %pkgdatadir/clamd-wrapper     $RPM_BUILD_ROOT%_initrddir/clamd-wrapper
@@ -660,7 +660,7 @@ test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %post scanner-sysvinit
 /sbin/chkconfig --add clamd.scan
 
@@ -825,13 +825,13 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %exclude %_mandir/man8/clamav-milter*
 
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %files server-sysvinit
 %_initrddir/clamd-wrapper
 %pkgdatadir/clamd-wrapper
 %endif
 
-%if 0%{?with_systemd:1}
+%if %{with systemd}
 %files server-systemd
  %_unitdir/clamd@.service
 %endif
@@ -842,25 +842,25 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %config(noreplace) %_sysconfdir/clamd.d/scan.conf
 %ghost %scanstatedir/clamd.sock
 
-%if 0%{?with_tmpfiles:1}
+%if %{with tmpfiles}
   %_tmpfilesdir/clamd.scan.conf
   %ghost %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
 %else
   %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
 %endif
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %files scanner-sysvinit
   %attr(0755,root,root) %config %_initrddir/clamd.scan
   %ghost %scanstatedir/clamd.pid
 %endif
 
-%if 0%{?with_upstart:1}
+%if %{with upstart}
 %files scanner-upstart
   %config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
 
-%if 0%{?with_systemd:1}
+%if %{with systemd}
 %files scanner-systemd
   %_unitdir/clamd@scan.service
 %endif
@@ -876,25 +876,25 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 %ghost %milterstatedir/clamav-milter.socket
 
-%if 0%{?with_tmpfiles:1}
+%if %{with tmpfiles}
   %_tmpfilesdir/clamav-milter.conf
   %ghost %dir %attr(0710,%milteruser,%milteruser) %milterstatedir
 %else
   %dir %attr(0710,%milteruser,%milteruser) %milterstatedir
 %endif
 
-%if 0%{?with_sysv:1}
+%if %{with sysv}
 %files milter-sysvinit
   %config %_initrddir/clamav-milter
   %ghost %milterstatedir/clamav-milter.pid
 %endif
 
-%if 0%{?with_upstart:1}
+%if %{with upstart}
 %files milter-upstart
   %config(noreplace) %_sysconfdir/init/clamav-milter*
 %endif
 
-%if 0%{?with_systemd:1}
+%if %{with systemd}
 %files milter-systemd
   %_unitdir/clamav-milter.service
 %endif
@@ -902,8 +902,11 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %changelog
 * Thu Jan 04 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-14
+- Use 4 spaces instead tabs
 - Fix rhbz #1530678
 - Fix rhbz #1518016
+- Simplify conditional builds reference: /usr/lib/rpm/macros
+- use make_build and make install macros
 
 * Sun Nov 26 2017 Robert Scheck <robert@fedoraproject.org> - 0.99.2-13
 - Backported upstream patch to unbreak e2guardian vs. temp files
