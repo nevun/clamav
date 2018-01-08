@@ -2,14 +2,24 @@
 
 ## Fedora Extras specific customization below...
 %bcond_without  fedora
-%bcond_with     upstart
+%if 0%{?fedora} > 22 || 0%{?rhel} > 6
 %bcond_without  systemd
-%if 0%{?fedora} < 23
-%bcond_without  sysv
-%else
-%bcond_with     sysv
-%endif
 %bcond_without  tmpfiles
+%bcond_with     sysv
+%bcond_with     upstart
+%else
+%if 0%{?rhel} == 6
+%bcond_with     systemd
+%bcond_with     tmpfiles
+%bcond_without  sysv
+%bcond_without  upstart
+%else
+%bcond_with     systemd
+%bcond_with     tmpfiles
+%bcond_without  sysv
+%bcond_with     upstart
+%endif
+%endif
 %bcond_with     unrar
 %bcond_without  noarch
 %bcond_without  bytecode
@@ -43,7 +53,6 @@
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
 %{!?systemd_reqs:%global systemd_reqs \
-BuildRequires: systemd\
 Requires(post):      /bin/systemctl\
 Requires(preun):     /bin/systemctl\
 Requires(postun):    /bin/systemctl\
@@ -99,9 +108,23 @@ BuildRequires:  %_includedir/tcpd.h
 %endif
 # nc reuqired for tests
 BuildRequires: nc
+%if %{with systemd}
+BuildRequires: systemd
+%endif
 
 Requires:   clamav-lib = %version-%release
 Requires:   data(clamav)
+
+%description
+Clam AntiVirus is an anti-virus toolkit for UNIX. The main purpose of this
+software is the integration with mail servers (attachment scanning). The
+package provides a flexible and scalable multi-threaded daemon, a command
+line scanner, and a tool for automatic updating via Internet. The programs
+are based on a shared library distributed with the Clam AntiVirus package,
+which you can use with your own software. The virus database is based on
+the virus database from OpenAntiVirus, but contains additional signatures
+(including signatures for popular polymorphic viruses, too) and is KEPT UP
+TO DATE.
 
 %package filesystem
 Summary:    Filesystem structure for clamav
@@ -115,10 +138,20 @@ Conflicts:  %name > %version-%release
 Requires(pre):  shadow-utils
 %{?noarch}
 
+%description filesystem
+This package provides the filesystem structure and contains the
+user-creation scripts required by clamav.
+
+
 %package lib
 Summary:    Dynamic libraries for the Clam Antivirus scanner
 Group:      System Environment/Libraries
 Requires:   data(clamav)
+
+%description lib
+This package contains dynamic libraries shared between applications
+using the Clam Antivirus scanner.
+
 
 %package devel
 Summary:    Header files and libraries for the Clam Antivirus scanner
@@ -127,6 +160,11 @@ Source100:  clamd-gen
 Requires:   clamav-lib        = %version-%release
 Requires:   clamav-filesystem = %version-%release
 Requires:   openssl-devel
+
+%description devel
+This package contains headerfiles and libraries which are needed to
+build applications using clamav.
+
 
 %package data
 Summary:    Virus signature data for the Clam Antivirus scanner
@@ -138,6 +176,20 @@ Conflicts:      data(clamav) < full
 Conflicts:      data(clamav) > full
 %{?noarch}
 
+%description data
+This package contains the virus-database needed by clamav. This
+database should be updated regularly; the 'clamav-update' package
+ships a corresponding cron-job. This package and the
+'clamav-data-empty' package are mutually exclusive.
+
+Use -data when you want a working (but perhaps outdated) virus scanner
+immediately after package installation.
+
+Use -data-empty when you are updating the virus database regulary and
+do not want to download a >5MB sized rpm-package with outdated virus
+definitions.
+
+
 %package data-empty
 Summary:    Empty data package for the Clam Antivirus scanner
 Group:      Applications/File
@@ -145,6 +197,19 @@ Provides:   data(clamav) = empty
 Conflicts:  data(clamav) < empty
 Conflicts:  data(clamav) > empty
 %{?noarch}
+
+%description data-empty
+This is an empty package to fulfill inter-package dependencies of the
+clamav suite. This package and the 'clamav-data' package are mutually
+exclusive.
+
+Use -data when you want a working (but perhaps outdated) virus scanner
+immediately after package installation.
+
+Use -data-empty when you are updating the virus database regulary and
+do not want to download a >5MB sized rpm-package with outdated virus
+definitions.
+
 
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
@@ -159,6 +224,12 @@ Requires:   /etc/cron.d
 Requires(post):     %__chown %__chmod
 Requires(post):     group(%updateuser)
 
+%description update
+This package contains programs which can be used to update the clamav
+anti-virus database automatically. It uses the freshclam(1) utility for
+this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
+
+
 %package server
 Summary:    Clam Antivirus scanner server
 Group:      System Environment/Daemons
@@ -172,7 +243,18 @@ Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 
-%if %{with sysv}
+%description server
+ATTENTION: most users do not need this package; the main package has
+everything (or depends on it) which is needed to scan for virii on
+workstations.
+
+This package contains files which are needed to execute the clamd-daemon.
+This daemon does not provide a system-wide service. Instead of, an instance
+of this daemon should be started for each service requiring it.
+
+See the README file how this can be done with a minimum of effort.
+
+
 %package server-sysvinit
 Summary:    SysV initscripts for clamav server
 Group:      System Environment/Daemons
@@ -183,7 +265,10 @@ Provides:   clamav-server-sysv = %version-%release
 Obsoletes:  clamav-server-sysv < %version-%release
 Source520:  clamd-wrapper
 %{?noarch}
-%endif
+
+%description server-sysvinit
+SysV initscripts template for the clamav server
+
 
 %package server-systemd
 Summary:    Systemd initscripts for clamav server
@@ -193,6 +278,9 @@ Requires:   clamav-server = %version-%release
 Source530:  clamd@.service
 %{?systemd_reqs}
 %{?noarch}
+
+%description server-systemd
+Systemd template for the clamav server
 
 
 %package scanner
@@ -206,8 +294,12 @@ Requires(pre):  shadow-utils
 Requires(pre):  group(virusgroup)
 %{?noarch}
 
+%description scanner
+This package contains a generic system wide clamd service which is
+e.g. used by the clamav-milter package.
+
+
 # Remove me after EOL of RHEL5
-%if %{with sysv}
 %package scanner-sysvinit
 Summary:    SysV initscripts for clamav scanner daemon
 Group:      System Environment/Daemons
@@ -219,7 +311,10 @@ Requires(postun):   initscripts
 Requires(post):     chkconfig
 Requires(preun):    chkconfig initscripts
 %{?noarch}
-%endif
+
+%description scanner-sysvinit
+The SysV initscripts for clamav-scanner.
+
 
 # Remove me after EOL of RHEL6
 %package scanner-upstart
@@ -233,6 +328,10 @@ Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
 %{?noarch}
 
+%description scanner-upstart
+The Upstart initscripts for clamav-scanner.
+
+
 %package scanner-systemd
 Summary:    Systemd initscripts for clamav scanner daemon
 Group:      System Environment/Daemons
@@ -242,6 +341,10 @@ Requires:   clamav-scanner = %version-%release
 Requires:   clamav-server-systemd = %version-%release
 %{?systemd_reqs}
 %{?noarch}
+
+%description scanner-systemd
+The systemd initscripts for clamav-scanner.
+
 
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
@@ -263,8 +366,11 @@ Obsoletes:  clamav-milter-core < %version-%release
 Provides:   clamav-milter-sendmail = %version-%release
 Obsoletes:  clamav-milter-sendmail < %version-%release
 
+%description milter
+This package contains files which are needed to run the clamav-milter.
+
+
 # Remove me after EOL of RHEL5
-%if %{with sysv}
 %package milter-sysvinit
 Summary:    SysV initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
@@ -280,7 +386,10 @@ Requires(preun):    chkconfig initscripts
 Provides:       clamav-milter-sysv = %version-%release
 Obsoletes:      clamav-milter-sysv < %version-%release
 %{?noarch}
-%endif
+
+%description milter-sysvinit
+The SysV initscripts for clamav-milter.
+
 
 # Remove me after EOL of RHEL6
 %package milter-upstart
@@ -294,6 +403,10 @@ Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
 %{?noarch}
 
+%description milter-upstart
+The Upstart initscripts for clamav-milter.
+
+
 %package milter-systemd
 Summary:    Systemd initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
@@ -303,113 +416,8 @@ Requires:   clamav-milter = %version-%release
 %{?systemd_reqs}
 %{?noarch}
 
-
-%description
-Clam AntiVirus is an anti-virus toolkit for UNIX. The main purpose of this
-software is the integration with mail servers (attachment scanning). The
-package provides a flexible and scalable multi-threaded daemon, a command
-line scanner, and a tool for automatic updating via Internet. The programs
-are based on a shared library distributed with the Clam AntiVirus package,
-which you can use with your own software. The virus database is based on
-the virus database from OpenAntiVirus, but contains additional signatures
-(including signatures for popular polymorphic viruses, too) and is KEPT UP
-TO DATE.
-
-%description filesystem
-This package provides the filesystem structure and contains the
-user-creation scripts required by clamav.
-
-%description lib
-This package contains dynamic libraries shared between applications
-using the Clam Antivirus scanner.
-
-%description devel
-This package contains headerfiles and libraries which are needed to
-build applications using clamav.
-
-%description data
-This package contains the virus-database needed by clamav. This
-database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job. This package and the
-'clamav-data-empty' package are mutually exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%description data-empty
-This is an empty package to fulfill inter-package dependencies of the
-clamav suite. This package and the 'clamav-data' package are mutually
-exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%description update
-This package contains programs which can be used to update the clamav
-anti-virus database automatically. It uses the freshclam(1) utility for
-this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
-
-%description server
-ATTENTION: most users do not need this package; the main package has
-everything (or depends on it) which is needed to scan for virii on
-workstations.
-
-This package contains files which are needed to execute the clamd-daemon.
-This daemon does not provide a system-wide service. Instead of, an instance
-of this daemon should be started for each service requiring it.
-
-See the README file how this can be done with a minimum of effort.
-
-
-%if %{with sysv}
-%description server-sysvinit
-SysV initscripts template for the clamav server
-%endif
-
-%description server-systemd
-Systemd template for the clamav server
-
-
-%description scanner
-This package contains a generic system wide clamd service which is
-e.g. used by the clamav-milter package.
-
-%if %{with sysv}
-%description scanner-sysvinit
-The SysV initscripts for clamav-scanner.
-%endif
-
-%description scanner-upstart
-The Upstart initscripts for clamav-scanner.
-
-%description scanner-systemd
-The systemd initscripts for clamav-scanner.
-
-
-%description milter
-This package contains files which are needed to run the clamav-milter.
-
-%if %{with sysv}
-%description milter-sysvinit
-The SysV initscripts for clamav-milter.
-%endif
-
-%description milter-upstart
-The Upstart initscripts for clamav-milter.
-
 %description milter-systemd
 The systemd initscripts for clamav-scanner.
-
 ## ------------------------------------------------------------
 
 %prep
@@ -663,7 +671,6 @@ test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 
 
-%if %{with sysv}
 %post scanner-sysvinit
 /sbin/chkconfig --add clamd.scan
 
@@ -673,7 +680,6 @@ test "$1" != 0 || /sbin/chkconfig --del clamd.scan
 
 %postun scanner-sysvinit
 test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
-%endif
 
 
 %post scanner-upstart
@@ -728,7 +734,6 @@ test -e %milterlog || {
 ! test -x /sbin/restorecon || /sbin/restorecon %milterlog &>/dev/null || :
 
 
-%if 0%{?with_sysv:1}
 %post milter-sysvinit
 /sbin/chkconfig --add clamav-milter
 
@@ -738,7 +743,6 @@ test "$1" != 0 || /sbin/chkconfig --del clamav-milter
 
 %postun milter-sysvinit
 test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
-%endif
 
 
 %post milter-upstart
