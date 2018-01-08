@@ -84,11 +84,40 @@ Source999:  http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?
 #  make clean-sources NAME=clamav VERSION=<version> TARBALL=clamav-<version>.tar.gz TARBALL_CLEAN=clamav-<version>-norar.tar.xz
 Source0:    %name-%version%{?prerelease}-norar.tar.xz
 %endif
+#for server
+Source2:    clamd.sysconfig
+Source3:    clamd.logrotate
+Source5:    clamd-README
+Source7:    clamd.SERVICE.init
+Source8:    clamav-notify-servers
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 Source10:   http://db.local.clamav.net/main-57.cvd
 Source11:   http://db.local.clamav.net/daily-21723.cvd
-%{?with_bytecode:Source12:  http://db.local.clamav.net/bytecode-278.cvd}
+Source12:   http://db.local.clamav.net/bytecode-278.cvd
+#for devel
+Source100:  clamd-gen
+#for update
+Source200:  freshclam-sleep
+Source201:  freshclam.sysconfig
+Source202:  clamav-update.crond
+Source203:  clamav-update.logrotate
+#for milter
+Source300:  README.fedora
+#for clamav-milter.upstart
+Source310:  clamav-milter.upstart
+#for milter-sysvinit
+Source320:  clamav-milter.sysv
+#for clamav-milter.systemd
+Source330:  clamav-milter.systemd
+#for scanner-upstart
+Source410:  clamd.scan.upstart
+#for scanner-systemd
+Source430:  clamd@scan.service
+#for server-sysvinit
+Source520:  clamd-wrapper
+#for server-systemd
+Source530:  clamd@.service
 
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.98-umask.patch
@@ -111,6 +140,8 @@ BuildRequires: nc
 %if %{with systemd}
 BuildRequires: systemd
 %endif
+#for milter
+BuildRequires:  sendmail-devel
 
 Requires:   clamav-lib = %version-%release
 Requires:   data(clamav)
@@ -156,7 +187,6 @@ using the Clam Antivirus scanner.
 %package devel
 Summary:    Header files and libraries for the Clam Antivirus scanner
 Group:      Development/Libraries
-Source100:  clamd-gen
 Requires:   clamav-lib        = %version-%release
 Requires:   clamav-filesystem = %version-%release
 Requires:   openssl-devel
@@ -214,10 +244,6 @@ definitions.
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
 Group:      Applications/File
-Source200:  freshclam-sleep
-Source201:  freshclam.sysconfig
-Source202:  clamav-update.crond
-Source203:  clamav-update.logrotate
 Requires:   clamav-filesystem = %version-%release
 Requires:   crontabs
 Requires:   /etc/cron.d
@@ -233,11 +259,6 @@ this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
 %package server
 Summary:    Clam Antivirus scanner server
 Group:      System Environment/Daemons
-Source2:    clamd.sysconfig
-Source3:    clamd.logrotate
-Source5:    clamd-README
-Source7:    clamd.SERVICE.init
-Source8:    clamav-notify-servers
 Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
@@ -263,7 +284,6 @@ Requires:   clamav-server = %version-%release
 Requires:   %_initrddir
 Provides:   clamav-server-sysv = %version-%release
 Obsoletes:  clamav-server-sysv < %version-%release
-Source520:  clamd-wrapper
 %{?noarch}
 
 %description server-sysvinit
@@ -275,7 +295,6 @@ Summary:    Systemd initscripts for clamav server
 Group:      System Environment/Daemons
 Provides:   init(clamav-server) = systemd
 Requires:   clamav-server = %version-%release
-Source530:  clamd@.service
 %{?systemd_reqs}
 %{?noarch}
 
@@ -320,7 +339,6 @@ The SysV initscripts for clamav-scanner.
 %package scanner-upstart
 Summary:    Upstart initscripts for clamav scanner daemon
 Group:      System Environment/Daemons
-Source410:  clamd.scan.upstart
 Provides:   init(clamav-scanner) = upstart
 Requires:   clamav-scanner = %version-%release
 Requires:   /etc/init
@@ -335,7 +353,6 @@ The Upstart initscripts for clamav-scanner.
 %package scanner-systemd
 Summary:    Systemd initscripts for clamav scanner daemon
 Group:      System Environment/Daemons
-Source430:  clamd@scan.service
 Provides:   init(clamav-scanner) = systemd
 Requires:   clamav-scanner = %version-%release
 Requires:   clamav-server-systemd = %version-%release
@@ -349,9 +366,7 @@ The systemd initscripts for clamav-scanner.
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
 Group:      System Environment/Daemons
-Source300:  README.fedora
 Requires:   init(clamav-milter)
-BuildRequires:  sendmail-devel
 Provides:   user(%milteruser)  = 5
 Provides:   group(%milteruser) = 5
 Requires(post): coreutils
@@ -374,7 +389,6 @@ This package contains files which are needed to run the clamav-milter.
 %package milter-sysvinit
 Summary:    SysV initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
-Source320:  clamav-milter.sysv
 Provides:   init(clamav-milter) = sysvinit
 Requires:   clamav-milter = %version-%release
 Requires(post):     user(%milteruser) clamav-milter
@@ -395,7 +409,6 @@ The SysV initscripts for clamav-milter.
 %package milter-upstart
 Summary:    Upstart initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
-Source310:  clamav-milter.upstart
 Provides:   init(clamav-milter) = upstart
 Requires:   clamav-milter = %version-%release
 Requires:   /etc/init
@@ -410,7 +423,6 @@ The Upstart initscripts for clamav-milter.
 %package milter-systemd
 Summary:    Systemd initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
-Source330:  clamav-milter.systemd
 Provides:   init(clamav-milter) = systemd
 Requires:   clamav-milter = %version-%release
 %{?systemd_reqs}
