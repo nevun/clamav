@@ -23,16 +23,18 @@
 %global have_ocaml  0
 %endif
 
+%{!?_rundir:%global _rundir /var/run}
+
 %global updateuser  clamupdate
 %global homedir     %_var/lib/clamav
 %global freshclamlog    %_var/log/freshclam.log
 %global milteruser  clamilt
 %global milterlog   %_var/log/clamav-milter.log
-%global milterstatedir  %_var/run/clamav-milter
+%global milterstatedir  %_rundir/clamav-milter
 %global pkgdatadir  %_datadir/%name
 
 %global scanuser    clamscan
-%global scanstatedir    %_var/run/clamd.scan
+%global scanstatedir    %_rundir/clamd.scan
 
 %{?with_noarch:%global noarch   BuildArch:  noarch}
 %{!?_unitdir:%global _unitdir /lib/systemd/system}
@@ -59,7 +61,7 @@ Requires(postun):    /bin/systemctl\
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.2
-Release:    14%{?dist}
+Release:    15%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -505,7 +507,8 @@ function smartsubst() {
 install -d -m 0755 \
     $RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d} \
     $RPM_BUILD_ROOT%_tmpfilesdir \
-    $RPM_BUILD_ROOT%_var/{log,run} \
+    $RPM_BUILD_ROOT%_rundir \
+    $RPM_BUILD_ROOT%_var/log \
     $RPM_BUILD_ROOT%milterstatedir \
     $RPM_BUILD_ROOT%pkgdatadir/template \
     $RPM_BUILD_ROOT%_initrddir \
@@ -608,7 +611,7 @@ touch $RPM_BUILD_ROOT{%milterstatedir/clamav-milter.{socket,pid},%milterlog}
 %{!?with_upstart:  rm -rf $RPM_BUILD_ROOT%_sysconfdir/init}
 %{!?with_systemd:  rm -rf $RPM_BUILD_ROOT%_unitdir}
 %{!?with_sysv:     rm -f  $RPM_BUILD_ROOT%_initrddir/*}
-%{!?with_sysv:     rm -rf $RPM_BUILD_ROOT%_var/run/*/*.pid}
+%{!?with_sysv:     rm -rf $RPM_BUILD_ROOT%_rundir/*/*.pid}
 %{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_tmpfilesdir}
 
 %if %{with systemd}
@@ -901,6 +904,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Mon Jan 08 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-15
+- Fix rundir path (#1126595)
+
 * Thu Jan 04 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-14
 - Use 4 spaces instead tabs
 - Fix rhbz #1530678
