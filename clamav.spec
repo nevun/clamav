@@ -70,7 +70,7 @@ Requires(postun):    /bin/systemctl\
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.2
-Release:    15%{?dist}
+Release:    16%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -264,6 +264,9 @@ Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
+%if ! %{with sysv}
+Obsoletes:  server-sysvinit < %version-%release
+%endif
 
 %description server
 ATTENTION: most users do not need this package; the main package has
@@ -312,6 +315,12 @@ Provides:   group(%scanuser) = 49
 Requires:   clamav-server = %version-%release
 Requires(pre):  shadow-utils
 Requires(pre):  group(virusgroup)
+%if ! %{with sysv}
+Obsoletes:  scanner-sysvinit < %version-%release
+%endif
+%if ! %{with upstart}
+Obsoletes:  scanner-upstart < %version-%release
+%endif
 %{?noarch}
 
 %description scanner
@@ -381,6 +390,12 @@ Provides:   clamav-milter-core = %version-%release
 Obsoletes:  clamav-milter-core < %version-%release
 Provides:   clamav-milter-sendmail = %version-%release
 Obsoletes:  clamav-milter-sendmail < %version-%release
+%if ! %{with sysv}
+Obsoletes:  milter-sysvinit < %version-%release
+%endif
+%if ! %{with upstart}
+Obsoletes:  milter-upstart < %version-%release
+%endif
 
 %description milter
 This package contains files which are needed to run the clamav-milter.
@@ -919,6 +934,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Jan 09 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-16
+- Make sure that Obsoletes sysv and upstart for Epel upgrade and update
+
 * Mon Jan 08 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-15
 - Fix rundir path (#1126595)
 - Update main.cvd, daily.cvd and bytecode.cvd
