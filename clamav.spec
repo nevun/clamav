@@ -471,12 +471,11 @@ sed -ri \
 CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
 CXXFLAGS="$RPM_OPT_FLAGS -std=gnu++98"
 export LDFLAGS='%{?__global_ldflags} -Wl,--as-needed'
-# HACK: remove me...
-export FRESHCLAM_LIBS='-lz'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
 
-autoreconf -ivf
+rm -rf libltdl autom4te.cache Makefile.in
+autoreconf -i
 %configure \
     --disable-static \
     --disable-rpath \
@@ -485,7 +484,7 @@ autoreconf -ivf
     --with-user=%updateuser \
     --with-group=%updateuser \
     --with-libcurl=%{_prefix} \
-    --with-dbdir=/var/lib/clamav \
+    --with-dbdir=%homedir \
     --enable-milter \
     --enable-clamdtop \
     --disable-zlib-vcheck \
@@ -500,7 +499,6 @@ sed -i \
     -e 's! -shared ! -Wl,--as-needed\0!g'                   \
     -e '/sys_lib_dlsearch_path_spec=\"\/lib \/usr\/lib /s!\"\/lib \/usr\/lib !/\"/%_lib /usr/%_lib !g'  \
     libtool
-
 
 %make_build
 
@@ -923,6 +921,16 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Mon Jan 08 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-15
 - Fix rundir path (#1126595)
+- Update main.cvd, daily.cvd and bytecode.cvd
+- Fixes for rhbz 1464269 and rhbz 1126625
+- Move Sources and BuildRequires to the beginning
+- Build systemd for F22+ and el7+
+- Build sysv and upstart for el6 else build only sysv
+- Only enable tmpfiles with systemd enabled
+- Move descritions to near the package macro and remove his build
+  conditionals, this also fix the generation of src.rpm
+- Remove hack from 2010 (git show e1a9be60)
+- Use autoreconf without --force
 
 * Thu Jan 04 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-14
 - Use 4 spaces instead tabs
