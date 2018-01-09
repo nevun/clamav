@@ -92,9 +92,10 @@ Source7:    clamd.SERVICE.init
 Source8:    clamav-notify-servers
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
-Source10:   http://db.local.clamav.net/main-57.cvd
-Source11:   http://db.local.clamav.net/daily-21723.cvd
-Source12:   http://db.local.clamav.net/bytecode-278.cvd
+# I used file *.cvd  to see the version
+Source10:   http://db.local.clamav.net/main-58.cvd
+Source11:   http://db.local.clamav.net/daily-2420.cvd
+Source12:   http://db.local.clamav.net/bytecode-319.cvd
 #for devel
 Source100:  clamd-gen
 #for update
