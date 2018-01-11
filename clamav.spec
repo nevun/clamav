@@ -70,7 +70,7 @@ Requires(postun):    /bin/systemctl\
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.2
-Release:    16%{?dist}
+Release:    17%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -127,6 +127,11 @@ Patch30:    llvm-glibc.patch
 Patch31:    clamav-0.99.1-setsebool.patch
 Patch32:    fa15aa98c7d5e1d8fc22e818ebd089f2e53ebe1d.diff
 Patch33:    clamav-0.99.2-temp-cleanup.patch
+Patch34:    dfc00cd3301a42b571454b51a6102eecf58407bc.patch
+Patch35:    a83773682e856ad6529ba6db8d1792e6d515d7f1.patch
+Patch36:    586a5180287262070637c8943f2f7efd652e4a2c.patch
+
+
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
@@ -457,6 +462,9 @@ The systemd initscripts for clamav-scanner.
 %apply -n31 -p1 -b .setsebool
 %apply -n32 -p1 -b .openssl_1.1.0
 %apply -n33 -p1 -b .temp-cleanup
+%apply -n34 -p1 -b .CVE-2017-6420
+%apply -n35 -p1 -b .CVE-2017-6419
+%apply -n36 -p1 -b .CVE-2017-6418 
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -934,6 +942,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Thu Jan 11 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-17
+- Security fixes CVE-2017-6420 (#1483910), CVE-2017-6419 (#1483909),
+  CVE-2017-6418 (#1483908)
+
 * Tue Jan 09 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-16
 - Make sure that Obsoletes sysv and upstart for Epel upgrade and update
 
