@@ -70,7 +70,7 @@ Requires(postun):    /bin/systemctl\
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.2
-Release:    17%{?dist}
+Release:    18%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -942,6 +942,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Tue Jan 16 2018 Orion Poplawski <orion@nwra.com> - 0.99.2-18
+- Fix type of clamd@ service
+
 * Thu Jan 11 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-17
 - Security fixes CVE-2017-6420 (#1483910), CVE-2017-6418 (#1483908)
 
