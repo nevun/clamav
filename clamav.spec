@@ -270,7 +270,7 @@ Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 %if ! %{with sysv}
-Obsoletes:  server-sysvinit < %version-%release
+Obsoletes:  clamav-server-sysvinit < %version-%release
 %endif
 
 %description server
@@ -321,10 +321,10 @@ Requires:   clamav-server = %version-%release
 Requires(pre):  shadow-utils
 Requires(pre):  group(virusgroup)
 %if ! %{with sysv}
-Obsoletes:  scanner-sysvinit < %version-%release
+Obsoletes:  clamav-scanner-sysvinit < %version-%release
 %endif
 %if ! %{with upstart}
-Obsoletes:  scanner-upstart < %version-%release
+Obsoletes:  clamav-scanner-upstart < %version-%release
 %endif
 %{?noarch}
 
@@ -396,10 +396,10 @@ Obsoletes:  clamav-milter-core < %version-%release
 Provides:   clamav-milter-sendmail = %version-%release
 Obsoletes:  clamav-milter-sendmail < %version-%release
 %if ! %{with sysv}
-Obsoletes:  milter-sysvinit < %version-%release
+Obsoletes:  clamav-milter-sysvinit < %version-%release
 %endif
 %if ! %{with upstart}
-Obsoletes:  milter-upstart < %version-%release
+Obsoletes:  clamav-milter-upstart < %version-%release
 %endif
 
 %description milter
@@ -944,6 +944,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %changelog
 * Tue Jan 16 2018 Orion Poplawski <orion@nwra.com> - 0.99.2-18
 - Fix type of clamd@ service
+- Fix packages name of Obsoletes directives
 
 * Thu Jan 11 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-17
 - Security fixes CVE-2017-6420 (#1483910), CVE-2017-6418 (#1483908)
