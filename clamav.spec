@@ -942,9 +942,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
-* Tue Jan 16 2018 Orion Poplawski <orion@nwra.com> - 0.99.2-18
+* Wed Jan 17 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-18
 - Fix type of clamd@ service
 - Fix packages name of Obsoletes directives
+- Also fix type of clamav-milter.service
 
 * Thu Jan 11 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-17
 - Security fixes CVE-2017-6420 (#1483910), CVE-2017-6418 (#1483908)

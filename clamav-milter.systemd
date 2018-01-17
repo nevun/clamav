@@ -6,8 +6,8 @@ Before = postfix.service
 After = clamd@scan.service
 
 [Service]
-Type = simple
-ExecStart = /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf --foreground=yes
+Type = forking
+ExecStart = /usr/sbin/clamav-milter -c /etc/mail/clamav-milter.conf
 Restart = on-failure
 
 User=clamilt
