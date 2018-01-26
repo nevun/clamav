@@ -2,7 +2,7 @@
 
 ## Fedora Extras specific customization below...
 %bcond_without  fedora
-%if 0%{?fedora} > 22 || 0%{?rhel} > 6
+%if 0%{?fedora} || 0%{?rhel} > 6
 %bcond_without  systemd
 %bcond_without  tmpfiles
 %bcond_with     sysv
@@ -69,8 +69,8 @@ Requires(postun):    /bin/systemctl\
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.99.2
-Release:    18%{?dist}
+Version:    0.99.3
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -89,12 +89,12 @@ Source2:    clamd.sysconfig
 Source3:    clamd.logrotate
 Source5:    clamd-README
 Source7:    clamd.SERVICE.init
-Source8:    clamav-notify-servers
 # To download the *.cvd, go to http://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
-# I used file *.cvd  to see the version
+# Check the first line of the file for version, file is not working
+# see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 Source10:   http://db.local.clamav.net/main-58.cvd
-Source11:   http://db.local.clamav.net/daily-2420.cvd
+Source11:   http://db.local.clamav.net/daily-24253.cvd
 Source12:   http://db.local.clamav.net/bytecode-319.cvd
 #for devel
 Source100:  clamd-gen
@@ -125,11 +125,7 @@ Patch27:    clamav-0.98-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:    llvm-glibc.patch
 Patch31:    clamav-0.99.1-setsebool.patch
-Patch32:    fa15aa98c7d5e1d8fc22e818ebd089f2e53ebe1d.diff
 Patch33:    clamav-0.99.2-temp-cleanup.patch
-Patch34:    dfc00cd3301a42b571454b51a6102eecf58407bc.patch
-Patch35:    60671e3deb1df6c626e5c7e13752c2eec1649f98.patch
-Patch36:    586a5180287262070637c8943f2f7efd652e4a2c.patch
 
 
 
@@ -460,11 +456,7 @@ The systemd initscripts for clamav-scanner.
 %apply -n27 -p1 -b .umask
 %apply -n30 -p1
 %apply -n31 -p1 -b .setsebool
-%apply -n32 -p1 -b .openssl_1.1.0
 %apply -n33 -p1 -b .temp-cleanup
-%apply -n34 -p1 -b .CVE-2017-6420
-%apply -n35 -p1 -b .CVE-2017-6420
-%apply -n36 -p1 -b .CVE-2017-6418
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -592,7 +584,6 @@ install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 ## prepare the update-files
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
-install -D -m 0755 -p %SOURCE8      $RPM_BUILD_ROOT%_sbindir/clamav-notify-servers
 touch $RPM_BUILD_ROOT%freshclamlog
 
 install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
@@ -859,12 +850,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %files server
 %doc _doc_server/*
-%_mandir/man[58]/clamd*
-%_sbindir/*
-
-%exclude %_sbindir/*milter*
-%exclude %_mandir/man8/clamav-milter*
-
+%_mandir/man5/clamd.conf.5*
+%_mandir/man8/clamd.8*
+%_sbindir/clamd
 
 %if %{with sysv}
 %files server-sysvinit
@@ -942,6 +930,12 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Fri Jan 26 2018 Orion Poplawski <orion@nwra.com> - 0.99.3-1
+- Update to 0.99.3
+- Security fixes CVE-2017-12374 CVE-2017-12375 CVE-2017-12376 CVE-2017-12377
+  CVE-2017-12378 CVE-2017-12379 CVE-2017-12380 (bug #1539030)
+- Drop clamav-notify-servers and it's dependency on ncat (bug #1530678)
+
 * Wed Jan 17 2018 Sérgio Basto <sergio@serjux.com> - 0.99.2-18
 - Fix type of clamd@ service
 - Fix packages name of Obsoletes directives

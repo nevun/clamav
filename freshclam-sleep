@@ -49,9 +49,4 @@ WARNING: update of clamav database is disabled; please see
 	;;
 esac
 
-
-/usr/bin/freshclam --quiet && {
-    test -x /usr/sbin/clamav-notify-servers &&  \
-	exec /usr/sbin/clamav-notify-servers || \
-	:
-}
+/usr/bin/freshclam --quiet
