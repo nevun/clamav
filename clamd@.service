@@ -1,0 +1,8 @@
+[Unit]
+Description = clamd scanner (%i) daemon
+After = syslog.target nss-lookup.target network.target
+
+[Service]
+Type = forking
+ExecStart = /usr/sbin/clamd -c /etc/clamd.d/%i.conf
+Restart = on-failure
