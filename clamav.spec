@@ -792,6 +792,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %exclude %_bindir/clamav-config
 %exclude %_bindir/freshclam
 %exclude %_mandir/*/freshclam*
+%exclude %_mandir/man5/clamd.conf.5*
 
 ## -----------------------
 
