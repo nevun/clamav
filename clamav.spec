@@ -667,29 +667,9 @@ getent passwd %{scanuser} >/dev/null || \
 usermod %{scanuser} -a -G virusgroup
 exit 0
 
-
 %{?with_tmpfiles:
 %post scanner
 %{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}}
-
-
-%post scanner-sysvinit
-/sbin/chkconfig --add clamd.scan
-
-%preun scanner-sysvinit
-test "$1" != 0 || %_initrddir/clamd.scan stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamd.scan
-
-%postun scanner-sysvinit
-test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
-
-
-%post scanner-upstart
-/usr/bin/killall -u %scanuser clamd 2>/dev/null || :
-
-%preun scanner-upstart
-test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
-
 
 
 %post update
@@ -718,7 +698,6 @@ getent passwd %{milteruser} >/dev/null || \
 usermod %{milteruser} -a -G virusgroup
 exit 0
 
-
 %post milter
 test -e %milterlog || {
     touch %milterlog
@@ -728,29 +707,9 @@ test -e %milterlog || {
 }
 %{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :}
 
-
 %triggerin milter -- %name-milter < 0.97.3-1704
 # remove me after F19
 ! test -x /sbin/restorecon || /sbin/restorecon %milterlog &>/dev/null || :
-
-
-%post milter-sysvinit
-/sbin/chkconfig --add clamav-milter
-
-%preun milter-sysvinit
-test "$1" != 0 || %_initrddir/clamav-milter stop &>/dev/null || :
-test "$1" != 0 || /sbin/chkconfig --del clamav-milter
-
-%postun milter-sysvinit
-test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
-
-
-%post milter-upstart
-/usr/bin/killall -u %milteruser clamav-milter 2>/dev/null || :
-
-%preun milter-upstart
-test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
-
 
 
 %post   lib -p /sbin/ldconfig
@@ -862,12 +821,28 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %endif
 
 %if %{with sysv}
+%post scanner-sysvinit
+/sbin/chkconfig --add clamd.scan
+
+%preun scanner-sysvinit
+test "$1" != 0 || %_initrddir/clamd.scan stop &>/dev/null || :
+test "$1" != 0 || /sbin/chkconfig --del clamd.scan
+
+%postun scanner-sysvinit
+test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
+
 %files scanner-sysvinit
   %attr(0755,root,root) %config %_initrddir/clamd.scan
   %ghost %scanstatedir/clamd.pid
 %endif
 
 %if %{with upstart}
+%post scanner-upstart
+/usr/bin/killall -u %scanuser clamd 2>/dev/null || :
+
+%preun scanner-upstart
+test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
+
 %files scanner-upstart
   %config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
@@ -905,12 +880,28 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %endif
 
 %if %{with sysv}
+%post milter-sysvinit
+/sbin/chkconfig --add clamav-milter
+
+%preun milter-sysvinit
+test "$1" != 0 || %_initrddir/clamav-milter stop &>/dev/null || :
+test "$1" != 0 || /sbin/chkconfig --del clamav-milter
+
+%postun milter-sysvinit
+test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
+
 %files milter-sysvinit
   %config %_initrddir/clamav-milter
   %ghost %milterstatedir/clamav-milter.pid
 %endif
 
 %if %{with upstart}
+%post milter-upstart
+/usr/bin/killall -u %milteruser clamav-milter 2>/dev/null || :
+
+%preun milter-upstart
+test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
+
 %files milter-upstart
   %config(noreplace) %_sysconfdir/init/clamav-milter*
 %endif
