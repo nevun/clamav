@@ -923,7 +923,7 @@ systemctl daemon-reload
 %changelog
 * Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-3
 - Use systemctl daemon-reload because we change services and epel7 seems not
-  reload services and break contional restart.
+  reload services and break conditional restart.
 
 * Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com>
 - Fix and organize systemd scriptlets, clamd@.service missed systemd_preun macro
