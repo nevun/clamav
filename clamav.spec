@@ -8,7 +8,7 @@
 %bcond_with     sysv
 %bcond_with     upstart
 %else
-%if 0%{?rhel} == 6
+%if 0%{?rhel} && 0%{?rhel} <= 6
 %bcond_with     systemd
 %bcond_with     tmpfiles
 %bcond_without  sysv
@@ -52,25 +52,12 @@
 %{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
 %{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
 %nil}
-%{!?systemd_reqs:%global systemd_reqs \
-Requires(post):      /bin/systemctl\
-Requires(preun):     /bin/systemctl\
-Requires(postun):    /bin/systemctl\
-%nil}
-%{!?systemd_install:%global systemd_install()\
-%post %1\
-%systemd_post %2 \
-%preun %1\
-%systemd_preun %2 \
-%postun %1\
-%systemd_postun_with_restart %2 \
-%nil}
 
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.3
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -128,7 +115,6 @@ Patch31:    clamav-0.99.1-setsebool.patch
 Patch33:    clamav-0.99.2-temp-cleanup.patch
 
 
-
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
@@ -140,6 +126,7 @@ BuildRequires:  %_includedir/tcpd.h
 # nc reuqired for tests
 BuildRequires: nc
 %if %{with systemd}
+%{?systemd_requires}
 BuildRequires: systemd
 %endif
 #for milter
@@ -300,7 +287,6 @@ Summary:    Systemd initscripts for clamav server
 Group:      System Environment/Daemons
 Provides:   init(clamav-server) = systemd
 Requires:   clamav-server = %version-%release
-%{?systemd_reqs}
 %{?noarch}
 
 %description server-systemd
@@ -367,7 +353,6 @@ Group:      System Environment/Daemons
 Provides:   init(clamav-scanner) = systemd
 Requires:   clamav-scanner = %version-%release
 Requires:   clamav-server-systemd = %version-%release
-%{?systemd_reqs}
 %{?noarch}
 
 %description scanner-systemd
@@ -442,7 +427,6 @@ Summary:    Systemd initscripts for the clamav sendmail-milter
 Group:      System Environment/Daemons
 Provides:   init(clamav-milter) = systemd
 Requires:   clamav-milter = %version-%release
-%{?systemd_reqs}
 %{?noarch}
 
 %description milter-systemd
@@ -689,13 +673,6 @@ exit 0
 %{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}}
 
 
-%post server-systemd
-test "$1" != "1" || /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-
-%postun server-systemd
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-
-
 %post scanner-sysvinit
 /sbin/chkconfig --add clamd.scan
 
@@ -713,8 +690,6 @@ test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
 %preun scanner-upstart
 test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 
-
-%systemd_install scanner-systemd clamd@scan.service
 
 
 %post update
@@ -776,8 +751,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %preun milter-upstart
 test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
-
-%systemd_install milter-systemd clamav-milter.service
 
 
 %post   lib -p /sbin/ldconfig
@@ -862,6 +835,15 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %endif
 
 %if %{with systemd}
+%post server-systemd
+%systemd_post clamd@.service
+
+%preun server-systemd
+%systemd_preun clamd@.service
+
+%postun server-systemd
+%systemd_postun_with_restart clamd@.service
+
 %files server-systemd
  %_unitdir/clamd@.service
 %endif
@@ -891,6 +873,15 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %endif
 
 %if %{with systemd}
+%post scanner-systemd
+%systemd_post clamd@scan.service
+
+%preun scanner-systemd
+%systemd_preun clamd@scan.service
+
+%postun scanner-systemd
+%systemd_postun_with_restart clamd@scan.service
+
 %files scanner-systemd
   %_unitdir/clamd@scan.service
 %endif
@@ -925,12 +916,25 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %endif
 
 %if %{with systemd}
+%post milter-systemd
+%systemd_post clamav-milter.service
+
+%preun milter-systemd
+%systemd_preun clamav-milter.service
+
+%postun milter-systemd
+%systemd_postun_with_restart clamav-milter.service
+
 %files milter-systemd
   %_unitdir/clamav-milter.service
 %endif
 
 
 %changelog
+* Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com>
+- Fix and organize systemd scriptlets, clamd@.service missed systemd_preun macro
+  and had a wrong systemd_postun_with_restart
+
 * Fri Jan 26 2018 Orion Poplawski <orion@nwra.com> - 0.99.3-1
 - Update to 0.99.3
 - Security fixes CVE-2017-12374 CVE-2017-12375 CVE-2017-12376 CVE-2017-12377
