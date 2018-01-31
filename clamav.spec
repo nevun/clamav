@@ -918,6 +918,10 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 * Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com>
 - Fix and organize systemd scriptlets, clamd@.service missed systemd_preun macro
   and had a wrong systemd_postun_with_restart
+- Remove triggerin macros that aren't need it anymore
+- Fix scriplet
+- Organize startup scriptlets
+- Exclude one file listed twice
 
 * Fri Jan 26 2018 Orion Poplawski <orion@nwra.com> - 0.99.3-1
 - Update to 0.99.3
