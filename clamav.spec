@@ -680,10 +680,6 @@ test -e %freshclamlog || {
     ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
-%triggerin update -- %name-update < 0.97.3-1704
-# remove me after F19
-! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog &>/dev/null || :
-
 
 %triggerin milter -- clamav-scanner
 # Add the milteruser to the scanuser group; this is required when
@@ -707,10 +703,6 @@ test -e %milterlog || {
 }
 %{?with_tmpfiles:
 %{?with_systemd:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :}}
-
-%triggerin milter -- %name-milter < 0.97.3-1704
-# remove me after F19
-! test -x /sbin/restorecon || /sbin/restorecon %milterlog &>/dev/null || :
 
 
 %post   lib -p /sbin/ldconfig
