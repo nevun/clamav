@@ -57,7 +57,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.3
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -794,8 +794,6 @@ test -e %milterlog || {
 %systemd_preun clamd@.service
 
 %postun server-systemd
-#temporary fix for epel7
-systemctl daemon-reload
 %systemd_postun_with_restart clamd@.service
 
 %files server-systemd
@@ -850,8 +848,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 %systemd_preun clamd@scan.service
 
 %postun scanner-systemd
-#temporary fix for epel7
-systemctl daemon-reload
 %systemd_postun_with_restart clamd@scan.service
 
 %files scanner-systemd
@@ -911,8 +907,6 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 %systemd_preun clamav-milter.service
 
 %postun milter-systemd
-#temporary fix for epel7
-systemctl daemon-reload
 %systemd_postun_with_restart clamav-milter.service
 
 %files milter-systemd
@@ -921,6 +915,9 @@ systemctl daemon-reload
 
 
 %changelog
+* Sat Feb 03 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-4
+- Epel 7 macro already have systemctl daemon-reload, reverting 0.99.3-3 release
+
 * Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-3
 - Use systemctl daemon-reload because we change services and epel7 seems not
   reload services and break conditional restart.
