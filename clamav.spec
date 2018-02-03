@@ -118,7 +118,7 @@ Patch33:    clamav-0.99.2-temp-cleanup.patch
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
-BuildRequires:  %_includedir/tcpd.h
+#BuildRequires:  %_includedir/tcpd.h
 %{?with_bytecode:BuildRequires: bc tcl groff graphviz}
 %if %{have_ocaml}
 %{?with_bytecode:BuildRequires: ocaml}
@@ -916,7 +916,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 %changelog
 * Sat Feb 03 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-4
-- Epel 7 macro already have systemctl daemon-reload, reverting 0.99.3-3 release
+- Last Epel 7 macro already have systemctl daemon-reload, reverting 0.99.3-3 release
+- Remove BR _includedir/tcpd.h due:
+  https://fedoraproject.org/wiki/Changes/Deprecate_TCP_wrappers
 
 * Wed Jan 31 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-3
 - Use systemctl daemon-reload because we change services and epel7 seems not
