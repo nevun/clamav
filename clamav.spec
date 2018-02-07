@@ -57,7 +57,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.3
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -915,6 +915,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.99.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Sat Feb 03 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-4
 - Last Epel 7 macro already have systemctl daemon-reload, reverting 0.99.3-3 release
 - Remove BR _includedir/tcpd.h due:
