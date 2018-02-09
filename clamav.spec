@@ -57,7 +57,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.3
-Release:    5%{?dist}
+Release:    6%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -915,6 +915,9 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 
 %changelog
+* Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.99.3-6
+- Escape macros in %%changelog
+
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.99.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
@@ -1257,7 +1260,7 @@ test "$1" != "0" || /sbin/initctl -q stop clamav-milter || :
 
 * Sat Aug  8 2009 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de> - 0.95.2-4
 - renamed 'clamav' user/group to 'clamupdate'
-- add the '%milteruser' user to the '%scanuser' group when the -scanner
+- add the '%%milteruser' user to the '%%scanuser' group when the -scanner
   subpackage is installed
 
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.95.2-2
