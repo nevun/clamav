@@ -392,8 +392,8 @@ autoreconf -i
     --disable-static \
     --disable-zlib-vcheck \
     %{!?with_unrar:--disable-unrar} \
-	--enable-id-check \
-	--enable-dns \
+    --enable-id-check \
+    --enable-dns \
     --with-dbdir=%homedir \
     --with-group=%updateuser \
     --with-libcurl=%{_prefix} \
@@ -815,6 +815,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - Call server and scanner sub-packages as clamd (el6 compatible and as uppstream
   call it)
 - clamav-data provides clamav-db (el6 compatible)
+- Explicitly enable-id-check and enable-dns in configure (as in el6).
 - Add missing build-time requirement pcre2-devel (it misses in el6 at least)
 
 * Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.99.3-6
