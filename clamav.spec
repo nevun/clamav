@@ -193,6 +193,8 @@ Requires:   clamav-filesystem = %version-%release
 Provides:       data(clamav) = full
 Conflicts:      data(clamav) < full
 Conflicts:      data(clamav) > full
+Provides: clamav-db = %{version}-%{release}
+Obsoletes: clamav-db < %{version}-%{release}
 %{?noarch}
 
 %description data
@@ -245,48 +247,26 @@ anti-virus database automatically. It uses the freshclam(1) utility for
 this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
 
 
-%package server
-Summary:    Clam Antivirus scanner server
-Group:      System Environment/Daemons
+%package -n clamd
+Summary: The Clam AntiVirus Daemon
+Group: System Environment/Daemons
 Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 %if %{with sysv}
 Requires:   %_initrddir
-Provides:   init(clamav-server) = sysv
 Provides:   clamav-server-sysvinit = %version-%release
 %endif
 Obsoletes:  clamav-server-sysvinit < %version-%release
 %if %{with systemd}
-Provides:   init(clamav-server) = systemd
 %endif
-
-%description server
-ATTENTION: most users do not need this package; the main package has
-everything (or depends on it) which is needed to scan for virii on
-workstations.
-
-This package contains files which are needed to execute the clamd-daemon.
-This daemon does not provide a system-wide service. Instead of, an instance
-of this daemon should be started for each service requiring it.
-
-See the README file how this can be done with a minimum of effort.
-
-
-%package scanner
-Summary:    Clamav scanner daemon
-Group:      System Environment/Daemons
-Requires:   init(clamav-scanner)
 Provides:   user(%scanuser)  = 49
 Provides:   group(%scanuser) = 49
-Requires:   clamav-server = %version-%release
 Requires(pre):  shadow-utils
 Requires(pre):  group(virusgroup)
 %if %{with sysv}
 # Remove me after EOL of RHEL5
-Provides:   init(clamav-scanner) = sysv
-Requires:   clamav-server-sysvinit = %version-%release
 Requires:   %_initrddir
 Requires(postun):   initscripts
 Requires(post):     chkconfig
@@ -296,7 +276,6 @@ Obsoletes:  clamav-scanner-sysvinit < %version-%release
 %endif
 %if %{with upstart}
 # Remove me after EOL of RHEL6
-Provides:   init(clamav-scanner) = upstart
 Requires:   /etc/init
 Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
@@ -304,18 +283,32 @@ Provides:  clamav-scanner-upstart = %version-%release
 %endif
 Obsoletes:  clamav-scanner-upstart < %version-%release
 %if %{with systemd}
-Provides:   init(clamav-scanner) = systemd
 %endif
-%{?noarch}
 
-%description scanner
+### Fedora Extras introduced them differently :(
+Provides: clamav-server = %{version}-%{release}
+Obsoletes: clamav-server < %{version}-%{release}
+Provides: clamav-server-sysv = %{version}-%{release}
+Obsoletes: clamav-server-sysv < %{version}-%{release}
+Provides: clamav-scanner = %{version}-%{release}
+Obsoletes: clamav-scanner < %{version}-%{release}
+Provides: clamav-scanner-upstart = %{version}-%{release}
+Obsoletes: clamav-scanner-upstart < %{version}-%{release}
+Provides: clamav-server-sysvinit = %{version}-%{release}
+Obsoletes: clamav-server-sysvinit < %{version}-%{release}
+
+
+%description -n clamd
+The Clam AntiVirus Daemon
+See the README file how this can be done with a minimum of effort.
 This package contains a generic system wide clamd service which is
 e.g. used by the clamav-milter package.
 
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
 Group:      System Environment/Daemons
-Requires:   init(clamav-milter)
+Requires: clamd = %{version}-%{release}
+Requires: /usr/sbin/sendmail
 Provides:   user(%milteruser)  = 5
 Provides:   group(%milteruser) = 5
 Requires(post): coreutils
@@ -327,7 +320,6 @@ Provides:   milter(clamav) = postfix
 
 %if %{with sysv}
 # Remove me after EOL of RHEL5
-Provides:   init(clamav-milter) = sysvinit
 Requires(post):     user(%milteruser) clamav-milter
 Requires(preun):    user(%milteruser) clamav-milter
 Requires:       %_initrddir
@@ -339,16 +331,12 @@ Provides:   clamav-milter-sysvinit = %version-%release
 Obsoletes:  clamav-milter-sysvinit < %version-%release
 %if %{with upstart}
 # Remove me after EOL of RHEL6
-Provides:   init(clamav-milter) = upstart
 Requires:   /etc/init
 Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
 Provides:  clamav-milter-upstart = %version-%release
 %endif
 Obsoletes:  clamav-milter-upstart < %version-%release
-%if %{with systemd}
-Provides:   init(clamav-milter) = systemd
-%endif
 
 %description milter
 This package contains files which are needed to run the clamav-milter.
@@ -398,19 +386,21 @@ export have_cv_ipv6=yes
 rm -rf libltdl autom4te.cache Makefile.in
 autoreconf -i
 %configure \
-    --disable-static \
-    --disable-rpath \
-    --disable-silent-rules \
+    --enable-milter \
     --disable-clamav \
-    --with-user=%updateuser \
+    --disable-static \
+    --disable-zlib-vcheck \
+    %{!?with_unrar:--disable-unrar} \
+	--enable-id-check \
+	--enable-dns \
+    --with-dbdir=%homedir \
     --with-group=%updateuser \
     --with-libcurl=%{_prefix} \
-    --with-dbdir=%homedir \
-    --enable-milter \
+    --with-user=%updateuser \
+    --disable-rpath \
+    --disable-silent-rules \
     --enable-clamdtop \
-    --disable-zlib-vcheck \
-    %{!?with_bytecode:--disable-llvm} \
-    %{!?with_unrar:--disable-unrar}
+    %{!?with_bytecode:--disable-llvm}
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
 
@@ -581,7 +571,7 @@ usermod %{updateuser} -a -G virusgroup
 exit 0
 
 
-%pre scanner
+%pre -n clamd
 getent group %{scanuser} >/dev/null || groupadd -r %{scanuser}
 getent passwd %{scanuser} >/dev/null || \
     useradd -r -g %{scanuser} -d / -s /sbin/nologin \
@@ -589,7 +579,7 @@ getent passwd %{scanuser} >/dev/null || \
 usermod %{scanuser} -a -G virusgroup
 exit 0
 
-%post scanner
+%post -n clamd
 %if %{with sysv}
 /sbin/chkconfig --add clamd.scan
 %endif
@@ -597,11 +587,12 @@ exit 0
 /usr/bin/killall -u %scanuser clamd 2>/dev/null || :
 %endif
 %if %{with systemd}
+%systemd_post clamd@.service
 %systemd_post clamd@scan.service
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}
 %endif
 
-%preun scanner
+%preun -n clamd
 %if %{with sysv}
 test "$1" != 0 || %_initrddir/clamd.scan stop &>/dev/null || :
 test "$1" != 0 || /sbin/chkconfig --del clamd.scan
@@ -610,14 +601,16 @@ test "$1" != 0 || /sbin/chkconfig --del clamd.scan
 test "$1" != "0" || /sbin/initctl -q stop clamd.scan || :
 %endif
 %if %{with systemd}
+%systemd_preun clamd@.service
 %systemd_preun clamd@scan.service
 %endif
 
-%postun scanner
+%postun -n clamd
 %if %{with sysv}
 test "$1"  = 0 || %_initrddir/clamd.scan condrestart >/dev/null || :
 %endif
 %if %{with systemd}
+%systemd_postun_with_restart clamd@.service
 %systemd_postun_with_restart clamd@scan.service
 %endif
 
@@ -630,16 +623,6 @@ test -e %freshclamlog || {
     ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
 
-%if %{with systemd}
-%post server
-%systemd_post clamd@.service
-
-%preun server
-%systemd_preun clamd@.service
-
-%postun server
-%systemd_postun_with_restart clamd@.service
-%endif
 
 %triggerin milter -- clamav-scanner
 # Add the milteruser to the scanuser group; this is required when
@@ -761,7 +744,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 ## -----------------------
 
-%files server
+%files -n clamd
 %doc _doc_server/*
 %_mandir/man5/clamd.conf.5*
 %_mandir/man8/clamd.8*
@@ -774,12 +757,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %_unitdir/clamd@.service
 %endif
 
-## -----------------------
-
-%files scanner
 %config(noreplace) %_sysconfdir/clamd.d/scan.conf
 %ghost %scanstatedir/clamd.sock
-
 %if %{with tmpfiles}
   %_tmpfilesdir/clamd.scan.conf
   %ghost %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
@@ -832,6 +811,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
   el6 .
 - Remove provides/obsoletes for very old sub-packges clamav-milter-core,
   clamav-milter-sendmail and clamav-milter-core
+- Call server and scanner sub-packages as clamd (el6 compatible and as uppstream
+  call it)
+- clamav-data provides clamav-db (el6 compatible)
 
 * Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.99.3-6
 - Escape macros in %%changelog
