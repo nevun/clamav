@@ -118,7 +118,7 @@ Patch33:    clamav-0.99.2-temp-cleanup.patch
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
-BuildRequires:  pcre-devel
+BuildRequires:  pcre2-devel
 #BuildRequires:  %_includedir/tcpd.h
 %{?with_bytecode:BuildRequires: bc tcl groff graphviz}
 %if %{have_ocaml}
@@ -815,7 +815,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - Call server and scanner sub-packages as clamd (el6 compatible and as uppstream
   call it)
 - clamav-data provides clamav-db (el6 compatible)
-- Added missing build-time requirement to pcre-devel
+- Add missing build-time requirement pcre2-devel (it misses in el6 at least)
 
 * Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.99.3-6
 - Escape macros in %%changelog
