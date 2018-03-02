@@ -56,14 +56,14 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.99.3
-Release:    7%{?dist}
+Version:    0.99.4
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
 %if %{with unrar}
-Source0:    http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz
-Source999:  http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?prerelease}.tar.gz.sig
+Source0:    http://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz
+Source999:  http://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
@@ -81,7 +81,7 @@ Source7:    clamd.SERVICE.init
 # Check the first line of the file for version, file is not working
 # see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 Source10:   http://db.local.clamav.net/main-58.cvd
-Source11:   http://db.local.clamav.net/daily-24253.cvd
+Source11:   http://db.local.clamav.net/daily-24356.cvd
 Source12:   http://db.local.clamav.net/bytecode-319.cvd
 #for devel
 Source100:  clamd-gen
@@ -112,7 +112,6 @@ Patch27:    clamav-0.98-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:    llvm-glibc.patch
 Patch31:    clamav-0.99.1-setsebool.patch
-Patch33:    clamav-0.99.2-temp-cleanup.patch
 
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
@@ -351,7 +350,6 @@ This package contains files which are needed to run the clamav-milter.
 %apply -n27 -p1 -b .umask
 %apply -n30 -p1
 %apply -n31 -p1 -b .setsebool
-%apply -n33 -p1 -b .temp-cleanup
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
@@ -807,6 +805,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Fri Mar 02 2018 Orion Poplawski <orion@nwra.com> - 0.99.4-1
+- Update to 0.99.4
+- Security fixes CVE-2012-6706 CVE-2017-6419 CVE-2017-11423 CVE-2018-1000085
+  CVE-2018-0202
+
 * Tue Feb 13 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-7
 - Remove sub-packages , sysvinit , upstart,  systemd to be more compatible with
   el6 .
