@@ -57,7 +57,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.4
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -127,7 +127,7 @@ BuildRequires:  pcre2-devel
 BuildRequires: nc
 %if %{with systemd}
 %{?systemd_requires}
-BuildRequires: systemd
+BuildRequires: systemd-devel
 %endif
 #for milter
 BuildRequires:  sendmail-devel
@@ -376,8 +376,8 @@ sed -ri \
 ## ------------------------------------------------------------
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
-CXXFLAGS="$RPM_OPT_FLAGS -std=gnu++98"
+#CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations -std=gnu99"
+#CXXFLAGS="$RPM_OPT_FLAGS -std=gnu++98"
 export LDFLAGS='%{?__global_ldflags} -Wl,--as-needed'
 # IPv6 check is buggy and does not work when there are no IPv6 interface on build machine
 export have_cv_ipv6=yes
@@ -805,13 +805,18 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Mar 12 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-2
+- Revert fix for llvm, build using -std=gnu++98 (#1307378)
+- Revert CFLAG assignment in commmit a4a6d252 (made in 2006)
+- BR systemd-devel to fix detection in configure.
+
 * Fri Mar 02 2018 Orion Poplawski <orion@nwra.com> - 0.99.4-1
 - Update to 0.99.4
 - Security fixes CVE-2012-6706 CVE-2017-6419 CVE-2017-11423 CVE-2018-1000085
   CVE-2018-0202
 
 * Tue Feb 13 2018 Sérgio Basto <sergio@serjux.com> - 0.99.3-7
-- Remove sub-packages , sysvinit , upstart,  systemd to be more compatible with
+- Remove sub-packages sysvinit, upstart and systemd to be more compatible with
   el6 .
 - Remove provides/obsoletes for very old sub-packges clamav-milter-core,
   clamav-milter-sendmail and clamav-milter-core
