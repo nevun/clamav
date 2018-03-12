@@ -22,7 +22,12 @@
 %endif
 %bcond_with     unrar
 %bcond_without  noarch
-%bcond_without  bytecode
+%ifnarch ppc64
+%bcond_without  llvm
+%else
+%bcond_with     llvm
+%endif
+
 ##
 
 %global _hardened_build 1
@@ -119,10 +124,8 @@ BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
 BuildRequires:  pcre2-devel
 #BuildRequires:  %_includedir/tcpd.h
-%{?with_bytecode:BuildRequires: bc tcl groff graphviz}
-%if %{have_ocaml}
-%{?with_bytecode:BuildRequires: ocaml}
-%endif
+BuildRequires:  bc tcl groff graphviz
+%{?have_ocaml:BuildRequires: ocaml}
 # nc reuqired for tests
 BuildRequires: nc
 %if %{with systemd}
@@ -399,7 +402,7 @@ autoreconf -i
     --disable-rpath \
     --disable-silent-rules \
     --enable-clamdtop \
-    %{!?with_bytecode:--disable-llvm}
+    %{!?with_llvm:--disable-llvm}
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
 
@@ -448,13 +451,12 @@ rm -f   $RPM_BUILD_ROOT%_sysconfdir/clamd.conf.sample \
     $RPM_BUILD_ROOT%_libdir/*.la
 
 
-%{?with_bytecode:touch $RPM_BUILD_ROOT%homedir/bytecode.cld}
-touch $RPM_BUILD_ROOT%homedir/{daily,main}.cld
+touch $RPM_BUILD_ROOT%homedir/{daily,main,bytecode}.cld
 touch $RPM_BUILD_ROOT%homedir/mirrors.dat
 
 install -D -m 0644 -p %SOURCE10     $RPM_BUILD_ROOT%homedir/main.cvd
 install -D -m 0644 -p %SOURCE11     $RPM_BUILD_ROOT%homedir/daily.cvd
-%{?with_bytecode:install -D -m 0644 -p %SOURCE12        $RPM_BUILD_ROOT%homedir/bytecode.cvd}
+install -D -m 0644 -p %SOURCE12     $RPM_BUILD_ROOT%homedir/bytecode.cvd
 
 ## prepare the server-files
 install -D -m 0644 -p %SOURCE2      _doc_server/clamd.sysconfig
@@ -809,6 +811,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - Revert fix for llvm, build using -std=gnu++98 (#1307378)
 - Revert CFLAG assignment in commmit a4a6d252 (made in 2006)
 - BR systemd-devel to fix detection in configure.
+- Disable llvm in ppc64 (#1534071)
+- "Disable llvm will use the internal bytecode interpreter rather than the llvm
+  jit", so drop bytecode build condition and use condional on enable or disable
+  llvm.
 
 * Fri Mar 02 2018 Orion Poplawski <orion@nwra.com> - 0.99.4-1
 - Update to 0.99.4
