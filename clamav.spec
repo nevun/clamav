@@ -192,7 +192,6 @@ build applications using clamav.
 Summary:    Virus signature data for the Clam Antivirus scanner
 Group:      Applications/File
 Requires:   clamav-filesystem = %version-%release
-Requires:   clamav-filesystem = %version-%release
 Provides:       data(clamav) = full
 Conflicts:      data(clamav) < full
 Conflicts:      data(clamav) > full
@@ -217,6 +216,8 @@ definitions.
 %package data-empty
 Summary:    Empty data package for the Clam Antivirus scanner
 Group:      Applications/File
+Requires:   clamav-filesystem = %version-%release
+Requires:   clamav-update = %version-%release
 Provides:   data(clamav) = empty
 Conflicts:  data(clamav) < empty
 Conflicts:  data(clamav) > empty
@@ -731,9 +732,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %files data-empty
-%defattr(-,%updateuser,%updateuser,-)
-%ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
-
+# empty, ghostfiles of *.cld are in update sub-package
 
 ## -----------------------
 
