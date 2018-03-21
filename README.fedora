@@ -1,3 +1,6 @@
+Please note since el7 and Fedora 15 or 19 we use only systemd.
+upstart and sysv was dropped, this document may still applies to el6.
+
 A clamav-milter setup consists of the following three components:
 
 * the clamav-milter itself
