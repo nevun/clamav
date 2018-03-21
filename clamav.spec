@@ -62,7 +62,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.99.4
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        http://www.clamav.net
@@ -724,7 +724,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 %files data-empty
 %defattr(-,%updateuser,%updateuser,-)
-%ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cvd
+%ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
 
 
 ## -----------------------
@@ -807,6 +807,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Mar 21 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-3
+- Fix data-empty sub-package (ghost the correct files)
+
 * Mon Mar 12 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-2
 - Revert fix for llvm, build using -std=gnu++98 (#1307378)
 - Revert CFLAG assignment in commmit a4a6d252 (made in 2006)
