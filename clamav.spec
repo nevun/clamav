@@ -286,7 +286,11 @@ Provides:  clamav-scanner-upstart = %version-%release
 %endif
 Obsoletes:  clamav-scanner-upstart < %version-%release
 %if %{with systemd}
+Provides: clamav-scanner-systemd = %{version}-%{release}
+Provides: clamav-server-systemd = %{version}-%{release}
 %endif
+Obsoletes: clamav-scanner-systemd < %{version}-%{release}
+Obsoletes: clamav-server-systemd < %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
 Provides: clamav-server = %{version}-%{release}
@@ -340,6 +344,10 @@ Requires(preun):    /sbin/initctl
 Provides:  clamav-milter-upstart = %version-%release
 %endif
 Obsoletes:  clamav-milter-upstart < %version-%release
+%if %{with systemd}
+Provides: clamav-milter-systemd = %{version}-%{release}
+%endif
+Obsoletes: clamav-milter-systemd < %{version}-%{release}
 
 %description milter
 This package contains files which are needed to run the clamav-milter.
@@ -809,6 +817,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %changelog
 * Wed Mar 21 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-3
 - Fix data-empty sub-package (ghost the correct files)
+- Add Obsoletes systemd sub-packages
 
 * Mon Mar 12 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-2
 - Revert fix for llvm, build using -std=gnu++98 (#1307378)
