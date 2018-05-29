@@ -317,8 +317,9 @@ e.g. used by the clamav-milter package.
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
 Group:      System Environment/Daemons
-Requires: clamd = %{version}-%{release}
-Requires: /usr/sbin/sendmail
+# clamav-milter could work without clamd and without sendmail
+#Requires: clamd = %{version}-%{release}
+#Requires: /usr/sbin/sendmail
 Provides:   user(%milteruser)  = 5
 Provides:   group(%milteruser) = 5
 Requires(post): coreutils
@@ -818,6 +819,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %changelog
 * Tue May 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
 - Move comments one line (to read before starting the scriptlet)
+- clamav-milter could work without clamd and without sendmail (#1583599)
 
 * Mon May 28 2018 Robert Scheck <robert@fedoraproject.org> - 0.100.0-1
 - Upgrade to 0.100.0 (#1565381)
