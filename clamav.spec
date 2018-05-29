@@ -62,7 +62,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.100.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -124,10 +124,10 @@ BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel json-c-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
 BuildRequires:  pcre2-devel
-#BuildRequires:  %_includedir/tcpd.h
+#BuildRequires:  %%_includedir/tcpd.h
 BuildRequires:  bc tcl groff graphviz
 %{?have_ocaml:BuildRequires: ocaml}
-# nc reuqired for tests
+# nc required for tests
 BuildRequires: nc
 %if %{with systemd}
 %{?systemd_requires}
@@ -271,8 +271,8 @@ Provides:   user(%scanuser)  = 49
 Provides:   group(%scanuser) = 49
 Requires(pre):  shadow-utils
 Requires(pre):  group(virusgroup)
+# Remove me after EOL of RHEL6
 %if %{with sysv}
-# Remove me after EOL of RHEL5
 Requires:   %_initrddir
 Requires(postun):   initscripts
 Requires(post):     chkconfig
@@ -280,8 +280,8 @@ Requires(preun):    chkconfig initscripts
 %else
 Obsoletes:  clamav-scanner-sysvinit < %version-%release
 %endif
-%if %{with upstart}
 # Remove me after EOL of RHEL6
+%if %{with upstart}
 Requires:   /etc/init
 Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
@@ -328,8 +328,8 @@ Requires(pre):  group(virusgroup)
 Provides:   milter(clamav) = sendmail
 Provides:   milter(clamav) = postfix
 
+# Remove me after EOL of RHEL6
 %if %{with sysv}
-# Remove me after EOL of RHEL5
 Requires(post):     user(%milteruser) clamav-milter
 Requires(preun):    user(%milteruser) clamav-milter
 Requires:       %_initrddir
@@ -339,8 +339,8 @@ Requires(preun):    chkconfig initscripts
 Provides:   clamav-milter-sysvinit = %version-%release
 %endif
 Obsoletes:  clamav-milter-sysvinit < %version-%release
-%if %{with upstart}
 # Remove me after EOL of RHEL6
+%if %{with upstart}
 Requires:   /etc/init
 Requires(post):     /usr/bin/killall
 Requires(preun):    /sbin/initctl
@@ -816,6 +816,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue May 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
+- Move comments one line (to read before starting the scriptlet)
+
 * Mon May 28 2018 Robert Scheck <robert@fedoraproject.org> - 0.100.0-1
 - Upgrade to 0.100.0 (#1565381)
 
