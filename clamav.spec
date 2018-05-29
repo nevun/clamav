@@ -61,14 +61,14 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.99.4
-Release:    3%{?dist}
+Version:    0.100.0
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
-URL:        http://www.clamav.net
+URL:        https://www.clamav.net/
 %if %{with unrar}
-Source0:    http://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz
-Source999:  http://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz.sig
+Source0:    https://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz
+Source999:  https://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
@@ -81,12 +81,12 @@ Source2:    clamd.sysconfig
 Source3:    clamd.logrotate
 Source5:    clamd-README
 Source7:    clamd.SERVICE.init
-# To download the *.cvd, go to http://www.clamav.net and use the links
+# To download the *.cvd, go to https://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
 # Check the first line of the file for version, file is not working
 # see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 Source10:   http://db.local.clamav.net/main-58.cvd
-Source11:   http://db.local.clamav.net/daily-24356.cvd
+Source11:   http://db.local.clamav.net/daily-24611.cvd
 Source12:   http://db.local.clamav.net/bytecode-319.cvd
 #for devel
 Source100:  clamd-gen
@@ -112,15 +112,16 @@ Source520:  clamd-wrapper
 #for server-systemd
 Source530:  clamd@.service
 
+Patch0:     clamav-0.100.0-stats-deprecation.patch
 Patch24:    clamav-0.99-private.patch
-Patch27:    clamav-0.98-umask.patch
+Patch27:    clamav-0.100.0-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:    llvm-glibc.patch
 Patch31:    clamav-0.99.1-setsebool.patch
 
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
-BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel
+BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel json-c-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
 BuildRequires:  pcre2-devel
 #BuildRequires:  %_includedir/tcpd.h
@@ -170,6 +171,7 @@ user-creation scripts required by clamav.
 Summary:    Dynamic libraries for the Clam Antivirus scanner
 Group:      System Environment/Libraries
 Requires:   data(clamav)
+Provides:   bundled(libmspack) = 0.5-0.1.alpha.modified_by_clamav
 
 %description lib
 This package contains dynamic libraries shared between applications
@@ -358,6 +360,7 @@ This package contains files which are needed to run the clamav-milter.
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
 
+%apply -n0 -p0 -b .stats-deprecation
 %apply -n24 -p1 -b .private
 %apply -n27 -p1 -b .umask
 %apply -n30 -p1
@@ -690,7 +693,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %files
-%doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS README UPGRADE
 %doc docs/*.pdf
 %_bindir/*
 %_mandir/man[15]/*
@@ -814,6 +816,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon May 28 2018 Robert Scheck <robert@fedoraproject.org> - 0.100.0-1
+- Upgrade to 0.100.0 (#1565381)
+
 * Wed Mar 21 2018 Sérgio Basto <sergio@serjux.com> - 0.99.4-3
 - Fix data-empty sub-package (ghost the correct files)
 - Add Obsoletes systemd sub-packages
