@@ -47,7 +47,6 @@
 %global milterlog   %_var/log/clamav-milter.log
 %global milterstatedir  %_rundir/clamav-milter
 %global pkgdatadir  %_datadir/%name
-
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
@@ -153,9 +152,6 @@ TO DATE.
 %package filesystem
 Summary:    Filesystem structure for clamav
 Group:      Applications/File
-Provides:   user(%updateuser)  = 4
-Provides:   group(%updateuser) = 4
-Provides:   group(virusgroup)
 # Prevent version mix
 Conflicts:  %name < %version-%release
 Conflicts:  %name > %version-%release
@@ -245,7 +241,6 @@ Requires:   clamav-filesystem = %version-%release
 Requires:   crontabs
 Requires:   /etc/cron.d
 Requires(post):     %__chown %__chmod
-Requires(post):     group(%updateuser)
 
 %description update
 This package contains programs which can be used to update the clamav
@@ -260,6 +255,7 @@ Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
+Requires(pre):  shadow-utils
 %if %{with sysv}
 Requires:   %_initrddir
 Provides:   clamav-server-sysvinit = %version-%release
@@ -267,10 +263,6 @@ Provides:   clamav-server-sysvinit = %version-%release
 Obsoletes:  clamav-server-sysvinit < %version-%release
 %if %{with systemd}
 %endif
-Provides:   user(%scanuser)  = 49
-Provides:   group(%scanuser) = 49
-Requires(pre):  shadow-utils
-Requires(pre):  group(virusgroup)
 # Remove me after EOL of RHEL6
 %if %{with sysv}
 Requires:   %_initrddir
@@ -288,6 +280,7 @@ Requires(preun):    /sbin/initctl
 Provides:  clamav-scanner-upstart = %version-%release
 %endif
 Obsoletes:  clamav-scanner-upstart < %version-%release
+
 %if %{with systemd}
 Provides: clamav-scanner-systemd = %{version}-%{release}
 Provides: clamav-server-systemd = %{version}-%{release}
@@ -320,19 +313,12 @@ Group:      System Environment/Daemons
 # clamav-milter could work without clamd and without sendmail
 #Requires: clamd = %{version}-%{release}
 #Requires: /usr/sbin/sendmail
-Provides:   user(%milteruser)  = 5
-Provides:   group(%milteruser) = 5
+Requires:   clamav-filesystem = %version-%release
 Requires(post): coreutils
 Requires(pre):  shadow-utils
-Requires(pre):  group(virusgroup)
-
-Provides:   milter(clamav) = sendmail
-Provides:   milter(clamav) = postfix
 
 # Remove me after EOL of RHEL6
 %if %{with sysv}
-Requires(post):     user(%milteruser) clamav-milter
-Requires(preun):    user(%milteruser) clamav-milter
 Requires:       %_initrddir
 Requires(postun):   initscripts
 Requires(post):     chkconfig
@@ -348,6 +334,7 @@ Requires(preun):    /sbin/initctl
 Provides:  clamav-milter-upstart = %version-%release
 %endif
 Obsoletes:  clamav-milter-upstart < %version-%release
+
 %if %{with systemd}
 Provides: clamav-milter-systemd = %{version}-%{release}
 %endif
@@ -820,6 +807,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 * Tue May 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
 - Move comments one line (to read before starting the scriptlet)
 - clamav-milter could work without clamd and without sendmail (#1583599)
+- Get rid of provides/requires with updateuser, virusgroup, scanuser and
+  milteruser and just simply require clamav-filesystem
 
 * Mon May 28 2018 Robert Scheck <robert@fedoraproject.org> - 0.100.0-1
 - Upgrade to 0.100.0 (#1565381)
