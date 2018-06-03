@@ -301,12 +301,12 @@ Obsoletes: clamav-scanner-upstart < %{version}-%{release}
 Provides: clamav-server-sysvinit = %{version}-%{release}
 Obsoletes: clamav-server-sysvinit < %{version}-%{release}
 
-
 %description -n clamd
 The Clam AntiVirus Daemon
 See the README file how this can be done with a minimum of effort.
 This package contains a generic system wide clamd service which is
 e.g. used by the clamav-milter package.
+
 
 %package server-systemd
 Requires:   clamd = %{version}-%{release}
@@ -322,6 +322,7 @@ Summary:    systemd initscripts for clamav scanner daemon
 %description scanner-systemd
 Empty package just to allow migration of service without stop it and disable it
 %files scanner-systemd
+
 
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
@@ -351,13 +352,20 @@ Provides:  clamav-milter-upstart = %version-%release
 %endif
 Obsoletes:  clamav-milter-upstart < %version-%release
 
-%if %{with systemd}
-Provides: clamav-milter-systemd = %{version}-%{release}
-%endif
-Obsoletes: clamav-milter-systemd < %{version}-%{release}
+#if %{with systemd}
+#Provides: clamav-milter-systemd = %{version}-%{release}
+#endif
+#Obsoletes: clamav-milter-systemd < %{version}-%{release}
 
 %description milter
 This package contains files which are needed to run the clamav-milter.
+
+%package milter-systemd
+Requires:   clamd = %{version}-%{release}
+Summary: Systemd initscripts for the clamav sendmail-milter
+%description milter-systemd
+Empty package just to allow migration of service without stop it and disable it
+%files milter-systemd
 
 ## ------------------------------------------------------------
 
@@ -671,7 +679,9 @@ test -e %milterlog || {
 /usr/bin/killall -u %milteruser clamav-milter 2>/dev/null || :
 %endif
 %if %{with systemd}
-%systemd_post clamav-milter.service
+#systemd_post clamav-milter.service
+# Package upgrade, not uninstall
+systemctl try-restart clamav-milter.service >/dev/null 2>&1 || :
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :}
 %endif
 
