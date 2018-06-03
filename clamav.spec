@@ -281,12 +281,13 @@ Provides:  clamav-scanner-upstart = %version-%release
 %endif
 Obsoletes:  clamav-scanner-upstart < %version-%release
 
-%if %{with systemd}
-Provides: clamav-scanner-systemd = %{version}-%{release}
-Provides: clamav-server-systemd = %{version}-%{release}
-%endif
-Obsoletes: clamav-scanner-systemd < %{version}-%{release}
-Obsoletes: clamav-server-systemd < %{version}-%{release}
+#if %{with systemd}
+#Provides: clamav-scanner-systemd = %{version}-%{release}
+#Provides: clamav-server-systemd = %{version}-%{release}
+#endif
+
+#Obsoletes: clamav-scanner-systemd < %{version}-%{release}
+#Obsoletes: clamav-server-systemd < %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
 Provides: clamav-server = %{version}-%{release}
@@ -307,11 +308,26 @@ See the README file how this can be done with a minimum of effort.
 This package contains a generic system wide clamd service which is
 e.g. used by the clamav-milter package.
 
+%package server-systemd
+Requires:   clamd = %{version}-%{release}
+Summary:    Systemd initscripts for clamav server
+%description server-systemd
+Empty package just to allow migration of service without stop it and disable it
+%files server-systemd
+
+
+%package scanner-systemd
+Requires:   clamd = %{version}-%{release}
+Summary:    systemd initscripts for clamav scanner daemon
+%description scanner-systemd
+Empty package just to allow migration of service without stop it and disable it
+%files scanner-systemd
+
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
 Group:      System Environment/Daemons
 # clamav-milter could work without clamd and without sendmail
-#Requires: clamd = %{version}-%{release}
+#Requires: clamd = %%{version}-%%{release}
 #Requires: /usr/sbin/sendmail
 Requires:   clamav-filesystem = %version-%release
 Requires(post): coreutils
@@ -588,8 +604,11 @@ exit 0
 /usr/bin/killall -u %scanuser clamd 2>/dev/null || :
 %endif
 %if %{with systemd}
-%systemd_post clamd@.service
-%systemd_post clamd@scan.service
+#systemd_post clamd@.service
+#systemd_post clamd@scan.service
+# Package upgrade, not uninstall
+systemctl try-restart clamd@.service >/dev/null 2>&1 || :
+systemctl try-restart clamd@scan.service >/dev/null 2>&1 || :
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}
 %endif
 
@@ -804,7 +823,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
-* Tue May 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
+* Sun Jun 03 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
+- Try to mitigate bug #1583599
 - Move comments one line (to read before starting the scriptlet)
 - clamav-milter could work without clamd and without sendmail (#1583599)
 - Get rid of provides/requires with updateuser, virusgroup, scanuser and
