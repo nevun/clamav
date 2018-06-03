@@ -313,6 +313,7 @@ Requires:   clamd = %{version}-%{release}
 Summary:    Systemd initscripts for clamav server
 %description server-systemd
 Empty package just to allow migration of service without stop it and disable it
+(#1583599). you may remove this package now (dnf remove clamav-server-systemd).
 %files server-systemd
 
 
@@ -321,6 +322,7 @@ Requires:   clamd = %{version}-%{release}
 Summary:    systemd initscripts for clamav scanner daemon
 %description scanner-systemd
 Empty package just to allow migration of service without stop it and disable it
+(#1583599). you may remove this package now (dnf remove clamav-scanner-systemd).
 %files scanner-systemd
 
 
@@ -365,6 +367,7 @@ Requires:   clamd = %{version}-%{release}
 Summary: Systemd initscripts for the clamav sendmail-milter
 %description milter-systemd
 Empty package just to allow migration of service without stop it and disable it
+(#1583599). you may remove this package now (dnf remove clamav-milter-systemd).
 %files milter-systemd
 
 ## ------------------------------------------------------------
