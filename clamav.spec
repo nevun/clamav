@@ -61,7 +61,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.100.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -190,48 +190,17 @@ build applications using clamav.
 Summary:    Virus signature data for the Clam Antivirus scanner
 Group:      Applications/File
 Requires:   clamav-filesystem = %version-%release
-Provides:       data(clamav) = full
-Conflicts:      data(clamav) < full
-Conflicts:      data(clamav) > full
-Provides: clamav-db = %{version}-%{release}
-Obsoletes: clamav-db < %{version}-%{release}
+Provides:   data(clamav) = full
+Provides:   clamav-db = %{version}-%{release}
+Obsoletes:  clamav-db < %{version}-%{release}
 %{?noarch}
 
 %description data
 This package contains the virus-database needed by clamav. This
 database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job. This package and the
-'clamav-data-empty' package are mutually exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%package data-empty
-Summary:    Empty data package for the Clam Antivirus scanner
-Group:      Applications/File
-Requires:   clamav-filesystem = %version-%release
-Requires:   clamav-update = %version-%release
-Provides:   data(clamav) = empty
-Conflicts:  data(clamav) < empty
-Conflicts:  data(clamav) > empty
-%{?noarch}
-
-%description data-empty
-This is an empty package to fulfill inter-package dependencies of the
-clamav suite. This package and the 'clamav-data' package are mutually
-exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
+ships a corresponding cron-job. Use this package when you want a
+working (but perhaps outdated) virus scanner immediately after package
+installation.
 
 
 %package update
@@ -240,12 +209,18 @@ Group:      Applications/File
 Requires:   clamav-filesystem = %version-%release
 Requires:   crontabs
 Requires:   /etc/cron.d
+Provides:   data(clamav) = empty
+Provides:   clamav-data-empty = %{version}-%{release}
+Obsoletes:  clamav-data-empty < %{version}-%{release}
 Requires(post):     %__chown %__chmod
 
 %description update
 This package contains programs which can be used to update the clamav
 anti-virus database automatically. It uses the freshclam(1) utility for
 this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
+Use this package when you go updating the virus database regulary and
+do not want to download a >120MB sized rpm-package with outdated virus
+definitions.
 
 
 %package -n clamd
@@ -753,11 +728,6 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %config %verify(not size md5 mtime) %homedir/*.cvd
 
 
-%files data-empty
-# empty, ghostfiles of *.cld are in update sub-package
-
-## -----------------------
-
 %files update
 %_bindir/freshclam
 %_mandir/*/freshclam*
@@ -836,6 +806,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Jul 02 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-3
+- Remove sub-package clamav-data-empty
+- Also remove conflicts between clamav-data and clamav-data-empty
+
 * Sun Jun 03 2018 Sérgio Basto <sergio@serjux.com> - 0.100.0-2
 - Try to mitigate bug #1583599
 - Move comments one line (to read before starting the scriptlet)
