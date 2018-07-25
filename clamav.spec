@@ -116,7 +116,6 @@ Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.100.0-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
 Patch30:    llvm-glibc.patch
-Patch31:    clamav-0.99.1-setsebool.patch
 
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
@@ -354,7 +353,6 @@ Empty package just to allow migration of service without stop it and disable it
 %apply -n24 -p1 -b .private
 %apply -n27 -p1 -b .umask
 %apply -n30 -p1
-%apply -n31 -p1 -b .setsebool
 %{?apply_end}
 
 install -p -m0644 %SOURCE300 clamav-milter/
