@@ -509,7 +509,7 @@ install -D -p -m 0644 %SOURCE410 $RPM_BUILD_ROOT%_sysconfdir/init/clamd.scan.con
 install -D -p -m 0644 %SOURCE430 $RPM_BUILD_ROOT%_unitdir/clamd@scan.service
 
 cat << EOF > $RPM_BUILD_ROOT%_tmpfilesdir/clamd.scan.conf
-d %scanstatedir 0710 %scanuser %scanuser
+d %scanstatedir 0710 %scanuser virusgroup
 EOF
 
 touch $RPM_BUILD_ROOT%scanstatedir/clamd.{sock,pid}
@@ -759,9 +759,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %ghost %scanstatedir/clamd.sock
 %if %{with tmpfiles}
   %_tmpfilesdir/clamd.scan.conf
-  %ghost %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
+  %ghost %dir %attr(0710,%scanuser,virusgroup) %scanstatedir
 %else
-  %dir %attr(0710,%scanuser,%scanuser) %scanstatedir
+  %dir %attr(0710,%scanuser,virusgroup) %scanstatedir
 %endif
 %if %{with sysv}
   %attr(0755,root,root) %config %_initrddir/clamd.scan
