@@ -21,7 +21,6 @@
 %endif
 %endif
 %bcond_with     unrar
-%bcond_without  noarch
 %ifnarch ppc64
 %bcond_without  llvm
 %else
@@ -50,7 +49,6 @@
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
-%{?with_noarch:%global noarch   BuildArch:  noarch}
 %{!?_unitdir:%global _unitdir /lib/systemd/system}
 %{!?_initrddir:%global _initrddir /etc/rc.d/init.d}
 
@@ -152,7 +150,7 @@ Group:      Applications/File
 Conflicts:  %name < %version-%release
 Conflicts:  %name > %version-%release
 Requires(pre):  shadow-utils
-%{?noarch}
+BuildArch:  noarch
 
 %description filesystem
 This package provides the filesystem structure and contains the
@@ -189,7 +187,7 @@ Requires:   clamav-filesystem = %version-%release
 Provides:   data(clamav) = full
 Provides:   clamav-db = %{version}-%{release}
 Obsoletes:  clamav-db < %{version}-%{release}
-%{?noarch}
+BuildArch:  noarch
 
 %description data
 This package contains the virus-database needed by clamav. This
@@ -804,6 +802,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 - Modify group of /var/run/clamd.scan to virusgroup
 - Add some SELinux notes from (#787434)
 - Drop pointless clamav-0.99.1-setsebool.patch
+- Drop conditionalized build of noarch
 
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.100.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
