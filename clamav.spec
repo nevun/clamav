@@ -61,7 +61,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.100.1
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -804,6 +804,11 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.1-3
+- Modify group of /var/run/clamd.scan to virusgroup
+- Add some SELinux notes from (#787434)
+- Drop pointless clamav-0.99.1-setsebool.patch
+
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.100.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
