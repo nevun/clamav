@@ -50,10 +50,25 @@ so that the socket can be accessed by clamd and by the applications
 using clamd. Make sure that the socket is not world accessible; else,
 DOS attacks or worse are trivial.
 
+After emulating these steps by hand (or else rebooting), you still need set
+SELinux:
+
+ chcon -t clamd_var_run_t /var/run/clamd.<SERVICE>
+or
+ restorecon -R -v "/var/run/clamd.<SERVICE>"
+
+More SELinux notes:
+you may need run:
+
+ setsebool -P antivirus_can_scan_system 1
+
+and also maybe this one (I need to confirm that is obsolete)
+
+ setsebool -P antivirus_use_jit 1
 
 [Disclaimer:
  this file and the script/configfiles are not part of the official
  clamav package.
 
  Please send complaints and comments to
- mailto:enrico.scholz@informatik.tu-chemnitz.de!]
+ https://bugzilla.redhat.com/enter_bug.cgi?product=Fedora%20EPEL&component=clamav]
