@@ -38,6 +38,8 @@
 %endif
 
 %{!?_rundir:%global _rundir /var/run}
+%{!?_unitdir:%global _unitdir /lib/systemd/system}
+%{!?_initrddir:%global _initrddir /etc/rc.d/init.d}
 
 %global updateuser  clamupdate
 %global homedir     %_var/lib/clamav
@@ -48,9 +50,6 @@
 %global pkgdatadir  %_datadir/%name
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
-
-%{!?_unitdir:%global _unitdir /lib/systemd/system}
-%{!?_initrddir:%global _initrddir /etc/rc.d/init.d}
 
 
 Summary:    End-user tools for the Clam Antivirus scanner
