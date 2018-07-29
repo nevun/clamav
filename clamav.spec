@@ -53,9 +53,6 @@
 %{?with_noarch:%global noarch   BuildArch:  noarch}
 %{!?_unitdir:%global _unitdir /lib/systemd/system}
 %{!?_initrddir:%global _initrddir /etc/rc.d/init.d}
-%{!?release_func:%global release_func() %%{?prerelease:0.}%1%%{?prerelease:.%%prerelease}%%{?dist}}
-%{!?apply:%global  apply(p:n:b:) %patch%%{-n:%%{-n*}} %%{-p:-p %%{-p*}} %%{-b:-b %%{-b*}} \
-%nil}
 
 
 Summary:    End-user tools for the Clam Antivirus scanner
@@ -349,11 +346,10 @@ Empty package just to allow migration of service without stop it and disable it
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
 
-%apply -n0 -p0 -b .stats-deprecation
-%apply -n24 -p1 -b .private
-%apply -n27 -p1 -b .umask
-%apply -n30 -p1
-%{?apply_end}
+%patch0 -p0 -b .stats-deprecation
+%patch24 -p1 -b .private
+%patch27 -p1 -b .umask
+%patch30 -p1
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
