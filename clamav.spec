@@ -55,7 +55,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.100.1
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -106,6 +106,7 @@ Source520:  clamd-wrapper
 Source530:  clamd@.service
 
 Patch0:     clamav-0.100.0-stats-deprecation.patch
+Patch1:     clamav-0.100.1-defaults_locations.patch
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.100.0-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
@@ -344,6 +345,7 @@ Empty package just to allow migration of service without stop it and disable it
 %setup -q -n %{name}-%{version}%{?prerelease}
 
 %patch0 -p0 -b .stats-deprecation
+%patch1 -p1 -b .default_confs
 %patch24 -p1 -b .private
 %patch27 -p1 -b .umask
 %patch30 -p1
@@ -797,6 +799,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Jul 30 2018 Sérgio Basto <sergio@serjux.com> - 0.100.1-4
+- Change the default location of configuration files in clamconf, binaries and
+  man pages, replacing with our default packaging (#859339).
+
 * Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 0.100.1-3
 - Modify group of /var/run/clamd.scan to virusgroup
 - Add some SELinux notes from (#787434)
