@@ -76,8 +76,8 @@ Source5:    clamd-README
 Source7:    clamd.SERVICE.init
 # To download the *.cvd, go to https://www.clamav.net and use the links
 # there (I renamed the files to add the -version suffix for verifying).
-# Check the first line of the file for version, file is not working
-# see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
+# Check the first line of the file for version or run file *cvd
+# Attention file < 5.33-7 have bugs see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 Source10:   http://db.local.clamav.net/main-58.cvd
 Source11:   http://db.local.clamav.net/daily-25005.cvd
 Source12:   http://db.local.clamav.net/bytecode-327.cvd
