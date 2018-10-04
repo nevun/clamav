@@ -55,7 +55,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.100.2
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -799,8 +799,13 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Oct 04 2018 Sérgio Basto <sergio@serjux.com> - 0.100.2-2
+- Revert unwanted committed parts of commit "clean whitespace"
+
 * Thu Oct 04 2018 Sérgio Basto <sergio@serjux.com> - 0.100.2-1
 - Update to 0.100.2
+- Fix logrotate example (#1610735)
+- Improve clamd@.service (enter in commit "clean whitespace" by mistake sorry)
 
 * Mon Jul 30 2018 Sérgio Basto <sergio@serjux.com> - 0.100.1-4
 - Change the default location of configuration files in clamconf, binaries and
