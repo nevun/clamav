@@ -54,8 +54,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.100.1
-Release:    4%{?dist}
+Version:    0.100.2
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -79,8 +79,8 @@ Source7:    clamd.SERVICE.init
 # Check the first line of the file for version, file is not working
 # see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 Source10:   http://db.local.clamav.net/main-58.cvd
-Source11:   http://db.local.clamav.net/daily-24741.cvd
-Source12:   http://db.local.clamav.net/bytecode-324.cvd
+Source11:   http://db.local.clamav.net/daily-25005.cvd
+Source12:   http://db.local.clamav.net/bytecode-327.cvd
 #for devel
 Source100:  clamd-gen
 #for update
@@ -799,6 +799,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Oct 04 2018 Sérgio Basto <sergio@serjux.com> - 0.100.2-1
+- Update to 0.100.2
+
 * Mon Jul 30 2018 Sérgio Basto <sergio@serjux.com> - 0.100.1-4
 - Change the default location of configuration files in clamconf, binaries and
   man pages, replacing with our default packaging (#859339).
