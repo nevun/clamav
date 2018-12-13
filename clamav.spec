@@ -685,7 +685,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %doc NEWS.md README.md docs/html
 %_bindir/clambc
 %_bindir/clamconf
-%_bindir/clamtop
+%_bindir/clamdscan
+%_bindir/clamdtop
 %_bindir/clamscan
 %_bindir/clamsubmit
 %_bindir/sigtool
