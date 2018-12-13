@@ -114,6 +114,7 @@ Patch30:    llvm-glibc.patch
 
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
+BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel json-c-devel
 BuildRequires:  ncurses-devel openssl-devel libxml2-devel
 BuildRequires:  pcre2-devel
