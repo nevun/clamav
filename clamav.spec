@@ -393,7 +393,6 @@ autoreconf -i
     --enable-dns \
     --with-dbdir=%homedir \
     --with-group=%updateuser \
-    --with-libcurl=%{_prefix} \
     --with-user=%updateuser \
     --disable-rpath \
     --disable-silent-rules \
@@ -415,7 +414,7 @@ sed -i \
 ## ------------------------------------------------------------
 
 %install
-rm -rf "$RPM_BUILD_ROOT" _doc*
+rm -rf _doc*
 %make_install
 
 function smartsubst() {
@@ -682,11 +681,15 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %files
-%doc docs/*.pdf
-%_bindir/*
+%license COPYING
+%doc NEWS.md README.md docs/html
+%_bindir/clambc
+%_bindir/clamconf
+%_bindir/clamtop
+%_bindir/clamscan
+%_bindir/clamsubmit
+%_bindir/sigtool
 %_mandir/man[15]/*
-%exclude %_bindir/clamav-config
-%exclude %_bindir/freshclam
 %exclude %_mandir/*/freshclam*
 %exclude %_mandir/man5/clamd.conf.5*
 
@@ -802,6 +805,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %changelog
 * Thu Dec 13 2018 Orion Poplawski <orion@nwra.com> - 0.101.0-1
 - Update to 0.101.0
+- Add %%license
+- pdf docs replaced with html
 
 * Thu Oct 04 2018 Sérgio Basto <sergio@serjux.com> - 0.100.2-2
 - Revert unwanted committed parts of commit "clean whitespace"
