@@ -1,0 +1,3445 @@
+From dee22f2acf5e322c24ff5df4b6606f93eac5690e Mon Sep 17 00:00:00 2001
+From: Micah Snyder <micasnyd@cisco.com>
+Date: Wed, 5 Dec 2018 20:46:20 -0500
+Subject: [PATCH] Replacing libclamav/cltypes.h with clamav-types.h.in, which
+ generates a header clamav-types.h that we install alongside clamav.h.
+
+---
+ Makefile.am                   |   2 +
+ Makefile.in                   |  72 +++++++++++++---
+ clamav-milter/Makefile.in     |  13 +++
+ clamav-types.h.in             |  84 ++++++++++++++++++
+ clambc/Makefile.in            |  13 +++
+ clambc/bcrun.c                |   1 -
+ clamconf/Makefile.in          |  13 +++
+ clamd/Makefile.in             |  13 +++
+ clamd/others.h                |   2 +-
+ clamd/server-th.c             |   1 -
+ clamdscan/Makefile.in         |  13 +++
+ clamdtop/Makefile.in          |  13 +++
+ clamscan/Makefile.in          |  13 +++
+ clamscan/manager.c            |   1 -
+ clamsubmit/Makefile.in        |  13 +++
+ configure                     | 157 +++++++++++++++++++++++++++++++++-
+ configure.ac                  |   4 +
+ database/Makefile.in          |  13 +++
+ docs/Makefile.in              |  13 +++
+ etc/Makefile.in               |  13 +++
+ freshclam/Makefile.in         |  13 +++
+ freshclam/mirman.c            |   1 -
+ freshclam/mirman.h            |   2 +-
+ libclamav/Makefile.am         |   1 -
+ libclamav/Makefile.in         |  43 ++++++----
+ libclamav/adc.c               |   1 -
+ libclamav/apm.c               |   2 +-
+ libclamav/apm.h               |   2 +-
+ libclamav/arc4.c              |   2 +-
+ libclamav/arc4.h              |   2 +-
+ libclamav/aspack.c            |   1 -
+ libclamav/aspack.h            |   2 +-
+ libclamav/binhex.c            |   1 -
+ libclamav/bytecode.h          |   2 +-
+ libclamav/bytecode_api.c      |   1 -
+ libclamav/bytecode_api_decl.c |   2 +-
+ libclamav/bytecode_detect.c   |   1 -
+ libclamav/bytecode_nojit.c    |   1 -
+ libclamav/clamav.h            |   2 +-
+ libclamav/cltypes.h           | 121 --------------------------
+ libclamav/cpio.c              |   1 -
+ libclamav/dconf.c             |   1 -
+ libclamav/dconf.h             |   1 -
+ libclamav/dmg.c               |   1 -
+ libclamav/dmg.h               |   2 +-
+ libclamav/elf.c               |   1 -
+ libclamav/elf.h               |   1 -
+ libclamav/entconv.c           |   1 -
+ libclamav/entconv.h           |   2 +-
+ libclamav/events.h            |   2 +-
+ libclamav/execs.h             |   2 +-
+ libclamav/explode.h           |   2 +-
+ libclamav/filetypes.h         |   1 -
+ libclamav/filtering.h         |   2 +-
+ libclamav/fmap.c              |   1 -
+ libclamav/fmap.h              |   2 +-
+ libclamav/fsg.c               |   1 -
+ libclamav/fsg.h               |   2 +-
+ libclamav/gpt.c               |   1 -
+ libclamav/gpt.h               |   2 +-
+ libclamav/hashtab.c           |   1 -
+ libclamav/hashtab.h           |   2 +-
+ libclamav/hfsplus.c           |   1 -
+ libclamav/hfsplus.h           |   2 +-
+ libclamav/ishield.c           |   1 -
+ libclamav/jpeg.c              |   1 -
+ libclamav/json_api.c          |   1 -
+ libclamav/json_api.h          |   2 +-
+ libclamav/jsparse/js-norm.c   |   1 -
+ libclamav/lzma_iface.h        |   2 +-
+ libclamav/macho.c             |   1 -
+ libclamav/matcher-ac.c        |   1 -
+ libclamav/matcher-ac.h        |   2 +-
+ libclamav/matcher-bm.c        |   1 -
+ libclamav/matcher-bm.h        |   2 +-
+ libclamav/matcher-byte-comp.c |   1 -
+ libclamav/matcher-byte-comp.h |   2 +-
+ libclamav/matcher-hash.h      |   2 +-
+ libclamav/matcher-pcre.c      |   1 -
+ libclamav/matcher-pcre.h      |   2 +-
+ libclamav/matcher.c           |   1 -
+ libclamav/matcher.h           |   1 -
+ libclamav/mbr.c               |   1 -
+ libclamav/mbr.h               |   2 +-
+ libclamav/mew.c               |   1 -
+ libclamav/mew.h               |   2 +-
+ libclamav/mpool.h             |   2 +-
+ libclamav/msdoc.c             |   1 -
+ libclamav/msexpand.c          |   1 -
+ libclamav/nsis/nulsft.c       |   1 -
+ libclamav/ole2_extract.c      |   1 -
+ libclamav/ooxml.c             |   1 -
+ libclamav/others.c            |   1 -
+ libclamav/others.h            |   1 -
+ libclamav/others_common.c     |   1 -
+ libclamav/packlibs.h          |   2 +-
+ libclamav/pe.c                |   1 -
+ libclamav/pe.h                |   1 -
+ libclamav/perflogging.h       |   2 +-
+ libclamav/petite.c            |   1 -
+ libclamav/petite.h            |   2 +-
+ libclamav/phishcheck.c        |   1 -
+ libclamav/prtn_intxn.c        |   1 -
+ libclamav/prtn_intxn.h        |   2 +-
+ libclamav/qsort.c             |   1 -
+ libclamav/readdb.c            |   1 -
+ libclamav/readdb.h            |   1 -
+ libclamav/rebuildpe.h         |   2 +-
+ libclamav/regex_pcre.c        |   1 -
+ libclamav/regex_pcre.h        |   2 +-
+ libclamav/sf_base64decode.h   |   2 +-
+ libclamav/special.c           |   1 -
+ libclamav/spin.c              |   1 -
+ libclamav/spin.h              |   2 +-
+ libclamav/str.c               |   1 -
+ libclamav/str.h               |   1 -
+ libclamav/swf.c               |   1 -
+ libclamav/tnef.c              |   1 -
+ libclamav/unarj.c             |   2 -
+ libclamav/uniq.h              |   2 +-
+ libclamav/unsp.c              |   1 -
+ libclamav/unsp.h              |   2 +-
+ libclamav/upack.c             |   1 -
+ libclamav/upack.h             |   2 +-
+ libclamav/upx.c               |   1 -
+ libclamav/upx.h               |   2 +-
+ libclamav/vba_extract.h       |   2 +-
+ libclamav/wwunpack.c          |   1 -
+ libclamav/wwunpack.h          |   2 +-
+ libclamav/xar.h               |   2 +-
+ libclamav/xz_iface.h          |   2 +-
+ libclamav/yc.c                |   1 -
+ libclamav/yc.h                |   2 +-
+ libfreshclam/Makefile.in      |  13 +++
+ libltdl/Makefile.in           |  13 +++
+ m4/reorganization/types.m4    |  94 ++++++++++++++++++++
+ sigtool/Makefile.in           |  13 +++
+ sigtool/vba.c                 |   1 -
+ test/Makefile.in              |  13 +++
+ unit_tests/Makefile.in        |  13 +++
+ unit_tests/check_clamd.c      |   1 -
+ win32/compat/resolv.h         | 122 +++++++++++++-------------
+ 142 files changed, 755 insertions(+), 330 deletions(-)
+ create mode 100644 clamav-types.h.in
+ delete mode 100644 libclamav/cltypes.h
+ create mode 100644 m4/reorganization/types.m4
+
+diff --git a/Makefile.am b/Makefile.am
+index ea2f849929..77473a7622 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -34,6 +34,8 @@ endif
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libclamav.pc
+ 
++nodist_include_HEADERS = clamav-types.h
++
+ # don't complain that configuration files and databases are not removed, this is intended
+ distuninstallcheck_listfiles = find . -type f ! -name clamd.conf ! -name freshclam.conf ! -name daily.cvd ! -name main.cvd -print
+ DISTCLEANFILES = target.h
+diff --git a/Makefile.in b/Makefile.in
+index f8527a6ee7..e8a62f5c31 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -33,6 +33,7 @@
+ #  MA 02110-1301, USA.
+ 
+ 
++
+ VPATH = @srcdir@
+ am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
+ am__make_running_with_option = \
+@@ -119,7 +120,8 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+ 	$(top_srcdir)/docs/man/freshclam.conf.5.in \
+ 	$(top_srcdir)/docs/man/sigtool.1.in \
+ 	$(top_srcdir)/docs/man/clamdtop.1.in \
+-	$(top_srcdir)/docs/man/clamsubmit.1.in COPYING config/ar-lib \
++	$(top_srcdir)/docs/man/clamsubmit.1.in \
++	$(srcdir)/clamav-types.h.in COPYING config/ar-lib \
+ 	config/compile config/config.guess config/config.rpath \
+ 	config/config.sub config/install-sh config/missing \
+ 	config/ylwrap config/ltmain.sh $(top_srcdir)/config/ar-lib \
+@@ -203,6 +205,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -215,7 +218,8 @@ CONFIG_CLEAN_FILES = clamav-config libclamav.pc platform.h \
+ 	docs/man/clambc.1 docs/man/clamconf.1 docs/man/clamd.8 \
+ 	docs/man/clamd.conf.5 docs/man/clamdscan.1 docs/man/clamscan.1 \
+ 	docs/man/freshclam.1 docs/man/freshclam.conf.5 \
+-	docs/man/sigtool.1 docs/man/clamdtop.1 docs/man/clamsubmit.1
++	docs/man/sigtool.1 docs/man/clamdtop.1 docs/man/clamsubmit.1 \
++	clamav-types.h
+ CONFIG_CLEAN_VPATH_FILES =
+ am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+ am__vpath_adj = case $$p in \
+@@ -244,7 +248,8 @@ am__uninstall_files_from_dir = { \
+     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+          $(am__cd) "$$dir" && rm -f $$files; }; \
+   }
+-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)"
++am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)" \
++	"$(DESTDIR)$(includedir)"
+ SCRIPTS = $(bin_SCRIPTS)
+ AM_V_P = $(am__v_P_@AM_V@)
+ am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
+@@ -274,6 +279,7 @@ am__can_run_installinfo = \
+     *) (install-info --version) >/dev/null 2>&1;; \
+   esac
+ DATA = $(pkgconfig_DATA)
++HEADERS = $(nodist_include_HEADERS)
+ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+   distclean-recursive maintainer-clean-recursive
+ am__recursive_targets = \
+@@ -393,6 +399,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -407,6 +415,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -421,6 +430,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -502,6 +516,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+@@ -582,6 +600,7 @@ EXTRA_DIST = examples shared libclamav.pc.in COPYING.bzip2 COPYING.lzma COPYING.
+ bin_SCRIPTS = clamav-config
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libclamav.pc
++nodist_include_HEADERS = clamav-types.h
+ 
+ # don't complain that configuration files and databases are not removed, this is intended
+ distuninstallcheck_listfiles = find . -type f ! -name clamd.conf ! -name freshclam.conf ! -name daily.cvd ! -name main.cvd -print
+@@ -680,6 +699,8 @@ docs/man/clamdtop.1: $(top_builddir)/config.status $(top_srcdir)/docs/man/clamdt
+ 	cd $(top_builddir) && $(SHELL) ./config.status $@
+ docs/man/clamsubmit.1: $(top_builddir)/config.status $(top_srcdir)/docs/man/clamsubmit.1.in
+ 	cd $(top_builddir) && $(SHELL) ./config.status $@
++clamav-types.h: $(top_builddir)/config.status $(srcdir)/clamav-types.h.in
++	cd $(top_builddir) && $(SHELL) ./config.status $@
+ install-binSCRIPTS: $(bin_SCRIPTS)
+ 	@$(NORMAL_INSTALL)
+ 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
+@@ -760,6 +781,27 @@ uninstall-pkgconfigDATA:
+ 	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+ 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+ 	dir='$(DESTDIR)$(pkgconfigdir)'; $(am__uninstall_files_from_dir)
++install-nodist_includeHEADERS: $(nodist_include_HEADERS)
++	@$(NORMAL_INSTALL)
++	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
++	if test -n "$$list"; then \
++	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
++	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
++	fi; \
++	for p in $$list; do \
++	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
++	  echo "$$d$$p"; \
++	done | $(am__base_list) | \
++	while read files; do \
++	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
++	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
++	done
++
++uninstall-nodist_includeHEADERS:
++	@$(NORMAL_UNINSTALL)
++	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
++	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
++	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
+ 
+ # This directory's subdirectories are mostly independent; you can cd
+ # into them and run 'make' without going through this Makefile.
+@@ -1059,10 +1101,10 @@ distcleancheck: distclean
+ 	       exit 1; } >&2
+ check-am: all-am
+ check: check-recursive
+-all-am: Makefile $(SCRIPTS) $(DATA) clamav-config.h
++all-am: Makefile $(SCRIPTS) $(DATA) $(HEADERS) clamav-config.h
+ installdirs: installdirs-recursive
+ installdirs-am:
+-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)"; do \
++	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(includedir)"; do \
+ 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+ 	done
+ install: install-recursive
+@@ -1118,7 +1160,7 @@ info: info-recursive
+ 
+ info-am:
+ 
+-install-data-am: install-pkgconfigDATA
++install-data-am: install-nodist_includeHEADERS install-pkgconfigDATA
+ 
+ install-dvi: install-dvi-recursive
+ 
+@@ -1164,7 +1206,8 @@ ps: ps-recursive
+ 
+ ps-am:
+ 
+-uninstall-am: uninstall-binSCRIPTS uninstall-pkgconfigDATA
++uninstall-am: uninstall-binSCRIPTS uninstall-nodist_includeHEADERS \
++	uninstall-pkgconfigDATA
+ 
+ .MAKE: $(am__recursive_targets) all install-am install-strip
+ 
+@@ -1179,13 +1222,14 @@ uninstall-am: uninstall-binSCRIPTS uninstall-pkgconfigDATA
+ 	install-binSCRIPTS install-data install-data-am install-dvi \
+ 	install-dvi-am install-exec install-exec-am install-html \
+ 	install-html-am install-info install-info-am install-man \
+-	install-pdf install-pdf-am install-pkgconfigDATA install-ps \
+-	install-ps-am install-strip installcheck installcheck-am \
+-	installcheck-binSCRIPTS installdirs installdirs-am \
+-	maintainer-clean maintainer-clean-generic mostlyclean \
+-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+-	tags tags-am uninstall uninstall-am uninstall-binSCRIPTS \
+-	uninstall-pkgconfigDATA
++	install-nodist_includeHEADERS install-pdf install-pdf-am \
++	install-pkgconfigDATA install-ps install-ps-am install-strip \
++	installcheck installcheck-am installcheck-binSCRIPTS \
++	installdirs installdirs-am maintainer-clean \
++	maintainer-clean-generic mostlyclean mostlyclean-generic \
++	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
++	uninstall-am uninstall-binSCRIPTS \
++	uninstall-nodist_includeHEADERS uninstall-pkgconfigDATA
+ 
+ lcov:
+ 	($(MAKE); cd unit_tests; $(MAKE) lcov)
+diff --git a/clamav-milter/Makefile.in b/clamav-milter/Makefile.in
+index 8d0dd5c623..b25bf2b0df 100644
+--- a/clamav-milter/Makefile.in
++++ b/clamav-milter/Makefile.in
+@@ -177,6 +177,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -347,6 +348,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOLIBCLAMAV
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -361,6 +364,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -375,6 +379,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -456,6 +465,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamav-types.h.in b/clamav-types.h.in
+new file mode 100644
+index 0000000000..3064c9b95e
+--- /dev/null
++++ b/clamav-types.h.in
+@@ -0,0 +1,84 @@
++/*
++ *  Copyright (C) 2015-2018 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
++ *  Copyright (C) 2007-2008 Sourcefire, Inc.
++ *
++ *  Authors: Tomasz Kojm, Micah Snyder
++ *
++ *  @GENERATE_WARNING@
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License version 2 as
++ *  published by the Free Software Foundation.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program; if not, write to the Free Software
++ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
++ *  MA 02110-1301, USA.
++ */
++
++#ifndef __CLAMAV_TYPES_H
++#define __CLAMAV_TYPES_H
++
++@INT_TYPES_HEADER@
++
++@INT8_DEF@
++@UINT8_DEF@
++
++@INT16_DEF@
++@UINT16_DEF@
++
++@INT32_DEF@
++@UINT32_DEF@
++
++@INT64_DEF@
++@UINT64_DEF@
++
++/* Ensure we have print format types */
++/* PRIu64 should be in <inttypes.h> */
++#ifndef _SF64_PREFIX
++    @DEFINE_SF64_PREFIX@
++#endif
++
++#ifndef PRIu64
++    #define PRIu64 _SF64_PREFIX "u"
++#endif
++#ifndef PRIx64
++    #define PRIx64 _SF64_PREFIX "i"
++#endif
++#ifndef PRIi64
++    #define PRIi64 _SF64_PREFIX "x"
++#endif
++
++#ifndef STDu64
++    #define STDu64 "%" PRIu64
++    #define STDi64 "%" PRIi64
++    #define STDx64 "%" PRIx64
++#endif
++
++/* PRIu32 should also be in <inttypes.h> */
++#ifndef PRIu32
++    #ifndef _SF32_PREFIX
++        @DEFINE_SF32_PREFIX@
++    #endif
++
++    #define PRIu32 _SF32_PREFIX "u"
++    #define PRIi32 _SF32_PREFIX "i"
++    #define PRIx32 _SF32_PREFIX "x"
++#endif
++
++#ifndef STDu32
++    #define STDu32 "%" PRIu32
++    #define STDi32 "%" PRIi32
++    #define STDx32 "%" PRIx32
++#endif
++
++#ifndef INT32_MAX
++    #define INT32_MAX 2147483647
++#endif
++
++#endif
+diff --git a/clambc/Makefile.in b/clambc/Makefile.in
+index 7aafe96deb..1e2c993104 100644
+--- a/clambc/Makefile.in
++++ b/clambc/Makefile.in
+@@ -158,6 +158,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -283,6 +284,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -297,6 +300,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -311,6 +315,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -392,6 +401,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clambc/bcrun.c b/clambc/bcrun.c
+index 0f4c0350e2..fab836040e 100644
+--- a/clambc/bcrun.c
++++ b/clambc/bcrun.c
+@@ -23,7 +23,6 @@
+ #if HAVE_CONFIG_H
+ #include "clamav-config.h"
+ #endif
+-#include "cltypes.h"
+ #ifndef _WIN32
+ #include <sys/time.h>
+ #endif
+diff --git a/clamconf/Makefile.in b/clamconf/Makefile.in
+index eb8cd68012..50c6fbc4a0 100644
+--- a/clamconf/Makefile.in
++++ b/clamconf/Makefile.in
+@@ -176,6 +176,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -301,6 +302,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -315,6 +318,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -329,6 +333,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -410,6 +419,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamd/Makefile.in b/clamd/Makefile.in
+index 76703b1fae..1fb6be2040 100644
+--- a/clamd/Makefile.in
++++ b/clamd/Makefile.in
+@@ -179,6 +179,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -358,6 +359,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -372,6 +375,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -386,6 +390,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -467,6 +476,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamd/others.h b/clamd/others.h
+index 702e5a036c..89ee5ab2db 100644
+--- a/clamd/others.h
++++ b/clamd/others.h
+@@ -29,7 +29,7 @@
+ #include <stdlib.h>
+ #include "shared/optparser.h"
+ #include "thrmgr.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ enum mode {
+     MODE_COMMAND,
+diff --git a/clamd/server-th.c b/clamd/server-th.c
+index 55cdb5ecb7..ece688fbe5 100644
+--- a/clamd/server-th.c
++++ b/clamd/server-th.c
+@@ -61,7 +61,6 @@
+ #include "shared.h"
+ #include "libclamav/others.h"
+ #include "libclamav/readdb.h"
+-#include "libclamav/cltypes.h"
+ 
+ #define BUFFSIZE 1024
+ 
+diff --git a/clamdscan/Makefile.in b/clamdscan/Makefile.in
+index 092eaf7828..10ae90662a 100644
+--- a/clamdscan/Makefile.in
++++ b/clamdscan/Makefile.in
+@@ -176,6 +176,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -312,6 +313,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS -DCL_NOLIBCLAMAV
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -326,6 +329,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -340,6 +344,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -421,6 +430,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamdtop/Makefile.in b/clamdtop/Makefile.in
+index 162908a4ac..826971bb25 100644
+--- a/clamdtop/Makefile.in
++++ b/clamdtop/Makefile.in
+@@ -158,6 +158,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -318,6 +319,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS -DCL_NOLIBCLAMAV
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -332,6 +335,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -346,6 +350,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -427,6 +436,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamscan/Makefile.in b/clamscan/Makefile.in
+index 4c0027ea19..2a4cfd7a80 100644
+--- a/clamscan/Makefile.in
++++ b/clamscan/Makefile.in
+@@ -177,6 +177,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -303,6 +304,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -317,6 +320,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -331,6 +335,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -412,6 +421,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/clamscan/manager.c b/clamscan/manager.c
+index 9d104476d5..0d3c968578 100644
+--- a/clamscan/manager.c
++++ b/clamscan/manager.c
+@@ -63,7 +63,6 @@
+ #include "libclamav/matcher-pcre.h"
+ #include "libclamav/str.h"
+ #include "libclamav/readdb.h"
+-#include "libclamav/cltypes.h"
+ 
+ #ifdef C_LINUX
+ dev_t procdev;
+diff --git a/clamsubmit/Makefile.in b/clamsubmit/Makefile.in
+index f2dfc6d321..b546e4ff98 100644
+--- a/clamsubmit/Makefile.in
++++ b/clamsubmit/Makefile.in
+@@ -176,6 +176,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -301,6 +302,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -315,6 +318,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -329,6 +333,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -410,6 +419,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/configure b/configure
+index 8a844ebfe8..5451614d14 100755
+--- a/configure
++++ b/configure
+@@ -646,6 +646,18 @@ am__EXEEXT_FALSE
+ am__EXEEXT_TRUE
+ LTLIBOBJS
+ LIBOBJS
++DEFINE_SF64_PREFIX
++DEFINE_SF32_PREFIX
++INT_TYPES_HEADER
++UINT64_DEF
++INT64_DEF
++UINT32_DEF
++INT32_DEF
++UINT16_DEF
++INT16_DEF
++UINT8_DEF
++INT8_DEF
++GENERATE_WARNING
+ HAVE_STRNI
+ JSON_LDFLAGS
+ JSON_LIBS
+@@ -29156,7 +29168,148 @@ else
+     mspack_msg="External, $LIBMSPACK_CFLAGS $LIBMSPACK_LIBS"
+ fi
+ 
+-ac_config_files="$ac_config_files clamscan/Makefile database/Makefile docs/Makefile clamd/Makefile clamd/clamav-daemon.service clamd/clamav-daemon.socket clamdscan/Makefile clamsubmit/Makefile clamav-milter/Makefile freshclam/clamav-freshclam.service freshclam/Makefile sigtool/Makefile clamconf/Makefile etc/Makefile test/Makefile unit_tests/Makefile clamdtop/Makefile clambc/Makefile libfreshclam/Makefile Makefile clamav-config libclamav.pc platform.h docs/man/clamav-milter.8 docs/man/clamav-milter.conf.5 docs/man/clambc.1 docs/man/clamconf.1 docs/man/clamd.8 docs/man/clamd.conf.5 docs/man/clamdscan.1 docs/man/clamscan.1 docs/man/freshclam.1 docs/man/freshclam.conf.5 docs/man/sigtool.1 docs/man/clamdtop.1 docs/man/clamsubmit.1"
++ac_config_files="$ac_config_files clamscan/Makefile database/Makefile docs/Makefile clamd/Makefile clamd/clamav-daemon.service clamd/clamav-daemon.socket clamdscan/Makefile clamsubmit/Makefile clamav-milter/Makefile freshclam/clamav-freshclam.service freshclam/Makefile sigtool/Makefile clamconf/Makefile etc/Makefile test/Makefile unit_tests/Makefile clamdtop/Makefile clambc/Makefile libfreshclam/Makefile Makefile clamav-config libclamav.pc platform.h docs/man/clamav-milter.8 docs/man/clamav-milter.conf.5 docs/man/clambc.1 docs/man/clamconf.1 docs/man/clamd.8 docs/man/clamd.conf.5 docs/man/clamdscan.1 docs/man/clamscan.1 docs/man/freshclam.1 docs/man/freshclam.conf.5 docs/man/sigtool.1 docs/man/clamdtop.1 docs/man/clamsubmit.1 clamav-types.h"
++
++
++# Define variables needed to generate clamav-types.h.
++# Define a warning for the user, so they don't edit clamav-types.h
++GENERATE_WARNING="Warning: This file is generated with ./configure. Do not edit!"
++
++
++# Initialize definitions to empty strings, in case they're not needed.
++INT8_DEF=""
++
++UINT8_DEF=""
++
++INT16_DEF=""
++
++UINT16_DEF=""
++
++INT32_DEF=""
++
++UINT32_DEF=""
++
++INT64_DEF=""
++
++UINT64_DEF=""
++
++
++# Check sys/int_types.h first, to give it higher priority on Solaris
++ac_fn_c_check_header_mongrel "$LINENO" "sys/int_types.h" "ac_cv_header_sys_int_types_h" "$ac_includes_default"
++if test "x$ac_cv_header_sys_int_types_h" = xyes; then :
++           INT_TYPES_HEADER="#include <sys/int_types.h>"
++
++
++else
++           ac_fn_c_check_header_mongrel "$LINENO" "inttypes.h" "ac_cv_header_inttypes_h" "$ac_includes_default"
++if test "x$ac_cv_header_inttypes_h" = xyes; then :
++                   INT_TYPES_HEADER="#include <inttypes.h>"
++
++
++else
++                   ac_fn_c_check_header_mongrel "$LINENO" "stdint.h" "ac_cv_header_stdint_h" "$ac_includes_default"
++if test "x$ac_cv_header_stdint_h" = xyes; then :
++                           INT_TYPES_HEADER="#include <stdint.h>"
++
++
++else
++                           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++
++
++                                        #ifndef _MSC_VER
++                                            error: _MSC_VER not found!
++                                        #endif
++
++
++int
++main ()
++{
++
++  ;
++  return 0;
++}
++
++_ACEOF
++if ac_fn_c_try_compile "$LINENO"; then :
++                                   INT_TYPES_HEADER="#include <stdint.h>"
++
++
++else
++                                   INT8_DEF="typedef signed char int8_t;"
++
++                                UINT8_DEF="typedef unsigned char uint8_t;"
++
++
++                                if test $ac_cv_sizeof_int = 2; then
++                                    INT16_DEF="typedef signed int int16_t;"
++
++                                    UINT16_DEF="typedef unsigned int uint16_t;"
++
++                                elif test $ac_cv_sizeof_short = 2; then
++                                    INT16_DEF="typedef signed short int16_t;"
++
++                                    UINT16_DEF="typedef unsigned short uint16_t;"
++
++                                fi
++
++                                if test $ac_cv_sizeof_int = 4; then
++                                    INT32_DEF="typedef signed int int32_t;"
++
++                                    UINT32_DEF="typedef unsigned int uint32_t;"
++
++                                elif test $ac_cv_sizeof_long = 4; then
++                                    INT32_DEF="typedef signed long int32_t;"
++
++                                    UINT32_DEF="typedef unsigned long uint32_t;"
++
++                                fi
++
++                                if test $ac_cv_sizeof_long = 8; then
++                                    INT64_DEF="typedef signed long int64_t;"
++
++                                    UINT64_DEF="typedef unsigned long uint64_t;"
++
++                                elif test $ac_cv_sizeof_long_long = 8; then
++                                    INT64_DEF="typedef signed long long int64_t;"
++
++                                    UINT64_DEF="typedef unsigned long long uint64_t;"
++
++                                fi
++
++
++fi
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
++
++fi
++
++
++
++fi
++
++
++
++fi
++
++
++
++# If _SF64_PREFIX isn't defined, this may be used.
++if test $ac_cv_sizeof_int = 4; then
++    DEFINE_SF32_PREFIX="#define _SF32_PREFIX \"\""
++
++elif test $ac_cv_sizeof_long = 4; then
++    DEFINE_SF32_PREFIX="#define _SF32_PREFIX \"l\""
++
++fi
++
++# If _SF32_PREFIX isn't defined, this may be used.
++if test $ac_cv_sizeof_long = 8; then
++    DEFINE_SF64_PREFIX="#define _SF64_PREFIX \"l\""
++
++elif test $ac_cv_sizeof_long_long = 8; then
++    DEFINE_SF64_PREFIX="#define _SF64_PREFIX \"ll\""
++
++fi
+ 
+ 
+ cat >confcache <<\_ACEOF
+@@ -30405,6 +30558,7 @@ do
+     "docs/man/sigtool.1") CONFIG_FILES="$CONFIG_FILES docs/man/sigtool.1" ;;
+     "docs/man/clamdtop.1") CONFIG_FILES="$CONFIG_FILES docs/man/clamdtop.1" ;;
+     "docs/man/clamsubmit.1") CONFIG_FILES="$CONFIG_FILES docs/man/clamsubmit.1" ;;
++    "clamav-types.h") CONFIG_FILES="$CONFIG_FILES clamav-types.h" ;;
+ 
+   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
+   esac
+@@ -33289,6 +33443,7 @@ do
+     "docs/man/sigtool.1") CONFIG_FILES="$CONFIG_FILES docs/man/sigtool.1" ;;
+     "docs/man/clamdtop.1") CONFIG_FILES="$CONFIG_FILES docs/man/clamdtop.1" ;;
+     "docs/man/clamsubmit.1") CONFIG_FILES="$CONFIG_FILES docs/man/clamsubmit.1" ;;
++    "clamav-types.h") CONFIG_FILES="$CONFIG_FILES clamav-types.h" ;;
+     "libclamav/Makefile") CONFIG_FILES="$CONFIG_FILES libclamav/Makefile" ;;
+ 
+   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
+diff --git a/configure.ac b/configure.ac
+index b83d738ea1..a5000e1626 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -190,8 +190,12 @@ docs/man/freshclam.conf.5
+ docs/man/sigtool.1
+ docs/man/clamdtop.1
+ docs/man/clamsubmit.1
++clamav-types.h
+ ])
+ 
++# Define variables needed to generate clamav-types.h.
++m4_include([m4/reorganization/types.m4])
++
+ AC_OUTPUT
+ 
+ if test "$enable_llvm" = "yes" && test "$subdirfailed" != "no"; then
+diff --git a/database/Makefile.in b/database/Makefile.in
+index d411d28573..b93875218d 100644
+--- a/database/Makefile.in
++++ b/database/Makefile.in
+@@ -174,6 +174,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -249,6 +250,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -263,6 +266,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -277,6 +281,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -358,6 +367,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/docs/Makefile.in b/docs/Makefile.in
+index 6a13882ad9..9fcab34a0c 100644
+--- a/docs/Makefile.in
++++ b/docs/Makefile.in
+@@ -174,6 +174,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -283,6 +284,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -297,6 +300,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -311,6 +315,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -392,6 +401,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/etc/Makefile.in b/etc/Makefile.in
+index 117557546c..0c8828aeff 100644
+--- a/etc/Makefile.in
++++ b/etc/Makefile.in
+@@ -175,6 +175,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -279,6 +280,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -293,6 +296,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -307,6 +311,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -388,6 +397,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/freshclam/Makefile.in b/freshclam/Makefile.in
+index edf7ad2418..d5cf77a287 100644
+--- a/freshclam/Makefile.in
++++ b/freshclam/Makefile.in
+@@ -179,6 +179,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -336,6 +337,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -350,6 +353,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -364,6 +368,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -445,6 +454,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/freshclam/mirman.c b/freshclam/mirman.c
+index d127ca93a8..dfb7e197f0 100644
+--- a/freshclam/mirman.c
++++ b/freshclam/mirman.c
+@@ -39,7 +39,6 @@
+ 
+ #include "mirman.h"
+ 
+-#include "libclamav/cltypes.h"
+ #include "libclamav/clamav.h"
+ 
+ #include "shared/output.h"
+diff --git a/freshclam/mirman.h b/freshclam/mirman.h
+index a6a3a2be06..1c6fd197cb 100644
+--- a/freshclam/mirman.h
++++ b/freshclam/mirman.h
+@@ -19,7 +19,7 @@
+ #ifndef __MIRMAN_H
+ #define __MIRMAN_H
+ 
+-#include "libclamav/cltypes.h"
++#include "clamav-types.h"
+ #include "freshclamcodes.h"
+ 
+ typedef enum mir_status_tag {
+diff --git a/libclamav/Makefile.am b/libclamav/Makefile.am
+index ac65938f89..ba2ff5172a 100644
+--- a/libclamav/Makefile.am
++++ b/libclamav/Makefile.am
+@@ -311,7 +311,6 @@ libclamav_la_SOURCES = \
+ 	ole2_extract.h \
+ 	vba_extract.c \
+ 	vba_extract.h \
+-	cltypes.h \
+ 	msexpand.c \
+ 	msexpand.h \
+ 	pe.c \
+diff --git a/libclamav/Makefile.in b/libclamav/Makefile.in
+index 9aa0f68a41..d729c48b18 100644
+--- a/libclamav/Makefile.in
++++ b/libclamav/Makefile.in
+@@ -205,6 +205,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -254,14 +255,13 @@ am__libclamav_la_SOURCES_DIST = matcher-ac.c matcher-ac.h matcher-bm.c \
+ 	filetypes.h filetypes_int.h rtf.c rtf.h blob.c blob.h mbox.c \
+ 	mbox.h message.c message.h table.c table.h text.c text.h \
+ 	ole2_extract.c ole2_extract.h vba_extract.c vba_extract.h \
+-	cltypes.h msexpand.c msexpand.h pe.c pe.h pe_icons.c \
+-	pe_icons.h disasm.c disasm.h disasm-common.h disasmpriv.h \
+-	upx.c upx.h htmlnorm.c htmlnorm.h libmspack.c libmspack.h \
+-	rebuildpe.c rebuildpe.h petite.c petite.h wwunpack.c \
+-	wwunpack.h unsp.c unsp.h aspack.c aspack.h packlibs.c \
+-	packlibs.h fsg.c fsg.h mew.c mew.h upack.c upack.h line.c \
+-	line.h untar.c untar.h unzip.c unzip.h ooxml.c ooxml.h \
+-	inflate64.c inflate64.h inffixed64.h inflate64_priv.h \
++	msexpand.c msexpand.h pe.c pe.h pe_icons.c pe_icons.h disasm.c \
++	disasm.h disasm-common.h disasmpriv.h upx.c upx.h htmlnorm.c \
++	htmlnorm.h libmspack.c libmspack.h rebuildpe.c rebuildpe.h \
++	petite.c petite.h wwunpack.c wwunpack.h unsp.c unsp.h aspack.c \
++	aspack.h packlibs.c packlibs.h fsg.c fsg.h mew.c mew.h upack.c \
++	upack.h line.c line.h untar.c untar.h unzip.c unzip.h ooxml.c \
++	ooxml.h inflate64.c inflate64.h inffixed64.h inflate64_priv.h \
+ 	special.c special.h binhex.c binhex.h is_tar.c is_tar.h tnef.c \
+ 	tnef.h autoit.c autoit.h unarj.c unarj.h nsis/bzlib.c \
+ 	nsis/bzlib_private.h nsis/nsis_bzlib.h nsis/nulsft.c \
+@@ -903,6 +903,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -917,6 +919,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -931,6 +934,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -1012,6 +1020,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+@@ -1294,14 +1306,13 @@ libclamav_la_SOURCES = matcher-ac.c matcher-ac.h matcher-bm.c \
+ 	filetypes.h filetypes_int.h rtf.c rtf.h blob.c blob.h mbox.c \
+ 	mbox.h message.c message.h table.c table.h text.c text.h \
+ 	ole2_extract.c ole2_extract.h vba_extract.c vba_extract.h \
+-	cltypes.h msexpand.c msexpand.h pe.c pe.h pe_icons.c \
+-	pe_icons.h disasm.c disasm.h disasm-common.h disasmpriv.h \
+-	upx.c upx.h htmlnorm.c htmlnorm.h libmspack.c libmspack.h \
+-	rebuildpe.c rebuildpe.h petite.c petite.h wwunpack.c \
+-	wwunpack.h unsp.c unsp.h aspack.c aspack.h packlibs.c \
+-	packlibs.h fsg.c fsg.h mew.c mew.h upack.c upack.h line.c \
+-	line.h untar.c untar.h unzip.c unzip.h ooxml.c ooxml.h \
+-	inflate64.c inflate64.h inffixed64.h inflate64_priv.h \
++	msexpand.c msexpand.h pe.c pe.h pe_icons.c pe_icons.h disasm.c \
++	disasm.h disasm-common.h disasmpriv.h upx.c upx.h htmlnorm.c \
++	htmlnorm.h libmspack.c libmspack.h rebuildpe.c rebuildpe.h \
++	petite.c petite.h wwunpack.c wwunpack.h unsp.c unsp.h aspack.c \
++	aspack.h packlibs.c packlibs.h fsg.c fsg.h mew.c mew.h upack.c \
++	upack.h line.c line.h untar.c untar.h unzip.c unzip.h ooxml.c \
++	ooxml.h inflate64.c inflate64.h inffixed64.h inflate64_priv.h \
+ 	special.c special.h binhex.c binhex.h is_tar.c is_tar.h tnef.c \
+ 	tnef.h autoit.c autoit.h unarj.c unarj.h nsis/bzlib.c \
+ 	nsis/bzlib_private.h nsis/nsis_bzlib.h nsis/nulsft.c \
+diff --git a/libclamav/adc.c b/libclamav/adc.c
+index 0b9105742d..05063366c7 100644
+--- a/libclamav/adc.c
++++ b/libclamav/adc.c
+@@ -30,7 +30,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "adc.h"
+ 
+diff --git a/libclamav/apm.c b/libclamav/apm.c
+index 899f149dec..5e309df503 100644
+--- a/libclamav/apm.c
++++ b/libclamav/apm.c
+@@ -30,7 +30,7 @@
+ #include <ctype.h>
+ #include <fcntl.h>
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ #include "apm.h"
+ #include "prtn_intxn.h"
+diff --git a/libclamav/apm.h b/libclamav/apm.h
+index 420e599191..87692ceac5 100644
+--- a/libclamav/apm.h
++++ b/libclamav/apm.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ #define APM_FALLBACK_SECTOR_SIZE 512
+diff --git a/libclamav/arc4.c b/libclamav/arc4.c
+index f1b3241e24..83183b322b 100644
+--- a/libclamav/arc4.c
++++ b/libclamav/arc4.c
+@@ -23,7 +23,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "arc4.h"
+ #include <string.h>
+ 
+diff --git a/libclamav/arc4.h b/libclamav/arc4.h
+index ea4b96f015..5a4fd9c5f3 100644
+--- a/libclamav/arc4.h
++++ b/libclamav/arc4.h
+@@ -19,7 +19,7 @@
+  *  MA 02110-1301, USA.
+  */
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ struct arc4_state {
+     /* really just 8 bit, but it is faster if reads are aligned */
+     uint32_t S[256];
+diff --git a/libclamav/aspack.c b/libclamav/aspack.c
+index c7f6a48454..56b01d7c15 100644
+--- a/libclamav/aspack.c
++++ b/libclamav/aspack.c
+@@ -22,7 +22,6 @@
+ #include <string.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "execs.h"
+ #include "others.h"
+ #include "rebuildpe.h"
+diff --git a/libclamav/aspack.h b/libclamav/aspack.h
+index 83fffa5a4d..2796ae0c5d 100644
+--- a/libclamav/aspack.h
++++ b/libclamav/aspack.h
+@@ -22,7 +22,7 @@
+ #ifndef __ASPACK_H
+ #define __ASPACK_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "execs.h"
+ 
+ #define ASPACK_EP_OFFSET_212    (58+0x70e)
+diff --git a/libclamav/binhex.c b/libclamav/binhex.c
+index eb3cce8845..4e1e23cf8e 100644
+--- a/libclamav/binhex.c
++++ b/libclamav/binhex.c
+@@ -27,7 +27,6 @@
+ #include <string.h>
+ 
+ #include "scanners.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "clamav.h"
+ #include "fmap.h"
+diff --git a/libclamav/bytecode.h b/libclamav/bytecode.h
+index c166a9d055..84efb4f4a8 100644
+--- a/libclamav/bytecode.h
++++ b/libclamav/bytecode.h
+@@ -22,7 +22,7 @@
+  */
+ #ifndef BYTECODE_H
+ #define BYTECODE_H
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "clambc.h"
+ #include <stdio.h>
+ #include "fmap.h"
+diff --git a/libclamav/bytecode_api.c b/libclamav/bytecode_api.c
+index 3d1be21b60..426b63ab90 100644
+--- a/libclamav/bytecode_api.c
++++ b/libclamav/bytecode_api.c
+@@ -36,7 +36,6 @@
+ #include <ctype.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "clambc.h"
+ #include "bytecode.h"
+ #include "bytecode_priv.h"
+diff --git a/libclamav/bytecode_api_decl.c b/libclamav/bytecode_api_decl.c
+index 643995bbe2..8cd7e86226 100644
+--- a/libclamav/bytecode_api_decl.c
++++ b/libclamav/bytecode_api_decl.c
+@@ -26,7 +26,7 @@
+  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  * SUCH DAMAGE
+  */
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "type_desc.h"
+ #include "bytecode_api.h"
+ #include "bytecode_api_impl.h"
+diff --git a/libclamav/bytecode_detect.c b/libclamav/bytecode_detect.c
+index 6a1fd035ba..dae9865de9 100644
+--- a/libclamav/bytecode_detect.c
++++ b/libclamav/bytecode_detect.c
+@@ -27,7 +27,6 @@
+ 
+ #include "clamav.h"
+ #include "target.h"
+-#include "cltypes.h"
+ 
+ #include "bytecode_detect.h"
+ #include "others.h"
+diff --git a/libclamav/bytecode_nojit.c b/libclamav/bytecode_nojit.c
+index f318ff6079..bd8432421b 100644
+--- a/libclamav/bytecode_nojit.c
++++ b/libclamav/bytecode_nojit.c
+@@ -24,7 +24,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ 
+-#include "cltypes.h"
+ #include "bytecode.h"
+ #include "bytecode_priv.h"
+ #include "clamav.h"
+diff --git a/libclamav/clamav.h b/libclamav/clamav.h
+index b72af2f215..07fb8addcf 100644
+--- a/libclamav/clamav.h
++++ b/libclamav/clamav.h
+@@ -65,7 +65,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ #ifdef __cplusplus
+ extern "C"
+diff --git a/libclamav/cltypes.h b/libclamav/cltypes.h
+deleted file mode 100644
+index 48a80e6aee..0000000000
+--- a/libclamav/cltypes.h
++++ /dev/null
+@@ -1,121 +0,0 @@
+-/*
+- *  Copyright (C) 2015 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+- *  Copyright (C) 2007-2008 Sourcefire, Inc.
+- *
+- *  Authors: Tomasz Kojm
+- *
+- *  This program is free software; you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License version 2 as
+- *  published by the Free Software Foundation.
+- *
+- *  This program is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with this program; if not, write to the Free Software
+- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+- *  MA 02110-1301, USA.
+- */
+-
+-#ifndef __CLTYPES_H
+-#define __CLTYPES_H
+-
+-#if HAVE_CONFIG_H
+-#include "clamav-config.h"
+-#endif
+-
+-#ifdef HAVE_SYS_INT_TYPES_H
+-/* First to give it higher priority on Solaris */
+-#include <sys/int_types.h>
+-#elif defined(HAVE_INTTYPES_H)
+-/* C99: inttypes.h should include stdint.h; more universal because some
+- * older platforms don't provide stdint.h
+- */
+-#include <inttypes.h>
+-#elif defined(HAVE_STDINT_H)
+-#include <stdint.h>
+-#elif defined(_MSC_VER)
+-#include <stdint.h>
+-#else
+-    typedef signed char int8_t;
+-    typedef unsigned char uint8_t;
+-
+-#if SIZEOF_INT == 2
+-    typedef signed int int16_t;
+-    typedef unsigned int uint16_t;
+-#elif SIZEOF_SHORT == 2
+-    typedef signed short int16_t;
+-    typedef unsigned short uint16_t;
+-#endif
+-
+-#if SIZEOF_INT == 4
+-    typedef signed int int32_t;
+-    typedef unsigned int uint32_t;
+-#elif SIZEOF_LONG == 4
+-    typedef signed long int32_t;
+-    typedef unsigned long uint32_t;
+-#endif
+-
+-#if SIZEOF_LONG == 8
+-    typedef signed long int64_t;
+-    typedef unsigned long uint64_t;
+-#elif SIZEOF_LONG_LONG == 8
+-    typedef signed long long int64_t;
+-    typedef unsigned long long uint64_t;
+-#endif
+-#endif
+-
+-/* Ensure we have print format types */
+-/* PRIu64 should be in <inttypes.h> */
+-#ifndef _SF64_PREFIX
+-#if SIZEOF_LONG == 8
+-#define _SF64_PREFIX "l"
+-#elif SIZEOF_LONG_LONG == 8
+-#define _SF64_PREFIX "ll"
+-#endif
+-#endif
+-
+-#ifndef PRIu64
+-#define PRIu64 _SF64_PREFIX "u"
+-#endif
+-#ifndef PRIx64
+-#define PRIx64 _SF64_PREFIX "i"
+-#endif
+-#ifndef PRIi64
+-#define PRIi64 _SF64_PREFIX "x"
+-#endif
+-
+-#ifndef STDu64
+-#define STDu64 "%" PRIu64
+-#define STDi64 "%" PRIi64
+-#define STDx64 "%" PRIx64
+-#endif
+-
+-/* PRIu32 should also be in <inttypes.h> */
+-#ifndef PRIu32
+-#ifndef _SF32_PREFIX
+-#if SIZEOF_INT == 4
+-#define _SF32_PREFIX ""
+-#elif SIZEOF_LONG == 4
+-#define _SF32_PREFIX "l"
+-#endif
+-#endif
+-
+-#define PRIu32 _SF32_PREFIX "u"
+-#define PRIi32 _SF32_PREFIX "i"
+-#define PRIx32 _SF32_PREFIX "x"
+-#endif
+-
+-#ifndef STDu32
+-#define STDu32 "%" PRIu32
+-#define STDi32 "%" PRIi32
+-#define STDx32 "%" PRIx32
+-#endif
+-
+-#ifndef INT32_MAX
+-#define INT32_MAX 2147483647
+-#endif
+-
+-#endif
+diff --git a/libclamav/cpio.c b/libclamav/cpio.c
+index b553fc18e8..fee2a8d6ca 100644
+--- a/libclamav/cpio.c
++++ b/libclamav/cpio.c
+@@ -34,7 +34,6 @@
+ #include <fcntl.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "cpio.h"
+ #include "scanners.h"
+diff --git a/libclamav/dconf.c b/libclamav/dconf.c
+index 0e01fe9c2c..32ea1cb939 100644
+--- a/libclamav/dconf.c
++++ b/libclamav/dconf.c
+@@ -30,7 +30,6 @@
+ #include <zlib.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "dconf.h"
+ #include "readdb.h"
+ #include "str.h"
+diff --git a/libclamav/dconf.h b/libclamav/dconf.h
+index b07ec858c2..5994ebb625 100644
+--- a/libclamav/dconf.h
++++ b/libclamav/dconf.h
+@@ -26,7 +26,6 @@
+ #include <zlib.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "cvd.h"
+ 
+ #include "mpool.h"
+diff --git a/libclamav/dmg.c b/libclamav/dmg.c
+index 93f3a87f63..6586fd837e 100644
+--- a/libclamav/dmg.c
++++ b/libclamav/dmg.c
+@@ -51,7 +51,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "dmg.h"
+ #include "scanners.h"
+diff --git a/libclamav/dmg.h b/libclamav/dmg.h
+index dad7e086ab..287c612571 100644
+--- a/libclamav/dmg.h
++++ b/libclamav/dmg.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ /* Simple stripe types */
+diff --git a/libclamav/elf.c b/libclamav/elf.c
+index dcb71c4f74..88d7489b11 100644
+--- a/libclamav/elf.c
++++ b/libclamav/elf.c
+@@ -38,7 +38,6 @@
+ #endif
+ #include <time.h>
+ 
+-#include "cltypes.h"
+ #include "elf.h"
+ #include "clamav.h"
+ #include "execs.h"
+diff --git a/libclamav/elf.h b/libclamav/elf.h
+index 82f28d410a..dc46200b04 100644
+--- a/libclamav/elf.h
++++ b/libclamav/elf.h
+@@ -26,7 +26,6 @@
+ #ifndef __ELF_H
+ #define __ELF_H
+ 
+-#include "cltypes.h"
+ #include "clamav.h"
+ #include "execs.h"
+ #include "others.h"
+diff --git a/libclamav/entconv.c b/libclamav/entconv.c
+index 9cdcc671db..226e1af799 100644
+--- a/libclamav/entconv.c
++++ b/libclamav/entconv.c
+@@ -42,7 +42,6 @@
+ #include "hashtab.h"
+ #include "entconv.h"
+ #include "entitylist.h"
+-#include "cltypes.h"
+ 
+ #ifdef HAVE_ICONV
+ #include <iconv.h>
+diff --git a/libclamav/entconv.h b/libclamav/entconv.h
+index 8ec4911213..3360e4d77d 100644
+--- a/libclamav/entconv.h
++++ b/libclamav/entconv.h
+@@ -24,7 +24,7 @@
+ #ifndef _ENTITIES_H
+ #define _ENTITIES_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ #include "hashtab.h"
+ 
+diff --git a/libclamav/events.h b/libclamav/events.h
+index c7d7961e59..21f577440b 100644
+--- a/libclamav/events.h
++++ b/libclamav/events.h
+@@ -24,7 +24,7 @@
+ #ifndef EVENTS_H
+ #define EVENTS_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ struct cli_events;
+ typedef struct cli_events cli_events_t;
+diff --git a/libclamav/execs.h b/libclamav/execs.h
+index b27ef52fa6..2e773fcb7c 100644
+--- a/libclamav/execs.h
++++ b/libclamav/execs.h
+@@ -22,7 +22,7 @@
+ #ifndef __EXECS_H
+ #define __EXECS_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "hashtab.h"
+ #include "bcfeatures.h"
+ 
+diff --git a/libclamav/explode.h b/libclamav/explode.h
+index 4a0475f7e6..13813704aa 100644
+--- a/libclamav/explode.h
++++ b/libclamav/explode.h
+@@ -25,7 +25,7 @@
+ #ifndef __EXPLODE_H
+ #define __EXPLODE_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ enum {
+   EXPLODE_EBUFF,
+diff --git a/libclamav/filetypes.h b/libclamav/filetypes.h
+index f722a5ff25..619988aaca 100644
+--- a/libclamav/filetypes.h
++++ b/libclamav/filetypes.h
+@@ -25,7 +25,6 @@
+ #include <sys/types.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "fmap.h"
+ 
+ #define CL_FILE_MBUFF_SIZE 1024
+diff --git a/libclamav/filtering.h b/libclamav/filtering.h
+index 37113df522..f7c5cf86ff 100644
+--- a/libclamav/filtering.h
++++ b/libclamav/filtering.h
+@@ -22,7 +22,7 @@
+  */
+ #ifndef FILTER_H
+ #define FILTER_H
+-#include "cltypes.h"
++#include "clamav-types.h"
+ struct filter {
+ 	uint8_t B[65536];
+ 	uint8_t end[65536];
+diff --git a/libclamav/fmap.c b/libclamav/fmap.c
+index 3c235a2fd8..a982b0d39c 100644
+--- a/libclamav/fmap.c
++++ b/libclamav/fmap.c
+@@ -46,7 +46,6 @@
+ 
+ #include "clamav.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "str.h"
+ 
+ static inline unsigned int fmap_align_items(unsigned int sz, unsigned int al);
+diff --git a/libclamav/fmap.h b/libclamav/fmap.h
+index 6c5a130a7d..ae7058bcb2 100644
+--- a/libclamav/fmap.h
++++ b/libclamav/fmap.h
+@@ -33,7 +33,7 @@
+ #include <limits.h>
+ #include <time.h>
+ #include <string.h>
+-#include "cltypes.h"
++
+ #include "clamav.h"
+ 
+ struct cl_fmap;
+diff --git a/libclamav/fsg.c b/libclamav/fsg.c
+index 5cb544db22..0a4012b319 100644
+--- a/libclamav/fsg.c
++++ b/libclamav/fsg.c
+@@ -42,7 +42,6 @@
+ #include <stdlib.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "rebuildpe.h"
+ #include "others.h"
+ #include "packlibs.h"
+diff --git a/libclamav/fsg.h b/libclamav/fsg.h
+index f408a43824..c8db07f19c 100644
+--- a/libclamav/fsg.h
++++ b/libclamav/fsg.h
+@@ -22,7 +22,7 @@
+ #ifndef __FSG_H
+ #define __FSG_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "execs.h"
+ 
+ int unfsg_200(const char *, char *, int, int, uint32_t, uint32_t, uint32_t, int);
+diff --git a/libclamav/gpt.c b/libclamav/gpt.c
+index ce85971159..2cb1077e83 100644
+--- a/libclamav/gpt.c
++++ b/libclamav/gpt.c
+@@ -33,7 +33,6 @@
+ #include <zlib.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "gpt.h"
+ #include "mbr.h"
+diff --git a/libclamav/gpt.h b/libclamav/gpt.h
+index 552e5273d6..25ff60269c 100644
+--- a/libclamav/gpt.h
++++ b/libclamav/gpt.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ /* GPT sector size is normally 512 bytes be can be set to much larger 
+diff --git a/libclamav/hashtab.c b/libclamav/hashtab.c
+index 8971fdfe3e..730024b488 100644
+--- a/libclamav/hashtab.c
++++ b/libclamav/hashtab.c
+@@ -30,7 +30,6 @@
+ #include <stdio.h>
+ #include <string.h>
+ 
+-#include "cltypes.h"
+ #include "clamav.h"
+ #include "others.h"
+ #include "hashtab.h"
+diff --git a/libclamav/hashtab.h b/libclamav/hashtab.h
+index 3347199efb..9255e7d22b 100644
+--- a/libclamav/hashtab.h
++++ b/libclamav/hashtab.h
+@@ -30,7 +30,7 @@
+ #include <stdio.h>
+ #include <stddef.h>
+ #include <sys/types.h>
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "mpool.h"
+ typedef long cli_element_data;
+ 
+diff --git a/libclamav/hfsplus.c b/libclamav/hfsplus.c
+index cb006c1bea..197d3376d9 100644
+--- a/libclamav/hfsplus.c
++++ b/libclamav/hfsplus.c
+@@ -24,7 +24,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "hfsplus.h"
+ #include "scanners.h"
+diff --git a/libclamav/hfsplus.h b/libclamav/hfsplus.h
+index c632e96a8a..6fc5231e74 100644
+--- a/libclamav/hfsplus.h
++++ b/libclamav/hfsplus.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ /* Structures based on Apple Technote 1150 */
+ 
+diff --git a/libclamav/ishield.c b/libclamav/ishield.c
+index 49c1d6d497..410389abd0 100644
+--- a/libclamav/ishield.c
++++ b/libclamav/ishield.c
+@@ -45,7 +45,6 @@
+ 
+ #include "clamav.h"
+ #include "scanners.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "fmap.h"
+ #include "ishield.h"
+diff --git a/libclamav/jpeg.c b/libclamav/jpeg.c
+index 0c0bed1b63..30d245ab0b 100644
+--- a/libclamav/jpeg.c
++++ b/libclamav/jpeg.c
+@@ -34,7 +34,6 @@
+ #endif
+ #include <time.h>
+ 
+-#include "cltypes.h"
+ #include "jpeg.h"
+ #include "clamav.h"
+ 
+diff --git a/libclamav/json_api.c b/libclamav/json_api.c
+index 4cb676ef96..9b9b9ab50e 100644
+--- a/libclamav/json_api.c
++++ b/libclamav/json_api.c
+@@ -24,7 +24,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "json_api.h"
+ 
+diff --git a/libclamav/json_api.h b/libclamav/json_api.h
+index dee61bb033..db2d2e664b 100644
+--- a/libclamav/json_api.h
++++ b/libclamav/json_api.h
+@@ -30,7 +30,7 @@
+ #include "json.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ #if HAVE_JSON
+diff --git a/libclamav/jsparse/js-norm.c b/libclamav/jsparse/js-norm.c
+index cf52a44357..1a991a4bdd 100644
+--- a/libclamav/jsparse/js-norm.c
++++ b/libclamav/jsparse/js-norm.c
+@@ -36,7 +36,6 @@
+ #include <assert.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "jsparse/lexglobal.h"
+ #include "hashtab.h"
+ #include "others.h"
+diff --git a/libclamav/lzma_iface.h b/libclamav/lzma_iface.h
+index 4a11668f6f..847214d185 100644
+--- a/libclamav/lzma_iface.h
++++ b/libclamav/lzma_iface.h
+@@ -28,7 +28,7 @@
+ #define __LZMA_IFACE_H
+ 
+ #include "7z/LzmaDec.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ struct CLI_LZMA {
+diff --git a/libclamav/macho.c b/libclamav/macho.c
+index 06142269cc..f489d9f7b7 100644
+--- a/libclamav/macho.c
++++ b/libclamav/macho.c
+@@ -30,7 +30,6 @@
+ #include <fcntl.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "macho.h"
+ #include "execs.h"
+diff --git a/libclamav/matcher-ac.c b/libclamav/matcher-ac.c
+index 70d341cff6..fe59e2f4f7 100644
+--- a/libclamav/matcher-ac.c
++++ b/libclamav/matcher-ac.c
+@@ -39,7 +39,6 @@
+ #include "matcher.h"
+ #include "matcher-ac.h"
+ #include "filetypes.h"
+-#include "cltypes.h"
+ #include "str.h"
+ #include "readdb.h"
+ #include "default.h"
+diff --git a/libclamav/matcher-ac.h b/libclamav/matcher-ac.h
+index 930e8fb184..90b3fcefdc 100644
+--- a/libclamav/matcher-ac.h
++++ b/libclamav/matcher-ac.h
+@@ -25,7 +25,7 @@
+ #include <sys/types.h>
+ 
+ #include "filetypes.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "fmap.h"
+ #include "hashtab.h"
+ 
+diff --git a/libclamav/matcher-bm.c b/libclamav/matcher-bm.c
+index 391d0a10d8..2056961b89 100644
+--- a/libclamav/matcher-bm.c
++++ b/libclamav/matcher-bm.c
+@@ -29,7 +29,6 @@
+ #include "clamav.h"
+ #include "memory.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "matcher.h"
+ #include "matcher-bm.h"
+ #include "filetypes.h"
+diff --git a/libclamav/matcher-bm.h b/libclamav/matcher-bm.h
+index 99ac9446ec..9f3b1f237c 100644
+--- a/libclamav/matcher-bm.h
++++ b/libclamav/matcher-bm.h
+@@ -24,7 +24,7 @@
+ 
+ #include "matcher.h"
+ #include "filetypes.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "fmap.h"
+ #include "others.h"
+ 
+diff --git a/libclamav/matcher-byte-comp.c b/libclamav/matcher-byte-comp.c
+index d94c605df2..1bf73fe22d 100644
+--- a/libclamav/matcher-byte-comp.c
++++ b/libclamav/matcher-byte-comp.c
+@@ -28,7 +28,6 @@
+ #include <errno.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "matcher.h"
+ #include "matcher-ac.h"
+diff --git a/libclamav/matcher-byte-comp.h b/libclamav/matcher-byte-comp.h
+index 878f73a9e9..63a7771204 100644
+--- a/libclamav/matcher-byte-comp.h
++++ b/libclamav/matcher-byte-comp.h
+@@ -30,7 +30,7 @@
+ 
+ #include <sys/types.h>
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "dconf.h"
+ #include "mpool.h"
+ 
+diff --git a/libclamav/matcher-hash.h b/libclamav/matcher-hash.h
+index 53b96288f8..3816d4c115 100644
+--- a/libclamav/matcher-hash.h
++++ b/libclamav/matcher-hash.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "hashtab.h"
+ 
+ enum CLI_HASH_TYPE {
+diff --git a/libclamav/matcher-pcre.c b/libclamav/matcher-pcre.c
+index 82f3adde53..94e93a42c7 100644
+--- a/libclamav/matcher-pcre.c
++++ b/libclamav/matcher-pcre.c
+@@ -27,7 +27,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "dconf.h"
+ #include "events.h"
+ #include "others.h"
+diff --git a/libclamav/matcher-pcre.h b/libclamav/matcher-pcre.h
+index 40133d5da0..af9e9556d8 100644
+--- a/libclamav/matcher-pcre.h
++++ b/libclamav/matcher-pcre.h
+@@ -31,7 +31,7 @@
+ 
+ #include <sys/types.h>
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "dconf.h"
+ #include "mpool.h"
+ #include "regex_pcre.h"
+diff --git a/libclamav/matcher.c b/libclamav/matcher.c
+index 64e8d38d40..80177cf666 100644
+--- a/libclamav/matcher.c
++++ b/libclamav/matcher.c
+@@ -45,7 +45,6 @@
+ #include "special.h"
+ #include "scanners.h"
+ #include "str.h"
+-#include "cltypes.h"
+ #include "default.h"
+ #include "macho.h"
+ #include "fmap.h"
+diff --git a/libclamav/matcher.h b/libclamav/matcher.h
+index e3bdc43a85..f431031c86 100644
+--- a/libclamav/matcher.h
++++ b/libclamav/matcher.h
+@@ -28,7 +28,6 @@
+ #include "filetypes.h"
+ #include "others.h"
+ #include "execs.h"
+-#include "cltypes.h"
+ 
+ struct cli_target_info {
+     off_t fsize;
+diff --git a/libclamav/mbr.c b/libclamav/mbr.c
+index 1267a57d46..de1f2fd820 100644
+--- a/libclamav/mbr.c
++++ b/libclamav/mbr.c
+@@ -33,7 +33,6 @@
+ #include <zlib.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "mbr.h"
+ #include "prtn_intxn.h"
+diff --git a/libclamav/mbr.h b/libclamav/mbr.h
+index ea202d46de..f7f309fa58 100644
+--- a/libclamav/mbr.h
++++ b/libclamav/mbr.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ #define MBR_SECTOR_SIZE 512
+diff --git a/libclamav/mew.c b/libclamav/mew.c
+index 461e2dd288..fca7034ec1 100644
+--- a/libclamav/mew.c
++++ b/libclamav/mew.c
+@@ -50,7 +50,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "pe.h"
+ #include "others.h"
+ #include "mew.h"
+diff --git a/libclamav/mew.h b/libclamav/mew.h
+index d60f128df5..5ef550103e 100644
+--- a/libclamav/mew.h
++++ b/libclamav/mew.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ struct lzmastate {
+ 	const char *p0;
+diff --git a/libclamav/mpool.h b/libclamav/mpool.h
+index 467abf204e..01d1ba75f5 100644
+--- a/libclamav/mpool.h
++++ b/libclamav/mpool.h
+@@ -23,7 +23,7 @@
+ #define MPOOL_H
+ 
+ #ifdef USE_MPOOL
+-#include "cltypes.h"
++#include "clamav-types.h"
+ typedef struct MP mpool_t;
+ struct cl_engine;
+ 
+diff --git a/libclamav/msdoc.c b/libclamav/msdoc.c
+index 932431190e..2cd250eedb 100644
+--- a/libclamav/msdoc.c
++++ b/libclamav/msdoc.c
+@@ -42,7 +42,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "msdoc.h"
+ #include "scanners.h"
+diff --git a/libclamav/msexpand.c b/libclamav/msexpand.c
+index 2556140b1f..5929f94303 100644
+--- a/libclamav/msexpand.c
++++ b/libclamav/msexpand.c
+@@ -33,7 +33,6 @@
+ #include <string.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "msexpand.h"
+ #include "fmap.h"
+diff --git a/libclamav/nsis/nulsft.c b/libclamav/nsis/nulsft.c
+index f47b752cb0..7c3b5ef349 100644
+--- a/libclamav/nsis/nulsft.c
++++ b/libclamav/nsis/nulsft.c
+@@ -33,7 +33,6 @@
+ 
+ #include "clamav.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "nsis_bzlib.h"
+ /* #include "zlib.h" */
+ #include "nsis_zlib.h"
+diff --git a/libclamav/ole2_extract.c b/libclamav/ole2_extract.c
+index cdbc4a9a40..97b2f05e1d 100644
+--- a/libclamav/ole2_extract.c
++++ b/libclamav/ole2_extract.c
+@@ -42,7 +42,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "hwp.h"
+ #include "ole2_extract.h"
+diff --git a/libclamav/ooxml.c b/libclamav/ooxml.c
+index ac30605474..d8d2344fc4 100644
+--- a/libclamav/ooxml.c
++++ b/libclamav/ooxml.c
+@@ -24,7 +24,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "filetypes.h"
+ #include "others.h"
+ #include "unzip.h"
+diff --git a/libclamav/others.c b/libclamav/others.c
+index eafb8ae061..bbf3d23ffd 100644
+--- a/libclamav/others.c
++++ b/libclamav/others.c
+@@ -68,7 +68,6 @@
+ 
+ #include "clamav.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "regex/regex.h"
+ #include "ltdl.h"
+ #include "matcher-ac.h"
+diff --git a/libclamav/others.h b/libclamav/others.h
+index a821ace4af..f5f4e59d69 100644
+--- a/libclamav/others.h
++++ b/libclamav/others.h
+@@ -38,7 +38,6 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+-#include "cltypes.h"
+ 
+ #include "clamav.h"
+ #include "dconf.h"
+diff --git a/libclamav/others_common.c b/libclamav/others_common.c
+index 40c34014c2..0d4c642b15 100644
+--- a/libclamav/others_common.c
++++ b/libclamav/others_common.c
+@@ -55,7 +55,6 @@
+ 
+ #include "clamav.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "regex/regex.h"
+ #include "ltdl.h"
+ #include "matcher-ac.h"
+diff --git a/libclamav/packlibs.h b/libclamav/packlibs.h
+index 722f85876b..b3116716d6 100644
+--- a/libclamav/packlibs.h
++++ b/libclamav/packlibs.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "rebuildpe.h"
+ 
+ int cli_unfsg(const char *, char *, int, int, const char **, char **);
+diff --git a/libclamav/pe.c b/libclamav/pe.c
+index 83c8cebc3a..2f19c5f320 100644
+--- a/libclamav/pe.c
++++ b/libclamav/pe.c
+@@ -62,7 +62,6 @@
+ #include <time.h>
+ #include <stdarg.h>
+ 
+-#include "cltypes.h"
+ #include "clamav.h"
+ #include "others.h"
+ #include "pe.h"
+diff --git a/libclamav/pe.h b/libclamav/pe.h
+index 87af9f8e9c..3fe42b0920 100644
+--- a/libclamav/pe.h
++++ b/libclamav/pe.h
+@@ -28,7 +28,6 @@
+ #include "clamav.h"
+ #include "execs.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "fmap.h"
+ #include "bcfeatures.h"
+ /** @file */
+diff --git a/libclamav/perflogging.h b/libclamav/perflogging.h
+index 737a9c6d3a..43f088d61b 100644
+--- a/libclamav/perflogging.h
++++ b/libclamav/perflogging.h
+@@ -36,7 +36,7 @@
+ /*TODO: maybe we need a GCC version check too here */
+ #include <pthread.h>
+ #include <assert.h>
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ enum perf_log_sumable {
+ 	RAW_BYTES_SCANNED,
+diff --git a/libclamav/petite.c b/libclamav/petite.c
+index 37acdf791e..820cd60e0e 100644
+--- a/libclamav/petite.c
++++ b/libclamav/petite.c
+@@ -54,7 +54,6 @@
+ #include <string.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "rebuildpe.h"
+ #include "execs.h"
+ #include "others.h"
+diff --git a/libclamav/petite.h b/libclamav/petite.h
+index 4dadddcf0c..353bdf5a8d 100644
+--- a/libclamav/petite.h
++++ b/libclamav/petite.h
+@@ -22,7 +22,7 @@
+ #ifndef __PETITE_H
+ #define __PETITE_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "pe.h"
+ 
+ int petite_inflate2x_1to9(char *buf, uint32_t minrva, uint32_t bufsz, struct cli_exe_section *sections, unsigned int sectcount, uint32_t Imagebase, uint32_t pep, int desc, int version, uint32_t ResRva, uint32_t ResSize);
+diff --git a/libclamav/phishcheck.c b/libclamav/phishcheck.c
+index b9b98a0726..8931b57c9a 100644
+--- a/libclamav/phishcheck.c
++++ b/libclamav/phishcheck.c
+@@ -36,7 +36,6 @@
+ #include <ctype.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "htmlnorm.h"
+ #include "phishcheck.h"
+diff --git a/libclamav/prtn_intxn.c b/libclamav/prtn_intxn.c
+index da3d2a82a2..1b61dad0de 100644
+--- a/libclamav/prtn_intxn.c
++++ b/libclamav/prtn_intxn.c
+@@ -24,7 +24,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "prtn_intxn.h"
+ 
+diff --git a/libclamav/prtn_intxn.h b/libclamav/prtn_intxn.h
+index 730d09db61..f710d96803 100644
+--- a/libclamav/prtn_intxn.h
++++ b/libclamav/prtn_intxn.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ #define PRTN_INTXN_DETECTION "heuristic.partitionintersection"
+diff --git a/libclamav/qsort.c b/libclamav/qsort.c
+index 9f63f1e8f2..abd80dfe4e 100644
+--- a/libclamav/qsort.c
++++ b/libclamav/qsort.c
+@@ -34,7 +34,6 @@
+ 
+ #include "clamav.h"
+ #include "platform.h"
+-#include "cltypes.h"
+ #include "others.h"
+ 
+ static inline char	*med3(char *, char *, char *, int (*)(const void *, const void *));
+diff --git a/libclamav/readdb.c b/libclamav/readdb.c
+index e2ed6ab544..07845b1fe9 100644
+--- a/libclamav/readdb.c
++++ b/libclamav/readdb.c
+@@ -58,7 +58,6 @@
+ #include "filetypes.h"
+ #include "filetypes_int.h"
+ #include "readdb.h"
+-#include "cltypes.h"
+ #include "default.h"
+ #include "dsig.h"
+ #include "asn1.h"
+diff --git a/libclamav/readdb.h b/libclamav/readdb.h
+index c7be6eafab..4f0aa264e8 100644
+--- a/libclamav/readdb.h
++++ b/libclamav/readdb.h
+@@ -24,7 +24,6 @@
+ #include "clamav.h"
+ #include "matcher.h"
+ #include "str.h"
+-#include "cltypes.h"
+ #include "cvd.h"
+ 
+ #ifdef HAVE_YARA
+diff --git a/libclamav/rebuildpe.h b/libclamav/rebuildpe.h
+index 2b33ee165f..d4fae854a4 100644
+--- a/libclamav/rebuildpe.h
++++ b/libclamav/rebuildpe.h
+@@ -22,7 +22,7 @@
+ #ifndef __REBUILDPE_H
+ #define __REBUILDPE_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "execs.h"
+ 
+ int cli_rebuildpe(char *, struct cli_exe_section *, int, uint32_t, uint32_t, uint32_t, uint32_t, int);
+diff --git a/libclamav/regex_pcre.c b/libclamav/regex_pcre.c
+index 17d3f7e7d9..d2b645cd23 100644
+--- a/libclamav/regex_pcre.c
++++ b/libclamav/regex_pcre.c
+@@ -35,7 +35,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "regex_pcre.h"
+ 
+diff --git a/libclamav/regex_pcre.h b/libclamav/regex_pcre.h
+index 6677b7e7d1..23d6c5dc48 100644
+--- a/libclamav/regex_pcre.h
++++ b/libclamav/regex_pcre.h
+@@ -37,7 +37,7 @@
+ #include <pcre.h>
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "mpool.h"
+ 
+ /* used for setting overrides */
+diff --git a/libclamav/sf_base64decode.h b/libclamav/sf_base64decode.h
+index d93c39ba45..2a84166657 100644
+--- a/libclamav/sf_base64decode.h
++++ b/libclamav/sf_base64decode.h
+@@ -25,7 +25,7 @@
+ #define _SF_BASE64DECODE_H_
+ 
+ #include <stdio.h>
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ int sf_base64decode(uint8_t*, size_t, uint8_t*, size_t, size_t*); 
+ 
+diff --git a/libclamav/special.c b/libclamav/special.c
+index 0a0a905ae6..652d664bfa 100644
+--- a/libclamav/special.c
++++ b/libclamav/special.c
+@@ -37,7 +37,6 @@
+ 
+ #include "clamav.h"
+ #include "others.h"
+-#include "cltypes.h"
+ #include "special.h"
+ #include "matcher.h"
+ 
+diff --git a/libclamav/spin.c b/libclamav/spin.c
+index e3880b70e0..5f4973c3d6 100644
+--- a/libclamav/spin.c
++++ b/libclamav/spin.c
+@@ -55,7 +55,6 @@
+ #include <string.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "pe.h"
+ #include "rebuildpe.h"
+ #include "execs.h"
+diff --git a/libclamav/spin.h b/libclamav/spin.h
+index ebd160a060..9dd3151665 100644
+--- a/libclamav/spin.h
++++ b/libclamav/spin.h
+@@ -22,7 +22,7 @@
+ #ifndef __SPIN_H
+ #define __SPIN_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "rebuildpe.h"
+ 
+ int unspin(char *, int, struct cli_exe_section *, int, uint32_t, int, cli_ctx *);
+diff --git a/libclamav/str.c b/libclamav/str.c
+index 0c7b2f2883..4c6fc20cea 100644
+--- a/libclamav/str.c
++++ b/libclamav/str.c
+@@ -41,7 +41,6 @@
+ #include "clamav.h"
+ #include "others.h"
+ #include "matcher.h"
+-#include "cltypes.h"
+ #include "jsparse/textbuf.h"
+ #include "platform.h"
+ 
+diff --git a/libclamav/str.h b/libclamav/str.h
+index 5b7b4bbced..d659001164 100644
+--- a/libclamav/str.h
++++ b/libclamav/str.h
+@@ -30,7 +30,6 @@
+ #include <limits.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "clamav.h"
+ 
+ #define SIZE_T_CHARLEN ( (sizeof(size_t) * CHAR_BIT + 2) / 3 + 1 )
+diff --git a/libclamav/swf.c b/libclamav/swf.c
+index e57468d8ff..dd3a6d9493 100644
+--- a/libclamav/swf.c
++++ b/libclamav/swf.c
+@@ -45,7 +45,6 @@
+ #include <time.h>
+ #include <zlib.h>
+ 
+-#include "cltypes.h"
+ #include "swf.h"
+ #include "clamav.h"
+ #include "scanners.h"
+diff --git a/libclamav/tnef.c b/libclamav/tnef.c
+index efd1364aeb..f7c8041f22 100644
+--- a/libclamav/tnef.c
++++ b/libclamav/tnef.c
+@@ -33,7 +33,6 @@
+ #include <unistd.h>
+ #endif
+ 
+-#include "cltypes.h"
+ #include "clamav.h"
+ #include "others.h"
+ 
+diff --git a/libclamav/unarj.c b/libclamav/unarj.c
+index 03fda05772..ae9554e652 100644
+--- a/libclamav/unarj.c
++++ b/libclamav/unarj.c
+@@ -34,11 +34,9 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+-#include <clamav.h>
+ #include <ctype.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "unarj.h"
+ 
+diff --git a/libclamav/uniq.h b/libclamav/uniq.h
+index c7a99db150..9c13e50508 100644
+--- a/libclamav/uniq.h
++++ b/libclamav/uniq.h
+@@ -24,7 +24,7 @@
+ #ifndef _UNIQ_H
+ #define _UNIQ_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ struct UNIQMD5 {
+   struct UNIQMD5 *next;
+diff --git a/libclamav/unsp.c b/libclamav/unsp.c
+index 25e8efd429..e89801342f 100644
+--- a/libclamav/unsp.c
++++ b/libclamav/unsp.c
+@@ -112,7 +112,6 @@ nsp1:00435A5A                 push    8000h
+ 
+ #include <stdlib.h>
+ 
+-#include "cltypes.h"
+ #include "clamav.h"
+ #include "others.h"
+ #include "rebuildpe.h"
+diff --git a/libclamav/unsp.h b/libclamav/unsp.h
+index 2bcd8d19ba..e5654c7328 100644
+--- a/libclamav/unsp.h
++++ b/libclamav/unsp.h
+@@ -22,7 +22,7 @@
+ #ifndef __UNSP_H
+ #define __UNSP_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ struct UNSP {
+diff --git a/libclamav/upack.c b/libclamav/upack.c
+index cfe7c7d81e..fe2a91f8b5 100644
+--- a/libclamav/upack.c
++++ b/libclamav/upack.c
+@@ -41,7 +41,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "pe.h"
+ #include "rebuildpe.h"
+ #include "others.h"
+diff --git a/libclamav/upack.h b/libclamav/upack.h
+index a5c4709558..0327539581 100644
+--- a/libclamav/upack.h
++++ b/libclamav/upack.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ int unupack(int, char *, uint32_t, char *, uint32_t, uint32_t, uint32_t, uint32_t, int);
+ 
+diff --git a/libclamav/upx.c b/libclamav/upx.c
+index 5d3484d819..1c1976813c 100644
+--- a/libclamav/upx.c
++++ b/libclamav/upx.c
+@@ -54,7 +54,6 @@
+ #include <string.h>
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "upx.h"
+ #include "str.h"
+diff --git a/libclamav/upx.h b/libclamav/upx.h
+index 2a8c7c1e16..c48b01e375 100644
+--- a/libclamav/upx.h
++++ b/libclamav/upx.h
+@@ -22,7 +22,7 @@
+ #ifndef __UPX_H
+ #define __UPX_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ int upx_inflate2b(const char *, uint32_t, char *, uint32_t *, uint32_t, uint32_t, uint32_t);
+ int upx_inflate2d(const char *, uint32_t, char *, uint32_t *, uint32_t, uint32_t, uint32_t);
+diff --git a/libclamav/vba_extract.h b/libclamav/vba_extract.h
+index b79dfc1859..9c04fd9429 100644
+--- a/libclamav/vba_extract.h
++++ b/libclamav/vba_extract.h
+@@ -25,7 +25,7 @@
+ #define __VBA_EXTRACT_H
+ 
+ #include "others.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "uniq.h"
+ 
+ typedef struct vba_project_tag {
+diff --git a/libclamav/wwunpack.c b/libclamav/wwunpack.c
+index a13550e8f5..218f85fcfb 100644
+--- a/libclamav/wwunpack.c
++++ b/libclamav/wwunpack.c
+@@ -24,7 +24,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "others.h"
+ #include "execs.h"
+ #include "wwunpack.h"
+diff --git a/libclamav/wwunpack.h b/libclamav/wwunpack.h
+index 28216e9dc8..9203db7e39 100644
+--- a/libclamav/wwunpack.h
++++ b/libclamav/wwunpack.h
+@@ -22,7 +22,7 @@
+ #ifndef __WWP32_H
+ #define __WWP32_H
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "execs.h"
+ 
+ int wwunpack(uint8_t *, uint32_t, uint8_t *, struct cli_exe_section *, uint16_t, uint32_t, int);
+diff --git a/libclamav/xar.h b/libclamav/xar.h
+index da78a772f3..01f3c149d2 100644
+--- a/libclamav/xar.h
++++ b/libclamav/xar.h
+@@ -26,7 +26,7 @@
+ #include "clamav-config.h"
+ #endif
+ 
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ #ifndef HAVE_ATTRIB_PACKED
+diff --git a/libclamav/xz_iface.h b/libclamav/xz_iface.h
+index 4b4595b9a8..6d738666d5 100644
+--- a/libclamav/xz_iface.h
++++ b/libclamav/xz_iface.h
+@@ -23,7 +23,7 @@
+ #define __XZ_IFACE_H
+ 
+ #include "7z/Xz.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ #include "others.h"
+ 
+ struct CLI_XZ {
+diff --git a/libclamav/yc.c b/libclamav/yc.c
+index 9f5c271779..1a3c53b3bc 100644
+--- a/libclamav/yc.c
++++ b/libclamav/yc.c
+@@ -33,7 +33,6 @@
+ #endif
+ 
+ #include "clamav.h"
+-#include "cltypes.h"
+ #include "pe.h"
+ #include "others.h"
+ #include "yc.h"
+diff --git a/libclamav/yc.h b/libclamav/yc.h
+index d7c78ec2c3..2d8fce7639 100644
+--- a/libclamav/yc.h
++++ b/libclamav/yc.h
+@@ -24,7 +24,7 @@
+ 
+ #include "pe.h"
+ #include "execs.h"
+-#include "cltypes.h"
++#include "clamav-types.h"
+ 
+ int yc_decrypt(cli_ctx *, char *, unsigned int, struct cli_exe_section *, unsigned int, uint32_t, int,uint32_t,int16_t);
+ 
+diff --git a/libfreshclam/Makefile.in b/libfreshclam/Makefile.in
+index e57ef396e8..4026b18ec2 100644
+--- a/libfreshclam/Makefile.in
++++ b/libfreshclam/Makefile.in
+@@ -175,6 +175,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -328,6 +329,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -342,6 +345,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -356,6 +360,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -437,6 +446,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/libltdl/Makefile.in b/libltdl/Makefile.in
+index dc52c47d69..0185a552e4 100644
+--- a/libltdl/Makefile.in
++++ b/libltdl/Makefile.in
+@@ -164,6 +164,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -380,6 +381,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -394,6 +397,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -408,6 +412,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -489,6 +498,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/m4/reorganization/types.m4 b/m4/reorganization/types.m4
+new file mode 100644
+index 0000000000..1f1114d8ca
+--- /dev/null
++++ b/m4/reorganization/types.m4
+@@ -0,0 +1,94 @@
++# Define a warning for the user, so they don't edit clamav-types.h
++AC_SUBST(GENERATE_WARNING, ["Warning: This file is generated with ./configure. Do not edit!"])
++
++# Initialize definitions to empty strings, in case they're not needed.
++AC_SUBST(INT8_DEF, [""])
++AC_SUBST(UINT8_DEF, [""])
++AC_SUBST(INT16_DEF, [""])
++AC_SUBST(UINT16_DEF, [""])
++AC_SUBST(INT32_DEF, [""])
++AC_SUBST(UINT32_DEF, [""])
++AC_SUBST(INT64_DEF, [""])
++AC_SUBST(UINT64_DEF, [""])
++
++# Check sys/int_types.h first, to give it higher priority on Solaris
++AC_CHECK_HEADER(
++    [sys/int_types.h], 
++    [ dnl Found
++        AC_SUBST(INT_TYPES_HEADER, ["#include <sys/int_types.h>"])
++    ], 
++    [ dnl Not-found
++        AC_CHECK_HEADER(
++            [inttypes.h], 
++            [ dnl Found; C99: inttypes.h should include stdint.h; more universal because some older platforms don't provide stdint.h
++                AC_SUBST(INT_TYPES_HEADER, ["#include <inttypes.h>"])
++            ], 
++            [ dnl Not-found
++                AC_CHECK_HEADER(
++                    [stdint.h], 
++                    [ dnl Found
++                        AC_SUBST(INT_TYPES_HEADER, ["#include <stdint.h>"])
++                    ], 
++                    [ dnl Not-found
++                        AC_COMPILE_IFELSE(
++                            [ dnl Check if Windows (Cygwin), using auto-defined _MSC_VER
++                                AC_LANG_PROGRAM([
++                                    [
++                                        #ifndef _MSC_VER
++                                            error: _MSC_VER not found!
++                                        #endif]
++                                    ]
++                                )
++                            ],
++                            [ dnl It's Windows, stdint.h should exist.
++                                AC_SUBST(INT_TYPES_HEADER, ["#include <stdint.h>"])
++                            ],
++                            [ dnl No int types header available. We'll define the types manually.
++                                AC_SUBST(INT8_DEF, ["typedef signed char int8_t;"])
++                                AC_SUBST(UINT8_DEF, ["typedef unsigned char uint8_t;"])
++
++                                if test $ac_cv_sizeof_int = 2; then 
++                                    AC_SUBST(INT16_DEF, ["typedef signed int int16_t;"])
++                                    AC_SUBST(UINT16_DEF, ["typedef unsigned int uint16_t;"])
++                                elif test $ac_cv_sizeof_short = 2; then 
++                                    AC_SUBST(INT16_DEF, ["typedef signed short int16_t;"])
++                                    AC_SUBST(UINT16_DEF, ["typedef unsigned short uint16_t;"])
++                                fi
++
++                                if test $ac_cv_sizeof_int = 4; then 
++                                    AC_SUBST(INT32_DEF, ["typedef signed int int32_t;"])
++                                    AC_SUBST(UINT32_DEF, ["typedef unsigned int uint32_t;"])
++                                elif test $ac_cv_sizeof_long = 4; then 
++                                    AC_SUBST(INT32_DEF, ["typedef signed long int32_t;"])
++                                    AC_SUBST(UINT32_DEF, ["typedef unsigned long uint32_t;"])
++                                fi
++
++                                if test $ac_cv_sizeof_long = 8; then 
++                                    AC_SUBST(INT64_DEF, ["typedef signed long int64_t;"])
++                                    AC_SUBST(UINT64_DEF, ["typedef unsigned long uint64_t;"])
++                                elif test $ac_cv_sizeof_long_long = 8; then 
++                                    AC_SUBST(INT64_DEF, ["typedef signed long long int64_t;"])
++                                    AC_SUBST(UINT64_DEF, ["typedef unsigned long long uint64_t;"])
++                                fi
++                            ]
++                        )
++                    ],
++                )
++            ],
++        )
++    ],
++)
++
++# If _SF64_PREFIX isn't defined, this may be used.
++if test $ac_cv_sizeof_int = 4; then 
++    AC_SUBST(DEFINE_SF32_PREFIX, ["#define _SF32_PREFIX \"\""])
++elif test $ac_cv_sizeof_long = 4; then 
++    AC_SUBST(DEFINE_SF32_PREFIX, ["#define _SF32_PREFIX \"l\""])
++fi
++
++# If _SF32_PREFIX isn't defined, this may be used.
++if test $ac_cv_sizeof_long = 8; then 
++    AC_SUBST(DEFINE_SF64_PREFIX, ["#define _SF64_PREFIX \"l\""])
++elif test $ac_cv_sizeof_long_long = 8; then 
++    AC_SUBST(DEFINE_SF64_PREFIX, ["#define _SF64_PREFIX \"ll\""])
++fi
+diff --git a/sigtool/Makefile.in b/sigtool/Makefile.in
+index 6db7dc4448..e5b64f43a3 100644
+--- a/sigtool/Makefile.in
++++ b/sigtool/Makefile.in
+@@ -176,6 +176,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -302,6 +303,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@ -DCL_NOTHREADS
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -316,6 +319,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -330,6 +334,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -411,6 +420,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/sigtool/vba.c b/sigtool/vba.c
+index 20426619d0..1476baf168 100644
+--- a/sigtool/vba.c
++++ b/sigtool/vba.c
+@@ -35,7 +35,6 @@
+ 
+ #include "libclamav/clamav.h"
+ #include "libclamav/vba_extract.h"
+-#include "libclamav/cltypes.h"
+ #include "libclamav/ole2_extract.h"
+ #include "shared/output.h"
+ 
+diff --git a/test/Makefile.in b/test/Makefile.in
+index 1ac828ab9f..a43c1c00a1 100644
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -157,6 +157,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -232,6 +233,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -246,6 +249,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -260,6 +264,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -341,6 +350,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/unit_tests/Makefile.in b/unit_tests/Makefile.in
+index c2fcd4ae06..285a1e53f8 100644
+--- a/unit_tests/Makefile.in
++++ b/unit_tests/Makefile.in
+@@ -159,6 +159,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
+ 	$(top_srcdir)/m4/reorganization/libs/curl.m4 \
+ 	$(top_srcdir)/m4/reorganization/substitutions.m4 \
+ 	$(top_srcdir)/m4/reorganization/strni.m4 \
++	$(top_srcdir)/m4/reorganization/types.m4 \
+ 	$(top_srcdir)/configure.ac
+ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
+ 	$(ACLOCAL_M4)
+@@ -522,6 +523,8 @@ CXXDEPMODE = @CXXDEPMODE@
+ CXXFLAGS = @CXXFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DBDIR = @DBDIR@
++DEFINE_SF32_PREFIX = @DEFINE_SF32_PREFIX@
++DEFINE_SF64_PREFIX = @DEFINE_SF64_PREFIX@
+ DEFS = @DEFS@
+ DEPDIR = @DEPDIR@
+ DLLTOOL = @DLLTOOL@
+@@ -536,6 +539,7 @@ FGREP = @FGREP@
+ FRESHCLAM_CPPFLAGS = @FRESHCLAM_CPPFLAGS@
+ FRESHCLAM_LIBS = @FRESHCLAM_LIBS@
+ GCOV = @GCOV@
++GENERATE_WARNING = @GENERATE_WARNING@
+ GENHTML = @GENHTML@
+ GETENT = @GETENT@
+ GPERF = @GPERF@
+@@ -550,6 +554,11 @@ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++INT16_DEF = @INT16_DEF@
++INT32_DEF = @INT32_DEF@
++INT64_DEF = @INT64_DEF@
++INT8_DEF = @INT8_DEF@
++INT_TYPES_HEADER = @INT_TYPES_HEADER@
+ JSON_CPPFLAGS = @JSON_CPPFLAGS@
+ JSON_LDFLAGS = @JSON_LDFLAGS@
+ JSON_LIBS = @JSON_LIBS@
+@@ -631,6 +640,10 @@ SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+ SYSTEMD_LIBS = @SYSTEMD_LIBS@
+ THREAD_LIBS = @THREAD_LIBS@
+ TH_SAFE = @TH_SAFE@
++UINT16_DEF = @UINT16_DEF@
++UINT32_DEF = @UINT32_DEF@
++UINT64_DEF = @UINT64_DEF@
++UINT8_DEF = @UINT8_DEF@
+ VERSION = @VERSION@
+ VERSIONSCRIPTFLAG = @VERSIONSCRIPTFLAG@
+ WERR_CFLAGS = @WERR_CFLAGS@
+diff --git a/unit_tests/check_clamd.c b/unit_tests/check_clamd.c
+index 6313973b63..cc2a12ce6e 100644
+--- a/unit_tests/check_clamd.c
++++ b/unit_tests/check_clamd.c
+@@ -52,7 +52,6 @@
+ #include "checks_common.h"
+ #include "libclamav/clamav.h"
+ #include "libclamav/version.h"
+-#include "libclamav/cltypes.h"
+ 
+ #ifdef CHECK_HAVE_LOOPS
+ 
+diff --git a/win32/compat/resolv.h b/win32/compat/resolv.h
+index 8fbdd446df..836b1fa1e9 100644
+--- a/win32/compat/resolv.h
++++ b/win32/compat/resolv.h
+@@ -1,36 +1,36 @@
+-/*
+- *  Copyright (C) 2015 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+- *  Copyright (C) 2009 Sourcefire, Inc.
+- *
+- *  Authors: aCaB <acab@clamav.net>
+- *
+- *  This program is free software; you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License version 2 as
+- *  published by the Free Software Foundation.
+- *
+- *  This program is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with this program; if not, write to the Free Software
+- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+- *  MA 02110-1301, USA.
+- */
+-
+-#ifndef __RESOLV_H
+-#define __RESOLV_H
+-
+-#if HAVE_CONFIG_H
+-#include "clamav-config.h"
+-#endif
+-
+-#include <Windns.h>
+-#include "cltypes.h"
+-
+-#define C_IN 1
+-
++/*
++ *  Copyright (C) 2015 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
++ *  Copyright (C) 2009 Sourcefire, Inc.
++ *
++ *  Authors: aCaB <acab@clamav.net>
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License version 2 as
++ *  published by the Free Software Foundation.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program; if not, write to the Free Software
++ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
++ *  MA 02110-1301, USA.
++ */
++
++#ifndef __RESOLV_H
++#define __RESOLV_H
++
++#if HAVE_CONFIG_H
++#include "clamav-config.h"
++#endif
++
++#include <Windns.h>
++#include "clamav-types.h"
++
++#define C_IN 1
++
+ #define T_A DNS_TYPE_A
+ #define T_NS DNS_TYPE_NS
+ #define T_MD DNS_TYPE_MD
+@@ -93,31 +93,31 @@
+ #define T_WINS DNS_TYPE_WINS
+ #define T_WINSR DNS_TYPE_WINSR
+ #define T_NBSTAT DNS_TYPE_NBSTAT
+-
+-#ifndef DNS_QUERY_NO_HOSTS_FILE
+-#define DNS_QUERY_NO_HOSTS_FILE 0
+-#endif
+-
+-typedef struct {
+-	unsigned short	id; /* fake stuff */
+-} HEADER;
+-
+-#define INT16SZ 2
+-
+-#define GETSHORT(var, ptr) do { \
+-    var = ((uint16_t)(*(uint8_t *)ptr++)) << 8; \
+-    var |= *(uint8_t *)ptr++; \
+-    } while (0)
+-
+-#define GETLONG(var, ptr) do { \
+-    var = ((uint32_t)(*(uint8_t *)ptr++)) << 24; \
+-    var = ((uint32_t)(*(uint8_t *)ptr++)) << 16; \
+-    var = ((uint32_t)(*(uint8_t *)ptr++)) << 8; \
+-    var |= *(uint8_t *)ptr++; \
+-    } while (0)
+-
+-int res_init(void);
+-int res_query(const char *dname, int class, int type, unsigned char *answer, int anslen);
+-int dn_expand(unsigned char *msg, unsigned char *eomorig, unsigned char *comp_dn, char *exp_dn, int length);
+-
+-#endif
++
++#ifndef DNS_QUERY_NO_HOSTS_FILE
++#define DNS_QUERY_NO_HOSTS_FILE 0
++#endif
++
++typedef struct {
++	unsigned short	id; /* fake stuff */
++} HEADER;
++
++#define INT16SZ 2
++
++#define GETSHORT(var, ptr) do { \
++    var = ((uint16_t)(*(uint8_t *)ptr++)) << 8; \
++    var |= *(uint8_t *)ptr++; \
++    } while (0)
++
++#define GETLONG(var, ptr) do { \
++    var = ((uint32_t)(*(uint8_t *)ptr++)) << 24; \
++    var = ((uint32_t)(*(uint8_t *)ptr++)) << 16; \
++    var = ((uint32_t)(*(uint8_t *)ptr++)) << 8; \
++    var |= *(uint8_t *)ptr++; \
++    } while (0)
++
++int res_init(void);
++int res_query(const char *dname, int class, int type, unsigned char *answer, int anslen);
++int dn_expand(unsigned char *msg, unsigned char *eomorig, unsigned char *comp_dn, char *exp_dn, int length);
++
++#endif

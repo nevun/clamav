@@ -55,7 +55,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -107,6 +107,9 @@ Source530:  clamd@.service
 
 Patch0:     clamav-0.100.0-stats-deprecation.patch
 Patch1:     clamav-0.100.1-defaults_locations.patch
+# Fix missing cltypes.h
+# https://bugzilla.redhat.com/show_bug.cgi?id=1663011
+Patch2:     https://github.com/Cisco-Talos/clamav-devel/commit/dee22f2acf5e322c24ff5df4b6606f93eac5690e.patch
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.100.0-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
@@ -697,7 +700,8 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 ## -----------------------
 
 %files lib
-%_libdir/*.so.*
+%_libdir/libclamav.so.9*
+%_libdir/libclammspack.so.0*
 
 ## -----------------------
 
@@ -804,6 +808,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Jan 3 2019 Orion Poplawski <orion@nwra.com> - 0.101.0-2
+- Explicitly list sonames to catch soname bumps
+- Backport header fix (bug #1663011)
+
 * Thu Dec 13 2018 Orion Poplawski <orion@nwra.com> - 0.101.0-1
 - Update to 0.101.0
 - Add %%license
