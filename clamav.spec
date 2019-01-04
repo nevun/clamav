@@ -55,7 +55,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -350,6 +350,7 @@ Empty package just to allow migration of service without stop it and disable it
 
 %patch0 -p0 -b .stats-deprecation
 %patch1 -p1 -b .default_confs
+%patch2 -p1 -b .cltypes
 %patch24 -p1 -b .private
 %patch27 -p1 -b .umask
 %patch30 -p1
@@ -808,6 +809,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Jan 3 2019 Orion Poplawski <orion@nwra.com> - 0.101.0-3
+- Actually apply patch
+
 * Thu Jan 3 2019 Orion Poplawski <orion@nwra.com> - 0.101.0-2
 - Explicitly list sonames to catch soname bumps
 - Backport header fix (bug #1663011)
