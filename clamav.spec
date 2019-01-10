@@ -54,8 +54,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.0
-Release:    3%{?dist}
+Version:    0.101.1
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 Group:      Applications/File
 URL:        https://www.clamav.net/
@@ -78,9 +78,12 @@ Source7:    clamd.SERVICE.init
 # there (I renamed the files to add the -version suffix for verifying).
 # Check the first line of the file for version or run file *cvd
 # Attention file < 5.33-7 have bugs see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
-Source10:   http://database.clamav.net/main-58.cvd
-Source11:   http://database.clamav.net/daily-25192.cvd
-Source12:   http://database.clamav.net/bytecode-327.cvd
+#http://database.clamav.net/main.cvd
+Source10:   main-58.cvd
+#http://database.clamav.net/daily.cvd
+Source11:   daily-25284.cvd
+#http://database.clamav.net/bytecode.cvd
+Source12:   bytecode-328.cvd
 #for devel
 Source100:  clamd-gen
 #for update
@@ -107,9 +110,6 @@ Source530:  clamd@.service
 
 Patch0:     clamav-0.100.0-stats-deprecation.patch
 Patch1:     clamav-0.100.1-defaults_locations.patch
-# Fix missing cltypes.h
-# https://bugzilla.redhat.com/show_bug.cgi?id=1663011
-Patch2:     https://github.com/Cisco-Talos/clamav-devel/commit/dee22f2acf5e322c24ff5df4b6606f93eac5690e.patch
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.100.0-umask.patch
 # https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
@@ -350,7 +350,6 @@ Empty package just to allow migration of service without stop it and disable it
 
 %patch0 -p0 -b .stats-deprecation
 %patch1 -p1 -b .default_confs
-%patch2 -p1 -b .cltypes
 %patch24 -p1 -b .private
 %patch27 -p1 -b .umask
 %patch30 -p1
@@ -809,6 +808,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Jan 10 2019 Sérgio Basto <sergio@serjux.com> - 0.101.1-1
+- Update to 0.101.1
+
 * Thu Jan 3 2019 Orion Poplawski <orion@nwra.com> - 0.101.0-3
 - Actually apply patch
 
