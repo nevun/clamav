@@ -679,8 +679,7 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %systemd_postun_with_restart clamav-milter.service
 %endif
 
-%post   lib -p /sbin/ldconfig
-%postun lib -p /sbin/ldconfig
+%ldconfig_scriptlets   lib
 
 
 %files
