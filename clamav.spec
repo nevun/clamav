@@ -57,7 +57,6 @@ Name:       clamav
 Version:    0.101.1
 Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
-Group:      Applications/File
 URL:        https://www.clamav.net/
 %if %{with unrar}
 Source0:    https://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz
@@ -149,7 +148,6 @@ TO DATE.
 
 %package filesystem
 Summary:    Filesystem structure for clamav
-Group:      Applications/File
 # Prevent version mix
 Conflicts:  %name < %version-%release
 Conflicts:  %name > %version-%release
@@ -163,7 +161,6 @@ user-creation scripts required by clamav.
 
 %package lib
 Summary:    Dynamic libraries for the Clam Antivirus scanner
-Group:      System Environment/Libraries
 Requires:   data(clamav)
 Provides:   bundled(libmspack) = 0.5-0.1.alpha.modified_by_clamav
 
@@ -174,7 +171,6 @@ using the Clam Antivirus scanner.
 
 %package devel
 Summary:    Header files and libraries for the Clam Antivirus scanner
-Group:      Development/Libraries
 Requires:   clamav-lib        = %version-%release
 Requires:   clamav-filesystem = %version-%release
 Requires:   openssl-devel
@@ -186,7 +182,6 @@ build applications using clamav.
 
 %package data
 Summary:    Virus signature data for the Clam Antivirus scanner
-Group:      Applications/File
 Requires:   clamav-filesystem = %version-%release
 Provides:   data(clamav) = full
 Provides:   clamav-db = %{version}-%{release}
@@ -203,7 +198,6 @@ installation.
 
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
-Group:      Applications/File
 Requires:   clamav-filesystem = %version-%release
 Requires:   crontabs
 Requires:   /etc/cron.d
@@ -223,7 +217,6 @@ definitions.
 
 %package -n clamd
 Summary: The Clam AntiVirus Daemon
-Group: System Environment/Daemons
 Requires:   data(clamav)
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
@@ -301,7 +294,6 @@ Empty package just to allow migration of service without stop it and disable it
 
 %package milter
 Summary:    Milter module for the Clam Antivirus scanner
-Group:      System Environment/Daemons
 # clamav-milter could work without clamd and without sendmail
 #Requires: clamd = %%{version}-%%{release}
 #Requires: /usr/sbin/sendmail
