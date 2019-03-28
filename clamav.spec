@@ -1,7 +1,6 @@
 #global prerelease  rc1
 
 ## Fedora Extras specific customization below...
-%bcond_without  fedora
 %if 0%{?fedora} || 0%{?rhel} > 6
 %bcond_without  systemd
 %bcond_without  tmpfiles
@@ -54,8 +53,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.1
-Release:    2%{?dist}
+Version:    0.101.2
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -80,7 +79,7 @@ Source7:    clamd.SERVICE.init
 #http://database.clamav.net/main.cvd
 Source10:   main-58.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25284.cvd
+Source11:   daily-25401.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-328.cvd
 #for devel
@@ -799,6 +798,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Mar 28 2019 Sérgio Basto <sergio@serjux.com> - 0.101.2-1
+- Update to 0.101.2
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.101.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
