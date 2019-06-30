@@ -54,7 +54,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.2
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -246,13 +246,12 @@ Provides:  clamav-scanner-upstart = %version-%release
 %endif
 Obsoletes:  clamav-scanner-upstart < %version-%release
 
-#if #{with systemd}
-#Provides: clamav-scanner-systemd = #{version}-#{release}
-#Provides: clamav-server-systemd = #{version}-#{release}
-#endif
-
-#Obsoletes: clamav-scanner-systemd < #{version}-#{release}
-#Obsoletes: clamav-server-systemd < #{version}-#{release}
+%if %{with systemd}
+Provides: clamav-scanner-systemd = %{version}-%{release}
+Provides: clamav-server-systemd = %{version}-%{release}
+%endif
+Obsoletes: clamav-scanner-systemd < %{version}-%{release}
+Obsoletes: clamav-server-systemd < %{version}-%{release}
 
 ### Fedora Extras introduced them differently :(
 Provides: clamav-server = %{version}-%{release}
@@ -266,29 +265,12 @@ Obsoletes: clamav-scanner-upstart < %{version}-%{release}
 Provides: clamav-server-sysvinit = %{version}-%{release}
 Obsoletes: clamav-server-sysvinit < %{version}-%{release}
 
+
 %description -n clamd
 The Clam AntiVirus Daemon
 See the README file how this can be done with a minimum of effort.
 This package contains a generic system wide clamd service which is
 e.g. used by the clamav-milter package.
-
-
-%package server-systemd
-Requires:   clamd = %{version}-%{release}
-Summary:    Systemd initscripts for clamav server
-%description server-systemd
-Empty package just to allow migration of service without stop it and disable it
-(#1583599). you may remove this package now (dnf remove clamav-server-systemd).
-%files server-systemd
-
-
-%package scanner-systemd
-Requires:   clamd = %{version}-%{release}
-Summary:    systemd initscripts for clamav scanner daemon
-%description scanner-systemd
-Empty package just to allow migration of service without stop it and disable it
-(#1583599). you may remove this package now (dnf remove clamav-scanner-systemd).
-%files scanner-systemd
 
 
 %package milter
@@ -318,21 +300,13 @@ Provides:  clamav-milter-upstart = %version-%release
 %endif
 Obsoletes:  clamav-milter-upstart < %version-%release
 
-#if #{with systemd}
-#Provides: clamav-milter-systemd = #{version}-#{release}
-#endif
-#Obsoletes: clamav-milter-systemd < #{version}-#{release}
+%if %{with systemd}
+Provides: clamav-milter-systemd = %{version}-%{release}
+%endif
+Obsoletes: clamav-milter-systemd < %{version}-%{release}
 
 %description milter
 This package contains files which are needed to run the clamav-milter.
-
-%package milter-systemd
-Requires:   clamd = %{version}-%{release}
-Summary: Systemd initscripts for the clamav sendmail-milter
-%description milter-systemd
-Empty package just to allow migration of service without stop it and disable it
-(#1583599). you may remove this package now (dnf remove clamav-milter-systemd).
-%files milter-systemd
 
 ## ------------------------------------------------------------
 
@@ -577,11 +551,8 @@ exit 0
 /usr/bin/killall -u %scanuser clamd 2>/dev/null || :
 %endif
 %if %{with systemd}
-#systemd_post clamd@.service
-#systemd_post clamd@scan.service
-# Package upgrade, not uninstall
-systemctl try-restart clamd@.service >/dev/null 2>&1 || :
-systemctl try-restart clamd@scan.service >/dev/null 2>&1 || :
+%systemd_post clamd@.service
+%systemd_post clamd@scan.service
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}
 %endif
 
@@ -644,9 +615,7 @@ test -e %milterlog || {
 /usr/bin/killall -u %milteruser clamav-milter 2>/dev/null || :
 %endif
 %if %{with systemd}
-#systemd_post clamav-milter.service
-# Package upgrade, not uninstall
-systemctl try-restart clamav-milter.service >/dev/null 2>&1 || :
+%systemd_post clamav-milter.service
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :}
 %endif
 
@@ -798,6 +767,12 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sun Jun 30 2019 Sérgio Basto <sergio@serjux.com> - 0.101.2-2
+- One year later we may remove pakages workaround of clamav-milter-systemd,
+  clamav-scanner-systemd and clamav-server-systemd, before I forget it was one
+  workaround to allow migration of service without stop it and disable it
+  (#1583599).
+
 * Thu Mar 28 2019 Sérgio Basto <sergio@serjux.com> - 0.101.2-1
 - Update to 0.101.2
 
