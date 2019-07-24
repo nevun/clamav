@@ -54,7 +54,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.2
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -767,6 +767,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.101.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Sun Jun 30 2019 Sérgio Basto <sergio@serjux.com> - 0.101.2-2
 - One year later we may remove pakages workaround of clamav-milter-systemd,
   clamav-scanner-systemd and clamav-server-systemd, before I forget it was one
