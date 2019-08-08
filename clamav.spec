@@ -53,8 +53,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.2
-Release:    3%{?dist}
+Version:    0.101.3
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -79,9 +79,9 @@ Source7:    clamd.SERVICE.init
 #http://database.clamav.net/main.cvd
 Source10:   main-58.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25401.cvd
+Source11:   daily-25534.cvd
 #http://database.clamav.net/bytecode.cvd
-Source12:   bytecode-328.cvd
+Source12:   bytecode-330.cvd
 #for devel
 Source100:  clamd-gen
 #for update
@@ -450,6 +450,8 @@ install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 mv -f $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
+# Can contain HTTPProxyPassword (bugz#1733112)
+chmod 600 $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf
 
 smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
         s!/usr/share/clamav!%pkgdatadir!g;
@@ -767,6 +769,10 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Wed Aug 7 2019 Orion Poplawski <orion@nwra.com> - 0.101.3-1
+- Update to 0.101.3
+- Fix permissions on freshclam.conf (bugz#1733112)
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.101.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
