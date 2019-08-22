@@ -53,7 +53,7 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.3
+Version:    0.101.4
 Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
@@ -769,6 +769,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Thu Aug 22 2019 Orion Poplawski <orion@nwra.com> - 0.101.4-1
+- Update to 0.101.4
+
 * Wed Aug 7 2019 Orion Poplawski <orion@nwra.com> - 0.101.3-1
 - Update to 0.101.3
 - Fix permissions on freshclam.conf (bugz#1733112)
