@@ -79,7 +79,7 @@ Source7:    clamd.SERVICE.init
 #http://database.clamav.net/main.cvd
 Source10:   main-58.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25534.cvd
+Source11:   daily-25550.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-330.cvd
 #for devel
