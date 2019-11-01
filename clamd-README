@@ -1,10 +1,9 @@
 To create individual clamd-instance take the following files and
 modify/copy them in the suggested way:
 
-clamd.conf:
-  * set LocalSocket (or better: TCPSocket) and User to suitable values;
-    avoid PidFile unless it is required by system monitoring or something
-    else. Logging through syslog is usually better than an individual
+/etc/clamd/scan.conf:
+  * set LocalSocket for localhost access or TCPSocket for network access
+    and User to suitable values. Logging through syslog is usually better than an individual
     Logfile.
   * place this file into /etc/clamd.d with an unique service-name;
     e.g. as /etc/clamd.d/<SERVICE>.conf
@@ -40,10 +39,10 @@ clamd@<SERVICE>.service: (systemd instance)
 
 Additionally, when using LocalSocket instead of TCPSocket, the directory
 for the socket file must be created.  For tmpfiles based systems, you
-might want to create a file /usr/lib/tmpfiles.d/clamd.<SERVICE>.conf
+might want to create a file /etc/tmpfiles.d/clamd.<SERVICE>.conf
 with a content of
 
- | d /var/run/clamd.<SERVICE> <MODE> <USER> <GROUP>
+ | d /run/clamd.<SERVICE> <MODE> <USER> <GROUP>
 
 Adjust <MODE> (0710 should suffice for most cases) and <USER> + <GROUP>
 so that the socket can be accessed by clamd and by the applications
@@ -53,9 +52,9 @@ DOS attacks or worse are trivial.
 After emulating these steps by hand (or else rebooting), you still need set
 SELinux:
 
- chcon -t clamd_var_run_t /var/run/clamd.<SERVICE>
+ chcon -t clamd_var_run_t /run/clamd.<SERVICE>
 or
- restorecon -R -v "/var/run/clamd.<SERVICE>"
+ restorecon -R -v "/run/clamd.<SERVICE>"
 
 More SELinux notes:
 you may need run:
