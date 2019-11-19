@@ -10,3 +10,4 @@ After = syslog.target nss-lookup.target network.target
 Type = forking
 ExecStart = /usr/sbin/clamd -c /etc/clamd.d/%i.conf
 Restart = on-failure
+TimeoutStartSec=420

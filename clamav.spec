@@ -54,7 +54,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.4
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -769,6 +769,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Mon Nov 18 2019 Orion Poplawski <orion@nwra.com> - 0.101.4-2
+- Add TimeoutStartSec=420 to clamd@.service to match upstream (bz#1764835)
+
 * Thu Aug 22 2019 Orion Poplawski <orion@nwra.com> - 0.101.4-1
 - Update to 0.101.4
 
