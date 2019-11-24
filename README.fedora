@@ -1,5 +1,5 @@
-Please note since el7 and Fedora 15 or 19 we use only systemd.
-upstart and sysv was dropped, this document may still applies to el6.
+Please note for Fedora and EPEL 7+ we use only systemd.
+upstart and sysvinit only apply to EPEL 6.
 
 A clamav-milter setup consists of the following three components:
 
@@ -11,17 +11,21 @@ A clamav-milter setup consists of the following three components:
   The main configuration is in /etc/mail/clamav-milter.conf and MUST
   be changed before first use.
 
+  This can be enabled with: 'systemctl enable clamav-milter.service'
+
   The -sysvinit package is managed by the traditional tools, but
   -upstart requires modification of /etc/event.d/clamav-milter to
   enable automatic startup.  See comments there for more details.
 
 * a clamav scanner daemon
 
-  --> this package is called 'clamav-scanner' plus (alternatively)
-      'clamav-scanner-upstart' or 'clamav-scanner-sysvinit'
+  --> this is in the clamd package (or on EL6:
+      'clamav-scanner-upstart' or 'clamav-scanner-sysvinit')
 
   The daemon is configured by /etc/clamd.d/scan.conf (which MUST be
   edited before first use).
+
+  This can be enabled with: 'systemctl enable clamd@scan.service'
 
   The -sysvinit package is managed by the traditional tools, but
   -upstart requires modification of /etc/event.d/clamd.scan to enable
@@ -32,17 +36,12 @@ A clamav-milter setup consists of the following three components:
   --> you should know how to install this...
 
   When communicating across unix sockets with the clamav-milter, it is
-  suggested to use the /var/run/clamav-milter/clamav-milter.socket
+  suggested to use the /run/clamav-milter/clamav-milter.socket
   path.  You have to add something like
 
-    INPUT_MAIL_FILTER(`clamav', `S=local:/var/run/clamav-milter/clamav-milter.socket, F=, T=S:4m;R:4m')dnl
+    INPUT_MAIL_FILTER(`clamav', `S=local:/run/clamav-milter/clamav-milter.socket, F=, T=S:4m;R:4m')dnl
 
   to your sendmail.mc.
-
-
-
-It is suggested that components communicate through TCP sockets as
-this eases setup.  Please add corresponding packet filter rules!
 
 
 EXAMPLE
@@ -70,13 +69,13 @@ B)  On the clamav-milter host (assumed hostname 'host-milter')
 
      and all the other options which are required on your system
 
-  3. Edit /etc/event.d/clamav-milter and uncomment the
+  3. Enable clamav-milter.service:
 
-    | start on starting local
+    | systemctl enable clamav-milter.service
 
-     line. Restart your system or execute
+     Restart your system or execute
 
-    | initctl emit starting local
+    | systemctl start clamav-milter.service
 
   4. Add something like
 
@@ -90,7 +89,7 @@ B)  On the clamav-milter host (assumed hostname 'host-milter')
 
 C)  On the clamav-scanner host (assumed hostname 'host-scanner')
 
-  1. Install clamav-scanner + clamav-scanner-upstart packages
+  1. Install clamd
 
   2. Add to /etc/clamd.d/scan.conf
 
@@ -100,13 +99,13 @@ C)  On the clamav-scanner host (assumed hostname 'host-scanner')
      comment out possible 'LocalSocket' lines and set all the other
      options which are required on your system
 
-  3. Edit /etc/event.d/clamav-scanner and uncomment the
+  3. Enable clamd@scan.service:
 
-    | start on starting local
+    | systemctl enable clamd@scan.service
 
-     line. Restart your system or execute
+     Restart your system or execute
 
-    | initctl emit starting local
+    | systemctl start clamd@scan.service
 
   4. Add something like
 
