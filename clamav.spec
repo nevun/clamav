@@ -53,8 +53,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.4
-Release:    3%{?dist}
+Version:    0.101.5
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -761,6 +761,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Sat Nov 23 2019 Orion Poplawski <orion@nwra.com> - 0.101.5-1
+- Update to 0.101.5 (CVE-2019-15961) (bz#1775550)
+
 * Mon Nov 18 2019 Orion Poplawski <orion@nwra.com> - 0.101.4-3
 - Drop clamd@scan.service file (bz#1725810)
 - Change /var/run to /run
