@@ -79,9 +79,9 @@ Source7:    clamd.SERVICE.init
 #http://database.clamav.net/main.cvd
 Source10:   main-58.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25550.cvd
+Source11:   daily-25642.cvd
 #http://database.clamav.net/bytecode.cvd
-Source12:   bytecode-330.cvd
+Source12:   bytecode-331.cvd
 #for update
 Source200:  freshclam-sleep
 Source201:  freshclam.sysconfig
