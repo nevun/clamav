@@ -54,7 +54,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -659,6 +659,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 %files lib
 %_libdir/libclamav.so.9*
 %_libdir/libclammspack.so.0*
+%if %{with unrar}
+%_libdir/libclamunrar*.so.9*
+%endif
 
 ## -----------------------
 
@@ -761,6 +764,9 @@ test "$1"  = 0 || %_initrddir/clamav-milter condrestart >/dev/null || :
 
 
 %changelog
+* Tue Dec 17 2019 Orion Poplawski <orion@nwra.com> - 0.101.5-2
+- Allow building --with unrar again (bz#1782638)
+
 * Sat Nov 23 2019 Orion Poplawski <orion@nwra.com> - 0.101.5-1
 - Update to 0.101.5 (CVE-2019-15961) (bz#1775550)
 
