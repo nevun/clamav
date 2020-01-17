@@ -37,7 +37,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -417,14 +417,14 @@ exit 0
 # Point to the new service unit
 [ -L /etc/systemd/system/multi-user.target.wants/clamd@scan.service ] &&
     ln -sf /usr/lib/systemd/system/clamd@.service /etc/systemd/system/multi-user.target.wants/clamd@scan.service || :
-%systemd_post clamd@\*.service
+%systemd_post clamd@.service
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}
 
 %preun -n clamd
-%systemd_preun clamd@\*.service
+%systemd_preun clamd@.service
 
 %postun -n clamd
-%systemd_postun_with_restart clamd@\*.service
+%systemd_postun_with_restart clamd@.service
 
 
 %post update
@@ -570,6 +570,9 @@ test -e %milterlog || {
 
 
 %changelog
+* Fri Jan 17 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-4
+- Fix scriplets (#1788338)
+
 * Tue Dec 17 2019 Sérgio Basto <sergio@serjux.com> - 0.101.5-3
 - Remove old init scripts and use systemd
 
