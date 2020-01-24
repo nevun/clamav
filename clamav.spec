@@ -189,6 +189,8 @@ Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 Requires(pre):  shadow-utils
 Requires:   %_initrddir
+Provides: clamav-scanner-systemd = %{version}-%{release}
+Provides: clamav-server-systemd = %{version}-%{release}
 Obsoletes: clamav-scanner-systemd < %{version}-%{release}
 Obsoletes: clamav-server-systemd < %{version}-%{release}
 
