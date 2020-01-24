@@ -25,11 +25,9 @@
 
 %global updateuser  clamupdate
 %global homedir     %_var/lib/clamav
-%global freshclamlog    %_var/log/freshclam.log
 %global milteruser  clamilt
 %global milterlog   %_var/log/clamav-milter.log
 %global milterstatedir  %_rundir/clamav-milter
-%global pkgdatadir  %_datadir/%name
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
@@ -37,7 +35,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -63,11 +61,6 @@ Source10:   main-58.cvd
 Source11:   daily-25642.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
-#for update
-Source200:  freshclam-sleep
-Source201:  freshclam.sysconfig
-Source202:  clamav-update.crond
-Source203:  clamav-update.logrotate
 #for milter
 Source300:  README.fedora
 #for clamav-milter.systemd
@@ -157,7 +150,7 @@ BuildArch:  noarch
 %description data
 This package contains the virus-database needed by clamav. This
 database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job. Use this package when you want a
+ships a corresponding systemd unit file. Use this package when you want a
 working (but perhaps outdated) virus scanner immediately after package
 installation.
 
@@ -165,8 +158,6 @@ installation.
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
 Requires:   clamav-filesystem = %version-%release
-Requires:   crontabs
-Requires:   /etc/cron.d
 Provides:   data(clamav) = empty
 Provides:   clamav-data-empty = %{version}-%{release}
 Obsoletes:  clamav-data-empty < %{version}-%{release}
@@ -175,9 +166,9 @@ Requires(post):     %__chown %__chmod
 %description update
 This package contains programs which can be used to update the clamav
 anti-virus database automatically. It uses the freshclam(1) utility for
-this task. To activate it, uncomment the entry in /etc/cron.d/clamav-update.
+this task. To activate it, comment or remove the comment entry in /etc/freshclam.conf .
 Use this package when you go updating the virus database regulary and
-do not want to download a >120MB sized rpm-package with outdated virus
+do not want to download a >160MB sized rpm-package with outdated virus
 definitions.
 
 
@@ -294,27 +285,12 @@ sed -i \
 rm -rf _doc*
 %make_install
 
-function smartsubst() {
-    local tmp
-    local regexp=$1
-    shift
-
-    tmp=$(mktemp /tmp/%name-subst.XXXXXX)
-    for i; do
-        sed -e "$regexp" "$i" >$tmp
-        cmp -s $tmp "$i" || cat $tmp >"$i"
-        rm -f $tmp
-    done
-}
-
-
 install -d -m 0755 \
-    $RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d} \
+    $RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d} \
     $RPM_BUILD_ROOT%_tmpfilesdir \
     $RPM_BUILD_ROOT%_rundir \
     $RPM_BUILD_ROOT%_var/log \
     $RPM_BUILD_ROOT%milterstatedir \
-    $RPM_BUILD_ROOT%pkgdatadir/template \
     $RPM_BUILD_ROOT%_initrddir \
     $RPM_BUILD_ROOT%homedir \
     $RPM_BUILD_ROOT%scanstatedir
@@ -335,28 +311,12 @@ install -D -m 0644 -p %SOURCE3      _doc_server/clamd.logrotate
 install -D -m 0644 -p %SOURCE5      _doc_server/README
 install -D -m 0644 -p etc/clamd.conf.sample _doc_server/clamd.conf
 
-#cp -pa _doc_server/*            $RPM_BUILD_ROOT%pkgdatadir/template
-
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 
-## prepare the update-files
-install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
-touch $RPM_BUILD_ROOT%freshclamlog
-
-install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
-install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
-install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 mv -f $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
 # Can contain HTTPProxyPassword (bugz#1733112)
 chmod 600 $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf
-
-smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
-        s!/usr/share/clamav!%pkgdatadir!g;
-        s!/usr/bin!%_bindir!g;
-            s!/usr/sbin!%_sbindir!g;' \
-   $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
-   $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 
 
 ### The scanner stuff
@@ -387,8 +347,8 @@ rm -f $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf.sample
 
 %{!?with_tmpfiles: rm -rf $RPM_BUILD_ROOT%_tmpfilesdir}
 
-# TODO: Evaluate using upstream's unit files
-rm $RPM_BUILD_ROOT%_unitdir/clamav-{daemon,freshclam}.*
+# TODO: Evaluate using upstream's unit with clamav-daemon.socket
+rm $RPM_BUILD_ROOT%_unitdir/clamav-daemon.*
 
 ## ------------------------------------------------------------
 
@@ -427,15 +387,6 @@ exit 0
 
 %postun -n clamd
 %systemd_postun_with_restart clamd@.service
-
-
-%post update
-test -e %freshclamlog || {
-    touch %freshclamlog
-    %__chmod 0664 %freshclamlog
-    %__chown root:%updateuser %freshclamlog
-    ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
-}
 
 
 %triggerin milter -- clamav-scanner
@@ -498,7 +449,6 @@ test -e %milterlog || {
 %files devel
 %_includedir/*
 %_libdir/*.so
-%pkgdatadir/template
 %_libdir/pkgconfig/*
 %_bindir/clamav-config
 
@@ -506,7 +456,6 @@ test -e %milterlog || {
 
 %files filesystem
 %attr(-,%updateuser,%updateuser) %dir %homedir
-%attr(-,root,root)           %dir %pkgdatadir
 %dir %_sysconfdir/clamd.d
 
 ## -----------------------
@@ -522,13 +471,8 @@ test -e %milterlog || {
 %files update
 %_bindir/freshclam
 %_mandir/*/freshclam*
-%pkgdatadir/freshclam-sleep
+%_unitdir/clamav-freshclam.service
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
-%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
-%config(noreplace) %_sysconfdir/cron.d/clamav-update
-%config(noreplace) %_sysconfdir/sysconfig/freshclam
-
-%ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
@@ -572,6 +516,13 @@ test -e %milterlog || {
 
 
 %changelog
+* Fri Jan 24 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-5
+- Improve upgrade path
+- Get rid of pkgdatadir variable
+- Use upstream freshclam systemd unit file, remove freshclam-sleep
+- Get rid of %freshclamlog variable
+- Get rid of smartsubst function
+
 * Fri Jan 17 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-4
 - Fix scriplets (#1788338)
 
