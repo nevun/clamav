@@ -35,7 +35,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    5%{?dist}
+Release:    6%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -379,14 +379,14 @@ exit 0
 # Point to the new service unit
 [ -L /etc/systemd/system/multi-user.target.wants/clamd@scan.service ] &&
     ln -sf /usr/lib/systemd/system/clamd@.service /etc/systemd/system/multi-user.target.wants/clamd@scan.service || :
-%systemd_post clamd@.service
+%systemd_post clamd@scan.service
 %{?with_tmpfiles:/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf || :}
 
 %preun -n clamd
-%systemd_preun clamd@.service
+%systemd_preun clamd@scan.service
 
 %postun -n clamd
-%systemd_postun_with_restart clamd@.service
+%systemd_postun_with_restart clamd@scan.service
 
 
 %triggerin milter -- clamav-scanner
@@ -417,6 +417,15 @@ test -e %milterlog || {
 
 %postun milter
 %systemd_postun_with_restart clamav-milter.service
+
+%post update
+%systemd_post clamav-freshclam.service
+
+%preun update
+%systemd_preun clamav-freshclam.service
+
+%postun update
+%systemd_postun_with_clamav-freshclam.service
 
 %ldconfig_scriptlets   lib
 
@@ -516,6 +525,9 @@ test -e %milterlog || {
 
 
 %changelog
+* Sun Jan 26 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-6
+- Fix clamd scriplets on update and add scriplets for clamav-freshclam.service
+
 * Fri Jan 24 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-5
 - Improve upgrade path
 - Get rid of pkgdatadir variable
