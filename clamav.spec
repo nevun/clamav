@@ -71,8 +71,6 @@ Patch0:     clamav-0.100.0-stats-deprecation.patch
 Patch1:     clamav-0.100.1-defaults_locations.patch
 Patch24:    clamav-0.99-private.patch
 Patch27:    clamav-0.100.0-umask.patch
-# https://llvm.org/viewvc/llvm-project/llvm/trunk/lib/ExecutionEngine/JIT/Intercept.cpp?r1=128086&r2=137567
-Patch30:    llvm-glibc.patch
 
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
@@ -215,7 +213,6 @@ This package contains files which are needed to run the clamav-milter.
 %patch1 -p1 -b .default_confs
 %patch24 -p1 -b .private
 %patch27 -p1 -b .umask
-%patch30 -p1
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -522,6 +519,7 @@ test -e %milterlog || {
 %changelog
 * Mon Jan 27 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-7
 - More cleanups
+- Remove llvm-glibc.patch (upstream already fixed it)
 
 * Sun Jan 26 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-6
 - Fix clamd scriplets on update and add scriplets for clamav-freshclam.service
