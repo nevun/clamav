@@ -34,7 +34,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    7%{?dist}
+Release:    8%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -518,6 +518,9 @@ test -e %milterlog || {
 
 
 %changelog
+* Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.101.5-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Mon Jan 27 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-7
 - More cleanups
 - Remove llvm-glibc.patch (upstream already fixed it)
