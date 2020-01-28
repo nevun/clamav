@@ -162,7 +162,7 @@ Obsoletes:  clamav-data-empty < %{version}-%{release}
 %description update
 This package contains programs which can be used to update the clamav
 anti-virus database automatically. It uses the freshclam(1) utility for
-this task. To activate it, comment or remove the comment entry in /etc/freshclam.conf .
+this task. To activate it use, systemctl enable --now clamav-freshclam .
 Use this package when you go updating the virus database regulary and
 do not want to download a >160MB sized rpm-package with outdated virus
 definitions.
@@ -302,6 +302,7 @@ chmod 600 $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf
 
 ### The scanner stuff
 sed -ri \
+    -e 's!^Example!#Example!' \
     -e 's!^#?(LogFile ).*!#\1/var/log/clamd.<SERVICE>!g' \
     -e 's!^#?(LocalSocket ).*!#\1%{_rundir}/clamd.<SERVICE>/clamd.sock!g' \
     -e 's!^(#?PidFile ).*!\1%{_rundir}/clamd.<SERVICE>/clamd.pid!g' \
@@ -520,6 +521,8 @@ test -e %milterlog || {
 * Mon Jan 27 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-7
 - More cleanups
 - Remove llvm-glibc.patch (upstream already fixed it)
+- Comment "Example" in scan.conf to make clamd@scan.service works without editing
+- Improve description of clamav-update
 
 * Sun Jan 26 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-6
 - Fix clamd scriplets on update and add scriplets for clamav-freshclam.service
