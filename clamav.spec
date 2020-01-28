@@ -418,7 +418,7 @@ test -e %milterlog || {
 %systemd_preun clamav-freshclam.service
 
 %postun update
-%systemd_postun_with_clamav-freshclam.service
+%systemd_postun_with_restart clamav-freshclam.service
 
 %ldconfig_scriptlets   lib
 
