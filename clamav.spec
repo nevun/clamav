@@ -204,7 +204,6 @@ Obsoletes: clamav-milter-systemd < %{version}-%{release}
 %description milter
 This package contains files which are needed to run the clamav-milter.
 
-## ------------------------------------------------------------
 
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
@@ -219,8 +218,6 @@ install -p -m0644 %SOURCE300 clamav-milter/
 mkdir -p libclamunrar{,_iface}
 %{!?with_unrar:touch libclamunrar/{Makefile.in,all,install}}
 
-
-## ------------------------------------------------------------
 
 %build
 # add -Wl,--as-needed if not exist
@@ -256,8 +253,6 @@ sed -i \
 
 %make_build
 
-
-## ------------------------------------------------------------
 
 %install
 rm -rf _doc*
@@ -343,12 +338,10 @@ EOF
 # TODO: Evaluate using upstream's unit with clamav-daemon.socket
 rm $RPM_BUILD_ROOT%_unitdir/clamav-daemon.*
 
-## ------------------------------------------------------------
 
 %check
 make check
 
-## ------------------------------------------------------------
 
 %pre filesystem
 getent group %{updateuser} >/dev/null || groupadd -r %{updateuser}
@@ -437,7 +430,6 @@ test -e %milterlog || {
 %exclude %_mandir/*/freshclam*
 %exclude %_mandir/man5/clamd.conf.5*
 
-## -----------------------
 
 %files lib
 %_libdir/libclamav.so.9*
@@ -446,7 +438,6 @@ test -e %milterlog || {
 %_libdir/libclamunrar*.so.9*
 %endif
 
-## -----------------------
 
 %files devel
 %_includedir/*
@@ -454,13 +445,11 @@ test -e %milterlog || {
 %_libdir/pkgconfig/*
 %_bindir/clamav-config
 
-## -----------------------
 
 %files filesystem
 %attr(-,%updateuser,%updateuser) %dir %homedir
 %dir %_sysconfdir/clamd.d
 
-## -----------------------
 
 %files data
 %defattr(-,%updateuser,%updateuser,-)
@@ -479,8 +468,6 @@ test -e %milterlog || {
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
 
-## -----------------------
-
 %files -n clamd
 %doc _doc_server/*
 %_mandir/man5/clamd.conf.5*
@@ -497,7 +484,6 @@ test -e %milterlog || {
   %dir %attr(0710,%scanuser,virusgroup) %scanstatedir
 %endif
 
-## -----------------------
 
 %files milter
 %doc clamav-milter/README.fedora
