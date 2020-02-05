@@ -34,7 +34,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    8%{?dist}
+Release:    9%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -405,6 +405,12 @@ test -e %milterlog || {
 %systemd_postun_with_restart clamav-milter.service
 
 %post update
+if [ $1 -eq 2 ] ; then
+   echo "Warning: clamav-update package changed"
+   echo "Now we provide clamav-freshclam.service systemd unit instead old scripts and the cron.d entry."
+   echo "Unfortunately this may break existing unattended installations."
+   echo "Please run 'systemctl enable clamav-freshclam --now' to enable freshclam updates again."
+fi
 %systemd_post clamav-freshclam.service
 
 %preun update
@@ -504,6 +510,10 @@ test -e %milterlog || {
 
 
 %changelog
+* Tue Feb 04 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-9
+- Add a message warning that We now provide clamav-freshclam.service systemd
+  unit instead old scripts
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.101.5-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
