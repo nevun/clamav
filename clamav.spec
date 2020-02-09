@@ -24,9 +24,11 @@
 
 %global updateuser  clamupdate
 %global homedir     %_var/lib/clamav
+%global freshclamlog    %_var/log/freshclam.log
 %global milteruser  clamilt
 %global milterlog   %_var/log/clamav-milter.log
 %global milterstatedir  %_rundir/clamav-milter
+%global pkgdatadir  %_datadir/%name
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
@@ -34,7 +36,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.101.5
-Release:    9%{?dist}
+Release:    10%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -60,6 +62,11 @@ Source10:   main-58.cvd
 Source11:   daily-25642.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
+#for update
+Source200:  freshclam-sleep
+Source201:  freshclam.sysconfig
+Source202:  clamav-update.crond
+Source203:  clamav-update.logrotate
 #for milter
 Source300:  README.fedora
 #for clamav-milter.systemd
@@ -147,7 +154,7 @@ BuildArch:  noarch
 %description data
 This package contains the virus-database needed by clamav. This
 database should be updated regularly; the 'clamav-update' package
-ships a corresponding systemd unit file. Use this package when you want a
+ships a corresponding cron-job. Use this package when you want a
 working (but perhaps outdated) virus scanner immediately after package
 installation.
 
@@ -155,6 +162,8 @@ installation.
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
 Requires:   clamav-filesystem = %version-%release
+Requires:   crontabs
+Requires:   /etc/cron.d
 Provides:   data(clamav) = empty
 Provides:   clamav-data-empty = %{version}-%{release}
 Obsoletes:  clamav-data-empty < %{version}-%{release}
@@ -162,7 +171,7 @@ Obsoletes:  clamav-data-empty < %{version}-%{release}
 %description update
 This package contains programs which can be used to update the clamav
 anti-virus database automatically. It uses the freshclam(1) utility for
-this task. To activate it use, systemctl enable --now clamav-freshclam .
+this task. To activate it use, uncomment the entry in /etc/cron.d/clamav-update.
 Use this package when you go updating the virus database regulary and
 do not want to download a >160MB sized rpm-package with outdated virus
 definitions.
@@ -259,7 +268,7 @@ rm -rf _doc*
 %make_install
 
 install -d -m 0755 \
-    $RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d} \
+    $RPM_BUILD_ROOT%_sysconfdir/{mail,clamd.d,logrotate.d} \
     $RPM_BUILD_ROOT%_tmpfilesdir \
     $RPM_BUILD_ROOT%_rundir \
     $RPM_BUILD_ROOT%_var/log \
@@ -283,6 +292,14 @@ install -D -m 0644 -p %SOURCE3      _doc_server/clamd.logrotate
 install -D -m 0644 -p %SOURCE5      _doc_server/README
 
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
+
+## prepare the update-files
+install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
+touch $RPM_BUILD_ROOT%freshclamlog
+
+install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
+install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
+install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 
 ### The freshclam stuff
 sed -ri \
@@ -405,13 +422,13 @@ test -e %milterlog || {
 %systemd_postun_with_restart clamav-milter.service
 
 %post update
-if [ $1 -eq 2 ] ; then
-   echo "Warning: clamav-update package changed"
-   echo "Now we provide clamav-freshclam.service systemd unit instead old scripts and the cron.d entry."
-   echo "Unfortunately this may break existing unattended installations."
-   echo "Please run 'systemctl enable clamav-freshclam --now' to enable freshclam updates again."
-fi
 %systemd_post clamav-freshclam.service
+test -e %freshclamlog || {
+    touch %freshclamlog
+    %__chmod 0664 %freshclamlog
+    %__chown root:%updateuser %freshclamlog
+    ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
+}
 
 %preun update
 %systemd_preun clamav-freshclam.service
@@ -468,8 +485,13 @@ fi
 %files update
 %_bindir/freshclam
 %_mandir/*/freshclam*
+%pkgdatadir/freshclam-sleep
 %_unitdir/clamav-freshclam.service
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
+%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
+%config(noreplace) %_sysconfdir/cron.d/clamav-update
+%config(noreplace) %_sysconfdir/sysconfig/freshclam
+%ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
@@ -510,6 +532,9 @@ fi
 
 
 %changelog
+* Sun Feb 09 2020 Orion Poplawski <orion@nwra.com> - 0.101.5-10
+- Re-add clamav-update.cron (bz#1800226)
+
 * Tue Feb 04 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-9
 - Add a message warning that We now provide clamav-freshclam.service systemd
   unit instead old scripts
