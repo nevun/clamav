@@ -1,5 +1,7 @@
 #global prerelease  rc1
 
+%global _hardened_build 1
+
 ## Fedora Extras specific customization below...
 %bcond_without  tmpfiles
 %bcond_with     unrar
@@ -9,9 +11,11 @@
 %bcond_with     llvm
 %endif
 
-##
-
-%global _hardened_build 1
+%if 0%{?fedora} && 0%{?rhel} >= 8
+%bcond_with old_freshclam
+%else
+%bcond_without old_freshclam
+%endif
 
 %ifnarch s390 s390x
 %global have_ocaml  1
@@ -162,8 +166,10 @@ installation.
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
 Requires:   clamav-filesystem = %version-%release
+%if %{with old_freshclam}
 Requires:   crontabs
 Requires:   /etc/cron.d
+%endif
 Provides:   data(clamav) = empty
 Provides:   clamav-data-empty = %{version}-%{release}
 Obsoletes:  clamav-data-empty < %{version}-%{release}
@@ -293,6 +299,7 @@ install -D -m 0644 -p %SOURCE5      _doc_server/README
 
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
+%if %{with old_freshclam}
 ## prepare the update-files
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
 touch $RPM_BUILD_ROOT%freshclamlog
@@ -300,6 +307,7 @@ touch $RPM_BUILD_ROOT%freshclamlog
 install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
+%endif
 
 ### The freshclam stuff
 sed -ri \
@@ -311,6 +319,27 @@ sed -ri \
 mv $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
 # Can contain HTTPProxyPassword (bugz#1733112)
 chmod 600 $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf
+
+%if %{with old_freshclam}
+function smartsubst() {
+    local tmp
+    local regexp=$1
+    shift
+
+    tmp=$(mktemp /tmp/%name-subst.XXXXXX)
+    for i; do
+        sed -e "$regexp" "$i" >$tmp
+        cmp -s $tmp "$i" || cat $tmp >"$i"
+        rm -f $tmp
+    done
+}
+smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
+        s!/usr/share/clamav!%pkgdatadir!g;
+        s!/usr/bin!%_bindir!g;
+            s!/usr/sbin!%_sbindir!g;' \
+   $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
+   $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
+%endif
 
 ### The scanner stuff
 sed -ri \
@@ -422,13 +451,22 @@ test -e %milterlog || {
 %systemd_postun_with_restart clamav-milter.service
 
 %post update
-%systemd_post clamav-freshclam.service
+%if %{with old_freshclam}
 test -e %freshclamlog || {
     touch %freshclamlog
     %__chmod 0664 %freshclamlog
     %__chown root:%updateuser %freshclamlog
     ! test -x /sbin/restorecon || /sbin/restorecon %freshclamlog
 }
+%else
+if [ $1 -eq 2 ] ; then
+   echo "Warning: clamav-update package changed"
+   echo "Now we provide clamav-freshclam.service systemd unit instead old scripts and the cron.d entry."
+   echo "Unfortunately this may break existing unattended installations."
+   echo "Please run 'systemctl enable clamav-freshclam --now' to enable freshclam updates again."
+fi
+%endif
+%systemd_post clamav-freshclam.service
 
 %preun update
 %systemd_preun clamav-freshclam.service
@@ -485,13 +523,15 @@ test -e %freshclamlog || {
 %files update
 %_bindir/freshclam
 %_mandir/*/freshclam*
-%pkgdatadir/freshclam-sleep
 %_unitdir/clamav-freshclam.service
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
+%if %{with old_freshclam}
+%pkgdatadir/freshclam-sleep
 %config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
 %config(noreplace) %_sysconfdir/cron.d/clamav-update
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 %ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
+%endif
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
@@ -534,6 +574,7 @@ test -e %freshclamlog || {
 %changelog
 * Sun Feb 09 2020 Orion Poplawski <orion@nwra.com> - 0.101.5-10
 - Re-add clamav-update.cron (bz#1800226)
+- Add conditional old_freshclam
 
 * Tue Feb 04 2020 Sérgio Basto <sergio@serjux.com> - 0.101.5-9
 - Add a message warning that We now provide clamav-freshclam.service systemd
