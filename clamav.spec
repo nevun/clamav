@@ -3,6 +3,12 @@
 %global _hardened_build 1
 
 ## Fedora Extras specific customization below...
+# EL7's curl is too old
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%bcond_without  clamonacc
+%else
+%bcond_with     clamonacc
+%endif
 %bcond_without  tmpfiles
 %bcond_with     unrar
 %ifnarch ppc64
@@ -39,8 +45,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.101.5
-Release:    10%{?dist}
+Version:    0.102.2
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -78,17 +84,26 @@ Source330:  clamav-milter.systemd
 #for scanner-systemd/server-systemd
 Source530:  clamd@.service
 
-Patch0:     clamav-0.100.0-stats-deprecation.patch
-Patch1:     clamav-0.100.1-defaults_locations.patch
-Patch24:    clamav-0.99-private.patch
-Patch27:    clamav-0.100.0-umask.patch
-
+# Restore some options removed in 0.100 as deprecated
+# Could be dropped in F32 with a note
+# https://bugzilla.redhat.com/show_bug.cgi?id=1565381#c1
+Patch0:     clamav-stats-deprecation.patch
+# Change default config locations for Fedora
+Patch1:     clamav-default_confs.patch
+# Fix pkg-config flags for static linking, multilib
+Patch2:     clamav-0.99-private.patch
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  gcc-c++
-BuildRequires:  zlib-devel bzip2-devel gmp-devel curl-devel json-c-devel
-BuildRequires:  ncurses-devel openssl-devel libxml2-devel
+BuildRequires:  bzip2-devel
+BuildRequires:  curl-devel
+BuildRequires:  gmp-devel
+BuildRequires:  json-c-devel
+BuildRequires:  libxml2-devel
+BuildRequires:  ncurses-devel
+BuildRequires:  openssl-devel
 BuildRequires:  pcre2-devel
+BuildRequires:  zlib-devel
 #BuildRequires:  %%_includedir/tcpd.h
 BuildRequires:  bc tcl groff graphviz
 %{?have_ocaml:BuildRequires: ocaml}
@@ -223,10 +238,12 @@ This package contains files which are needed to run the clamav-milter.
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
 
-%patch0 -p0 -b .stats-deprecation
+# No longer support deprecated options in F32+ and EL8+
+%if (0%{?fedora} && 0%{?fedora} < 32) || (0%{?rhel} && 0%{?rhel} < 8)
+%patch0 -p1 -b .stats-deprecation
+%endif
 %patch1 -p1 -b .default_confs
-%patch24 -p1 -b .private
-%patch27 -p1 -b .umask
+%patch2 -p1 -b .private
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -257,6 +274,7 @@ autoreconf -i
     --disable-rpath \
     --disable-silent-rules \
     --enable-clamdtop \
+    %{!?with_clamonacc:--disable-clamonacc} \
     %{!?with_llvm:--disable-llvm}
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
@@ -484,6 +502,9 @@ fi
 %_bindir/clamconf
 %_bindir/clamdscan
 %_bindir/clamdtop
+%if %{with clamonacc}
+%_bindir/clamonacc
+%endif
 %_bindir/clamscan
 %_bindir/clamsubmit
 %_bindir/sigtool
@@ -522,6 +543,7 @@ fi
 
 %files update
 %_bindir/freshclam
+%_libdir/libfreshclam.so.2*
 %_mandir/*/freshclam*
 %_unitdir/clamav-freshclam.service
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
@@ -572,6 +594,11 @@ fi
 
 
 %changelog
+* Sun Feb  9 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-1
+- Update to 0.102.2
+- Drop supporting deprecated options for F32+ and EL8+
+- Drop old umask patch
+
 * Sun Feb 09 2020 Orion Poplawski <orion@nwra.com> - 0.101.5-10
 - Re-add clamav-update.cron (bz#1800226)
 - Add conditional old_freshclam
