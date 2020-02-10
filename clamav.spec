@@ -67,9 +67,9 @@ Source5:    clamd-README
 # Check the first line of the file for version or run file *cvd
 # Attention file < 5.33-7 have bugs see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 #http://database.clamav.net/main.cvd
-Source10:   main-58.cvd
+Source10:   main-59.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25642.cvd
+Source11:   daily-25719.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
 #for update
