@@ -17,7 +17,7 @@
 %bcond_with     llvm
 %endif
 
-%if 0%{?fedora} && 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %bcond_with old_freshclam
 %else
 %bcond_without old_freshclam
@@ -46,7 +46,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -205,6 +205,8 @@ Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib        = %version-%release
 Requires:   coreutils
 Requires(pre):  shadow-utils
+# This is still used by clamsmtp and exim-clamav
+Provides: clamav-server = %{version}-%{release}
 Provides: clamav-scanner-systemd = %{version}-%{release}
 Provides: clamav-server-systemd = %{version}-%{release}
 Obsoletes: clamav-scanner-systemd < %{version}-%{release}
@@ -549,11 +551,11 @@ fi
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
 %if %{with old_freshclam}
 %pkgdatadir/freshclam-sleep
-%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
 %config(noreplace) %_sysconfdir/cron.d/clamav-update
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
-%ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
 %endif
+%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
+%ghost %attr(0664,root,%updateuser) %verify(not size md5 mtime) %freshclamlog
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/*.cld
 %ghost %attr(0664,%updateuser,%updateuser) %homedir/mirrors.dat
 
@@ -594,6 +596,11 @@ fi
 
 
 %changelog
+* Mon Feb 10 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-2
+- Keep /var/log/freshclam.log handling - can still be used
+- Restore clamav-server provides (bz#1801329)
+- Fix old_freshclam cron conditional (bz#1801199)
+
 * Sun Feb  9 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-1
 - Update to 0.102.2
 - Drop supporting deprecated options for F32+ and EL8+
