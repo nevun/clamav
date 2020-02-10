@@ -319,11 +319,11 @@ install -D -m 0644 -p %SOURCE5      _doc_server/README
 
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
-%if %{with old_freshclam}
 ## prepare the update-files
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
 touch $RPM_BUILD_ROOT%freshclamlog
 
+%if %{with old_freshclam}
 install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
 install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
