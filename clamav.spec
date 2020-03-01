@@ -105,12 +105,15 @@ BuildRequires:  openssl-devel
 BuildRequires:  pcre2-devel
 BuildRequires:  zlib-devel
 #BuildRequires:  %%_includedir/tcpd.h
-BuildRequires:  bc tcl groff graphviz
+BuildRequires:  bc
+BuildRequires:  tcl
+BuildRequires:  groff
+BuildRequires:  graphviz
 %{?have_ocaml:BuildRequires: ocaml}
 # nc required for tests
-BuildRequires: nc
+BuildRequires:  nc
 %{?systemd_requires}
-BuildRequires: systemd-devel
+BuildRequires:  systemd-devel
 #for milter
 BuildRequires:  sendmail-devel
 
@@ -212,8 +215,6 @@ Provides: clamav-server-systemd = %{version}-%{release}
 Obsoletes: clamav-scanner-systemd < %{version}-%{release}
 Obsoletes: clamav-server-systemd < %{version}-%{release}
 
-
-
 %description -n clamd
 The Clam AntiVirus Daemon
 See the README file how this can be done with a minimum of effort.
@@ -302,9 +303,7 @@ install -d -m 0755 \
     $RPM_BUILD_ROOT%homedir \
     $RPM_BUILD_ROOT%scanstatedir
 
-
 rm -f $RPM_BUILD_ROOT%_libdir/*.la
-
 
 touch $RPM_BUILD_ROOT%homedir/{daily,main,bytecode}.cld
 touch $RPM_BUILD_ROOT%homedir/mirrors.dat
