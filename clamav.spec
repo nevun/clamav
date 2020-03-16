@@ -46,7 +46,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -595,6 +595,9 @@ fi
 
 
 %changelog
+* Mon Mar 16 2020 Orion Poplawski <orion@cora.nwra.com> - 0.102.2-4
+- Quiet freshclam-sleep when used with proxy
+
 * Sat Feb 29 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-3
 - Add missingok to clamav-update.logrotate (bz#1807701)
 
