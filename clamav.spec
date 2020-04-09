@@ -627,6 +627,7 @@ fi
 * Wed Apr  8 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-5
 - Do not log freshclam output to syslog by default - creates double entries
   in the journal (bz#1822012)
+- (#1820069) add try-restart clamav-freshclam.service on logrotate
 
 * Mon Mar 16 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-4
 - Quiet freshclam-sleep when used with proxy
