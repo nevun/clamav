@@ -2,4 +2,7 @@
         monthly
         notifempty
         missingok
+        postrotate
+                systemctl try-restart clamav-freshclam.service
+        endscript
 }
