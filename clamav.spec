@@ -46,7 +46,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -332,7 +332,6 @@ install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-up
 sed -ri \
     -e 's!^Example!#Example!' \
     -e 's!^#?(UpdateLogFile )!#\1!g;' \
-    -e 's!^#?(LogSyslog).*!\1 yes!g' \
     -e 's!(DatabaseOwner *)clamav$!\1%updateuser!g' $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf.sample
 
 mv $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf{.sample,}
@@ -595,7 +594,11 @@ fi
 
 
 %changelog
-* Mon Mar 16 2020 Orion Poplawski <orion@cora.nwra.com> - 0.102.2-4
+* Wed Apr  8 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-5
+- Do not log freshclam output to syslog by default - creates double entries
+  in the journal (bz#1822012)
+
+* Mon Mar 16 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-4
 - Quiet freshclam-sleep when used with proxy
 
 * Sat Feb 29 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-3
