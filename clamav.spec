@@ -46,7 +46,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    5%{?dist}
+Release:    6%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -594,6 +594,9 @@ fi
 
 
 %changelog
+* Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 0.102.2-6
+- Rebuild (json-c)
+
 * Wed Apr  8 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-5
 - Do not log freshclam output to syslog by default - creates double entries
   in the journal (bz#1822012)
