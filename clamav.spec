@@ -67,6 +67,8 @@ Source10:   main-59.cvd
 Source11:   daily-25719.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
+#for clamonacc
+Source100:  clamonacc.service
 #for update
 Source200:  freshclam-sleep
 Source201:  freshclam.sysconfig
@@ -114,6 +116,7 @@ BuildRequires:  systemd-devel
 #for milter
 BuildRequires:  sendmail-devel
 
+Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib = %version-%release
 Requires:   data(clamav)
 
@@ -315,6 +318,8 @@ install -D -m 0644 -p %SOURCE12     $RPM_BUILD_ROOT%homedir/bytecode.cvd
 install -D -m 0644 -p %SOURCE3      _doc_server/clamd.logrotate
 install -D -m 0644 -p %SOURCE5      _doc_server/README
 
+install -D -p -m 0644 %SOURCE100        $RPM_BUILD_ROOT%_unitdir/clamonacc.service
+
 install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 ## prepare the update-files
@@ -404,6 +409,16 @@ rm $RPM_BUILD_ROOT%_unitdir/clamav-daemon.*
 
 %check
 make check
+
+
+%post
+%systemd_post clamonacc.service
+
+%preun
+%systemd_preun clamonacc.service
+
+%postun
+%systemd_postun_with_restart clamonacc.service
 
 
 %pre filesystem
@@ -510,6 +525,7 @@ fi
 %_mandir/man[15]/*
 %exclude %_mandir/*/freshclam*
 %exclude %_mandir/man5/clamd.conf.5*
+%_unitdir/clamonacc.service
 
 
 %files lib
@@ -530,6 +546,8 @@ fi
 %files filesystem
 %attr(-,%updateuser,%updateuser) %dir %homedir
 %dir %_sysconfdir/clamd.d
+# Used by both clamd, clamdscan, and clamonacc
+%config(noreplace) %_sysconfdir/clamd.d/scan.conf
 
 
 %files data
@@ -564,7 +582,6 @@ fi
 %_sbindir/clamd
 %_unitdir/clamd@.service
 
-%config(noreplace) %_sysconfdir/clamd.d/scan.conf
 %ghost %scanstatedir/clamd.sock
 %if %{with tmpfiles}
   %_tmpfilesdir/clamd.scan.conf
@@ -594,8 +611,10 @@ fi
 
 %changelog
 * Wed Apr 29 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-7
+- Move /etc/clamd.d/scan.conf to clamav-filesystem
 - Add patch to build with EL7 libcurl - re-enable on-access scanning
   (bz#1820395)
+- Add clamonacc.service
 
 * Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 0.102.2-6
 - Rebuild (json-c)
