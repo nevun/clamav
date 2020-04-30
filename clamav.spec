@@ -2,13 +2,8 @@
 
 %global _hardened_build 1
 
-## Fedora Extras specific customization below...
-# EL7's curl is too old
-%if 0%{?fedora} || 0%{?rhel} >= 8
+## Fedora specific customization below...
 %bcond_without  clamonacc
-%else
-%bcond_with     clamonacc
-%endif
 %bcond_without  tmpfiles
 %bcond_with     unrar
 %ifnarch ppc64
@@ -46,7 +41,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    6%{?dist}
+Release:    7%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -92,6 +87,8 @@ Patch0:     clamav-stats-deprecation.patch
 Patch1:     clamav-default_confs.patch
 # Fix pkg-config flags for static linking, multilib
 Patch2:     clamav-0.99-private.patch
+# Patch to use EL7 libcurl
+Patch3:     clamav-curl.patch
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  gcc-c++
@@ -247,6 +244,8 @@ This package contains files which are needed to run the clamav-milter.
 %endif
 %patch1 -p1 -b .default_confs
 %patch2 -p1 -b .private
+# Patch to use older libcurl
+%{?el7:%patch3 -p1 -b .curl}
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -594,6 +593,10 @@ fi
 
 
 %changelog
+* Wed Apr 29 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-7
+- Add patch to build with EL7 libcurl - re-enable on-access scanning
+  (bz#1820395)
+
 * Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 0.102.2-6
 - Rebuild (json-c)
 
