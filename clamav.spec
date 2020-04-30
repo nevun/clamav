@@ -41,7 +41,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.2
-Release:    7%{?dist}
+Release:    8%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -98,6 +98,7 @@ BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
 BuildRequires:  gmp-devel
 BuildRequires:  json-c-devel
+BuildRequires:  libprelude-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  ncurses-devel
 BuildRequires:  openssl-devel
@@ -279,6 +280,7 @@ autoreconf -i
     --disable-rpath \
     --disable-silent-rules \
     --enable-clamdtop \
+    --enable-prelude \
     %{!?with_clamonacc:--disable-clamonacc} \
     %{!?with_llvm:--disable-llvm}
 
@@ -610,6 +612,9 @@ fi
 
 
 %changelog
+* Thu Apr 30 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-8
+- Enable prelude support (bz#1829726)
+
 * Wed Apr 29 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-7
 - Move /etc/clamd.d/scan.conf to clamav-filesystem
 - Add patch to build with EL7 libcurl - re-enable on-access scanning
