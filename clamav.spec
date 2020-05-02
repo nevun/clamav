@@ -99,6 +99,9 @@ BuildRequires:  curl-devel
 BuildRequires:  gmp-devel
 BuildRequires:  json-c-devel
 BuildRequires:  libprelude-devel
+# libprelude-config --libs brings in gnutls
+# https://bugzilla.redhat.com/show_bug.cgi?id=1830473
+BuildRequires:  gnutls-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  ncurses-devel
 BuildRequires:  openssl-devel
