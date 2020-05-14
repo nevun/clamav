@@ -617,7 +617,7 @@ fi
 %changelog
 * Thu May 14 2020 Orion Poplawski <orion@nwra.com> - 0.102.3-1
 - Update to 0.102.3 (bz#1834910)
-- Security fixes CVE-2020-3341
+- Security fixes CVE-2020-3327 CVE-2020-3341
 
 * Sat May 02 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-9
 - Add upstream patch to fix "Attempt to allocate 0 bytes" errors while scanning
