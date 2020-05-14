@@ -40,8 +40,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.102.2
-Release:    9%{?dist}
+Version:    0.102.3
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -64,7 +64,7 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-59.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25719.cvd
+Source11:   daily-25811.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
 #for clamonacc
@@ -91,8 +91,6 @@ Patch1:     clamav-default_confs.patch
 Patch2:     clamav-0.99-private.patch
 # Patch to use EL7 libcurl
 Patch3:     clamav-curl.patch
-# Upstream fix for "Attempt to allocate 0 bytes" while scanning PDFs
-Patch4:     https://github.com/Cisco-Talos/clamav-devel/commit/0e865c4f0e5ea5c4879681d843a9b93fc871fd90.patch
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  gcc-c++
@@ -255,7 +253,6 @@ This package contains files which are needed to run the clamav-milter.
 %patch2 -p1 -b .private
 # Patch to use older libcurl
 %{?el7:%patch3 -p1 -b .curl}
-%patch4 -p1 -b .pdf
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -618,6 +615,10 @@ fi
 
 
 %changelog
+* Thu May 14 2020 Orion Poplawski <orion@nwra.com> - 0.102.3-1
+- Update to 0.102.3 (bz#1834910)
+- Security fixes CVE-2020-3341
+
 * Sat May 02 2020 Orion Poplawski <orion@nwra.com> - 0.102.2-9
 - Add upstream patch to fix "Attempt to allocate 0 bytes" errors while scanning
   certain PDFs
