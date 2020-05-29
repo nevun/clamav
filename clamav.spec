@@ -41,7 +41,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.102.3
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -322,6 +322,8 @@ install -D -m 0644 -p %SOURCE12     $RPM_BUILD_ROOT%homedir/bytecode.cvd
 ## prepare the clamd-files
 install -D -m 0644 -p %SOURCE3      _doc_server/clamd.logrotate
 install -D -m 0644 -p %SOURCE5      _doc_server/README
+## Fixup URL for EPEL
+%{?epel:sed -i -e s/product=Fedora/product=Fedora%20EPEL/ _doc_server/README}
 
 install -D -p -m 0644 %SOURCE100        $RPM_BUILD_ROOT%_unitdir/clamonacc.service
 
@@ -615,6 +617,9 @@ fi
 
 
 %changelog
+* Thu May 28 2020 Orion Poplawski <orion@nwra.com> - 0.102.3-2
+- Update clamd README file (bz#1798369)
+
 * Thu May 14 2020 Orion Poplawski <orion@nwra.com> - 0.102.3-1
 - Update to 0.102.3 (bz#1834910)
 - Security fixes CVE-2020-3327 CVE-2020-3341
