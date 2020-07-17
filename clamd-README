@@ -1,18 +1,16 @@
-To create individual clamd-instance take the following files and
-modify/copy them in the suggested way:
+  By default, clamd provides a general "scan" service that requires minimal
+configuration.  To configure, edit /etc/clamd/scan.conf and:
 
-/etc/clamd/scan.conf:
-  * set LocalSocket for localhost access or TCPSocket for network access
-    and User to suitable values. Logging through syslog is usually better than an individual
-    Logfile.
-  * place this file into /etc/clamd.d with an unique service-name;
-    e.g. as /etc/clamd.d/<SERVICE>.conf
+  * set LocalSocket for localhost access or TCPSocket for network access.
 
-  When using TCPSocket, create iptables rules which are limiting the
-  access by source and/or by using '-m owner'.
+  Default configuration will:
+
+  * Log to syslog
+  * Run as the user "clamscan"
 
   When LogFile feature is wanted, it must be writable for the assigned
-  User. Recommended way to reach this, is to:
+User.  The recommended way is to:
+
   * make it owned by the User's *group*
   * assign at least 0620 (u+rw,g+w) permissions
 
@@ -22,34 +20,41 @@ modify/copy them in the suggested way:
   | # chmod 0620   <logfile>
   | # restorecon <logfile>
 
-  NEVER use 'clamav' as the user since he can modify the database.
-  This is the user who is running the application; e.g. for mimedefang
-  (http://www.roaringpenguin.com/mimedefang), the user might be
-  'defang'.Theoretically, distinct users could be used, but it must be
-  made sure that the application-user can write into the socket-file,
-  and that the clamd-user can access the files asked by the
-  application to be checked.
+  NEVER use 'clamav' as the user since it can modify the database.  This is
+the user who is running the application; e.g. for mimedefang
+(http://www.roaringpenguin.com/mimedefang), the user might be 'defang'.
+Theoretically, distinct users could be used, but it must be made sure that
+the application-user can write into the socket-file, and that the clamd-user
+can access the files asked by the application to be checked.
+
+  The default service can be enabled and started with:
+
+  systemctl enable clamd@scan.service
+  systemctl start clamd@scan.service
+
+  To create other individual clamd-instances take the following files in
+/usr/share/doc/clamd/ and modify/copy them in the suggested way:
+
+clamd.conf, copy to /etc/clamd.d/<SERVICE>.conf
+  * Change <SERVICE> as to match name of config file
+  * Any other changes as noted above
 
 clamd.logrotate: (only when LogFile feature is used)
   * set the correct value for the logfile
   * place it into /etc/logrotate.d
 
-clamd@<SERVICE>.service: (systemd instance)
-  * instance of clamd@.service
-
-Additionally, when using LocalSocket instead of TCPSocket, the directory
-for the socket file must be created.  For tmpfiles based systems, you
-might want to create a file /etc/tmpfiles.d/clamd.<SERVICE>.conf
-with a content of
+  Additionally, when using LocalSocket instead of TCPSocket, the directory
+for the socket file must be created.  For tmpfiles based systems, you might
+want to create a file /etc/tmpfiles.d/clamd.<SERVICE>.conf with a content of
 
  | d /run/clamd.<SERVICE> <MODE> <USER> <GROUP>
 
-Adjust <MODE> (0710 should suffice for most cases) and <USER> + <GROUP>
-so that the socket can be accessed by clamd and by the applications
-using clamd. Make sure that the socket is not world accessible; else,
-DOS attacks or worse are trivial.
+  Adjust <MODE> (0710 should suffice for most cases) and <USER> + <GROUP>
+so that the socket can be accessed by clamd and by the applications using
+clamd. Make sure that the socket is not world accessible; else, DOS attacks
+or worse are trivial.
 
-After emulating these steps by hand (or else rebooting), you still need set
+  After emulating these steps by hand (or else rebooting), you still need set
 SELinux:
 
  chcon -t clamd_var_run_t /run/clamd.<SERVICE>
@@ -65,9 +70,15 @@ and also maybe this one (I need to confirm that is obsolete)
 
  setsebool -P antivirus_use_jit 1
 
+  The new service can be enabled and started with:
+
+  systemctl enable clamd@<SERVICE>.service
+  systemctl start clamd@<SERVICE>.service
+
+
 [Disclaimer:
  this file and the script/configfiles are not part of the official
  clamav package.
 
  Please send complaints and comments to
- https://bugzilla.redhat.com/enter_bug.cgi?product=Fedora%20EPEL&component=clamav]
+ https://bugzilla.redhat.com/enter_bug.cgi?product=Fedora&component=clamav]
