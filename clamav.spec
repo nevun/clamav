@@ -64,7 +64,7 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-59.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25811.cvd
+Source11:   daily-25876.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
 #for clamonacc
