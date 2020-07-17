@@ -40,8 +40,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.102.3
-Release:    2%{?dist}
+Version:    0.102.4
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -617,6 +617,10 @@ fi
 
 
 %changelog
+* Fri Jul 17 2020 Orion Poplawski <orion@nwra.com> - 0.102.4-1
+- Update to 0.102.4 (bz#1857867,1858262,1858263,1858265,1858266)
+- Security fixes CVE-2020-3327 CVE-2020-3350 CVE-2020-3481
+
 * Thu May 28 2020 Orion Poplawski <orion@nwra.com> - 0.102.3-2
 - Update clamd README file (bz#1798369)
 
