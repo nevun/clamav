@@ -1,7 +1,7 @@
-diff -up clamav-0.102.0/clamconf/clamconf.c.default_confs clamav-0.102.0/clamconf/clamconf.c
---- clamav-0.102.0/clamconf/clamconf.c.default_confs	2019-10-11 20:46:32.216962895 -0600
-+++ clamav-0.102.0/clamconf/clamconf.c	2019-10-11 20:47:16.201174669 -0600
-@@ -60,9 +60,9 @@ static struct _cfgfile {
+diff -up clamav-0.103.0/clamconf/clamconf.c.default_confs clamav-0.103.0/clamconf/clamconf.c
+--- clamav-0.103.0/clamconf/clamconf.c.default_confs	2020-09-12 18:27:09.000000000 -0600
++++ clamav-0.103.0/clamconf/clamconf.c	2020-09-17 22:00:20.792879792 -0600
+@@ -63,9 +63,9 @@ static struct _cfgfile {
      const char *name;
      int tool;
  } cfgfile[] = {
@@ -13,9 +13,9 @@ diff -up clamav-0.102.0/clamconf/clamconf.c.default_confs clamav-0.102.0/clamcon
      {NULL, 0}};
  
  static void printopts(struct optstruct *opts, int nondef)
-diff -up clamav-0.102.0/docs/man/clamav-milter.8.in.default_confs clamav-0.102.0/docs/man/clamav-milter.8.in
---- clamav-0.102.0/docs/man/clamav-milter.8.in.default_confs	2019-10-01 11:24:08.000000000 -0600
-+++ clamav-0.102.0/docs/man/clamav-milter.8.in	2019-10-11 20:46:32.218962904 -0600
+diff -up clamav-0.103.0/docs/man/clamav-milter.8.in.default_confs clamav-0.103.0/docs/man/clamav-milter.8.in
+--- clamav-0.103.0/docs/man/clamav-milter.8.in.default_confs	2020-09-12 18:27:09.000000000 -0600
++++ clamav-0.103.0/docs/man/clamav-milter.8.in	2020-09-17 22:00:20.793879800 -0600
 @@ -27,7 +27,7 @@ Print the version number and exit.
  Read configuration from FILE.
  .SH "FILES"
@@ -25,9 +25,9 @@ diff -up clamav-0.102.0/docs/man/clamav-milter.8.in.default_confs clamav-0.102.0
  .SH "AUTHOR"
  .LP 
  aCaB <acab@clamav.net>
-diff -up clamav-0.102.0/docs/man/clamav-milter.conf.5.in.default_confs clamav-0.102.0/docs/man/clamav-milter.conf.5.in
---- clamav-0.102.0/docs/man/clamav-milter.conf.5.in.default_confs	2019-10-01 11:24:08.000000000 -0600
-+++ clamav-0.102.0/docs/man/clamav-milter.conf.5.in	2019-10-11 20:46:32.218962904 -0600
+diff -up clamav-0.103.0/docs/man/clamav-milter.conf.5.in.default_confs clamav-0.103.0/docs/man/clamav-milter.conf.5.in
+--- clamav-0.103.0/docs/man/clamav-milter.conf.5.in.default_confs	2020-09-12 18:27:09.000000000 -0600
++++ clamav-0.103.0/docs/man/clamav-milter.conf.5.in	2020-09-17 22:00:20.794879808 -0600
 @@ -239,7 +239,7 @@ Default: no
  All options expressing a size are limited to max 4GB. Values in excess will be reset to the maximum.
  .SH "FILES"
@@ -37,9 +37,9 @@ diff -up clamav-0.102.0/docs/man/clamav-milter.conf.5.in.default_confs clamav-0.
  .SH "AUTHOR"
  .LP 
  aCaB <acab@clamav.net>
-diff -up clamav-0.102.0/docs/man/clamd.8.in.default_confs clamav-0.102.0/docs/man/clamd.8.in
---- clamav-0.102.0/docs/man/clamd.8.in.default_confs	2019-10-01 11:24:08.000000000 -0600
-+++ clamav-0.102.0/docs/man/clamd.8.in	2019-10-11 20:46:32.220962914 -0600
+diff -up clamav-0.103.0/docs/man/clamd.8.in.default_confs clamav-0.103.0/docs/man/clamd.8.in
+--- clamav-0.103.0/docs/man/clamd.8.in.default_confs	2020-09-12 18:27:09.000000000 -0600
++++ clamav-0.103.0/docs/man/clamd.8.in	2020-09-17 22:00:20.794879808 -0600
 @@ -7,7 +7,7 @@ clamd \- an anti\-virus daemon
  clamd [options]
  .SH "DESCRIPTION"
@@ -58,30 +58,30 @@ diff -up clamav-0.102.0/docs/man/clamd.8.in.default_confs clamav-0.102.0/docs/ma
  .SH "CREDITS"
  Please check the full documentation for credits.
  .SH "AUTHOR"
-diff -up clamav-0.102.0/docs/man/clamd.conf.5.in.default_confs clamav-0.102.0/docs/man/clamd.conf.5.in
---- clamav-0.102.0/docs/man/clamd.conf.5.in.default_confs	2019-10-01 11:24:08.000000000 -0600
-+++ clamav-0.102.0/docs/man/clamd.conf.5.in	2019-10-11 20:46:32.219962909 -0600
-@@ -742,7 +742,7 @@ Default: no
+diff -up clamav-0.103.0/docs/man/clamd.conf.5.in.default_confs clamav-0.103.0/docs/man/clamd.conf.5.in
+--- clamav-0.103.0/docs/man/clamd.conf.5.in.default_confs	2020-09-17 22:00:20.795879816 -0600
++++ clamav-0.103.0/docs/man/clamd.conf.5.in	2020-09-17 22:01:21.414353121 -0600
+@@ -759,7 +759,7 @@ Default: no
  All options expressing a size are limited to max 4GB. Values in excess will be reset to the maximum.
  .SH "FILES"
- .LP 
+ .LP
 -@CFGDIR@/clamd.conf
 +@CFGDIR@/clamd.d/scan.conf
  .SH "AUTHORS"
- .LP 
+ .LP
  Tomasz Kojm <tkojm@clamav.net>, Kevin Lin <klin@sourcefire.com>
-diff -up clamav-0.102.0/platform.h.in.default_confs clamav-0.102.0/platform.h.in
---- clamav-0.102.0/platform.h.in.default_confs	2019-10-01 11:24:09.000000000 -0600
-+++ clamav-0.102.0/platform.h.in	2019-10-11 20:46:32.217962899 -0600
-@@ -34,9 +34,9 @@ typedef	unsigned	int	in_addr_t;
- #define PATHSEP "/"
+diff -up clamav-0.103.0/platform.h.in.default_confs clamav-0.103.0/platform.h.in
+--- clamav-0.103.0/platform.h.in.default_confs	2020-09-17 22:00:20.796879824 -0600
++++ clamav-0.103.0/platform.h.in	2020-09-17 22:01:56.842629739 -0600
+@@ -112,9 +112,9 @@ typedef unsigned int in_addr_t;
  #endif
  
+ #ifndef _WIN32
 -#define CONFDIR_CLAMD CONFDIR PATHSEP "clamd.conf"
 +#define CONFDIR_CLAMD CONFDIR PATHSEP "clamd.d/scan.conf"
  #define CONFDIR_FRESHCLAM CONFDIR PATHSEP "freshclam.conf"
 -#define CONFDIR_MILTER CONFDIR PATHSEP "clamav-milter.conf"
 +#define CONFDIR_MILTER CONFDIR PATHSEP "mail/clamav-milter.conf"
+ #endif
  
- #define cli_to_utf8_maybe_alloc(x) (x)
- #define cli_strdup_to_utf8(x) strdup(x)
+ #ifndef WORDS_BIGENDIAN

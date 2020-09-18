@@ -40,8 +40,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.102.4
-Release:    2%{?dist}
+Version:    0.103.0
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -91,6 +91,9 @@ Patch1:     clamav-default_confs.patch
 Patch2:     clamav-0.99-private.patch
 # Patch to use EL7 libcurl
 Patch3:     clamav-curl.patch
+# Fix ck_assert_msg() call
+# https://github.com/Cisco-Talos/clamav-devel/pull/138
+Patch4:     clamav-check.patch
 
 BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
 BuildRequires:  gcc-c++
@@ -253,6 +256,7 @@ This package contains files which are needed to run the clamav-milter.
 %patch2 -p1 -b .private
 # Patch to use older libcurl
 %{?el7:%patch3 -p1 -b .curl}
+%patch4 -p1 -b .check
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -617,6 +621,9 @@ fi
 
 
 %changelog
+* Thu Sep 17 2020 Orion Poplawski <orion@nwra.com> - 0.103.0-1
+- Update to 0.103.0
+
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.102.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
