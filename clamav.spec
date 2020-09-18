@@ -527,12 +527,12 @@ fi
 %_bindir/clamconf
 %_bindir/clamdscan
 %_bindir/clamdtop
-%if %{with clamonacc}
-%_bindir/clamonacc
-%endif
 %_bindir/clamscan
 %_bindir/clamsubmit
 %_bindir/sigtool
+%if %{with clamonacc}
+%_sbindir/clamonacc
+%endif
 %_mandir/man[15]/*
 %exclude %_mandir/*/freshclam*
 %exclude %_mandir/man5/clamd.conf.5*
