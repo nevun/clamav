@@ -34,6 +34,7 @@
 %global milterlog   %_var/log/clamav-milter.log
 %global milterstatedir  %_rundir/clamav-milter
 %global pkgdatadir  %_datadir/%name
+%global quarantinedir %_var/spool/quarantine
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
@@ -313,6 +314,7 @@ install -d -m 0755 \
     $RPM_BUILD_ROOT%_var/log \
     $RPM_BUILD_ROOT%milterstatedir \
     $RPM_BUILD_ROOT%homedir \
+    $RPM_BUILD_ROOT%quarantinedir \
     $RPM_BUILD_ROOT%scanstatedir
 
 rm -f $RPM_BUILD_ROOT%_libdir/*.la
@@ -541,6 +543,7 @@ fi
 %exclude %_mandir/man5/clamd.conf.5*
 %_unitdir/clamonacc.service
 %_unitdir/clamav-clamonacc.service
+%attr(0750,root,root) %dir %quarantinedir
 
 
 %files lib

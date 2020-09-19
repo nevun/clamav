@@ -1,13 +1,12 @@
 diff -up clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service clamav-0.103.0/clamonacc/clamav-clamonacc.service.in
 --- clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service	2020-09-12 18:27:09.000000000 -0600
 +++ clamav-0.103.0/clamonacc/clamav-clamonacc.service.in	2020-09-18 19:49:35.400152760 -0600
-@@ -4,14 +4,14 @@
+@@ -4,14 +4,12 @@
  [Unit]
  Description=ClamAV On-Access Scanner
  Documentation=man:clamonacc(8) man:clamd.conf(5) https://www.clamav.net/documents
 -Requires=clamav-daemon.service
 -After=clamav-daemon.service syslog.target network.target
-+Requires=clamd@scan.service
 +After=clamd@scan.service syslog.target network.target
  
  [Service]
@@ -15,8 +14,7 @@ diff -up clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service 
  User=root
 -ExecStartPre=/bin/bash -c "while [ ! -S /run/clamav/clamd.ctl ]; do sleep 1; done"
 -ExecStart=@prefix@/sbin/clamonacc -F --config-file=@APP_CONFIG_DIRECTORY@/clamd.conf --log=/var/log/clamav/clamonacc.log --move=/root/quarantine
-+ExecStartPre=/bin/bash -c "while [ ! -S /run/clamd.scan/clamd.sock ]; do sleep 1; done"
-+ExecStart=@prefix@/sbin/clamonacc -F --config-file=/etc/clamd/scan.conf --log=/var/log/clamav/clamonacc.log --move=/root/quarantine
++ExecStart=@prefix@/sbin/clamonacc -F --config-file=/etc/clamd.d/scan.conf
  
  [Install]
  WantedBy=multi-user.target
