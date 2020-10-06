@@ -96,7 +96,11 @@ Patch4:     clamav-check.patch
 # Modify clamav-clamonacc.service for Fedora compatibility
 Patch5:     clamav-clamonacc-service.patch
 
-BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  gettext-devel
+BuildRequires:  libtool
+BuildRequires:  libtool-ltdl-devel
 BuildRequires:  gcc-c++
 BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
