@@ -88,8 +88,6 @@ Patch0:     clamav-stats-deprecation.patch
 Patch1:     clamav-default_confs.patch
 # Fix pkg-config flags for static linking, multilib
 Patch2:     clamav-0.99-private.patch
-# Patch to use EL7 libcurl
-Patch3:     clamav-curl.patch
 # Fix ck_assert_msg() call
 # https://github.com/Cisco-Talos/clamav-devel/pull/138
 Patch4:     clamav-check.patch
@@ -259,8 +257,6 @@ This package contains files which are needed to run the clamav-milter.
 %endif
 %patch1 -p1 -b .default_confs
 %patch2 -p1 -b .private
-# Patch to use older libcurl
-%{?el7:%patch3 -p1 -b .curl}
 %patch4 -p1 -b .check
 %patch5 -p1 -b .clamonacc-service
 
