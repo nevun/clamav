@@ -125,6 +125,7 @@ BuildRequires:  nc
 BuildRequires:  systemd-devel
 #for milter
 BuildRequires:  sendmail-devel
+BuildRequires: make
 
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib = %version-%release
