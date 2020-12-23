@@ -34,13 +34,14 @@
 %global milterlog   %_var/log/clamav-milter.log
 %global milterstatedir  %_rundir/clamav-milter
 %global pkgdatadir  %_datadir/%name
+%global quarantinedir %_var/spool/quarantine
 %global scanuser    clamscan
 %global scanstatedir    %_rundir/clamd.scan
 
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.102.4
+Version:    0.103.0
 Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
@@ -64,11 +65,9 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-59.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-25876.cvd
+Source11:   daily-25931.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-331.cvd
-#for clamonacc
-Source100:  clamonacc.service
 #for update
 Source200:  freshclam-sleep
 Source201:  freshclam.sysconfig
@@ -89,19 +88,26 @@ Patch0:     clamav-stats-deprecation.patch
 Patch1:     clamav-default_confs.patch
 # Fix pkg-config flags for static linking, multilib
 Patch2:     clamav-0.99-private.patch
-# Patch to use EL7 libcurl
-Patch3:     clamav-curl.patch
+# Fix ck_assert_msg() call
+# https://github.com/Cisco-Talos/clamav-devel/pull/138
+Patch4:     clamav-check.patch
+# Modify clamav-clamonacc.service for Fedora compatibility
+Patch5:     clamav-clamonacc-service.patch
 
-BuildRequires:  autoconf automake gettext-devel libtool libtool-ltdl-devel
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  gettext-devel
+BuildRequires:  libtool
+BuildRequires:  libtool-ltdl-devel
 BuildRequires:  gcc-c++
 BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
 BuildRequires:  gmp-devel
 BuildRequires:  json-c-devel
 BuildRequires:  libprelude-devel
-# libprelude-config --libs brings in gnutls
+# libprelude-config --libs brings in gnutls, pcre
 # https://bugzilla.redhat.com/show_bug.cgi?id=1830473
-BuildRequires:  gnutls-devel
+BuildRequires:  gnutls-devel pcre-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  ncurses-devel
 BuildRequires:  openssl-devel
@@ -119,6 +125,7 @@ BuildRequires:  nc
 BuildRequires:  systemd-devel
 #for milter
 BuildRequires:  sendmail-devel
+BuildRequires: make
 
 Requires:   clamav-filesystem = %version-%release
 Requires:   clamav-lib = %version-%release
@@ -251,8 +258,8 @@ This package contains files which are needed to run the clamav-milter.
 %endif
 %patch1 -p1 -b .default_confs
 %patch2 -p1 -b .private
-# Patch to use older libcurl
-%{?el7:%patch3 -p1 -b .curl}
+%patch4 -p1 -b .check
+%patch5 -p1 -b .clamonacc-service
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -308,6 +315,7 @@ install -d -m 0755 \
     $RPM_BUILD_ROOT%_var/log \
     $RPM_BUILD_ROOT%milterstatedir \
     $RPM_BUILD_ROOT%homedir \
+    $RPM_BUILD_ROOT%quarantinedir \
     $RPM_BUILD_ROOT%scanstatedir
 
 rm -f $RPM_BUILD_ROOT%_libdir/*.la
@@ -325,9 +333,10 @@ install -D -m 0644 -p %SOURCE5      _doc_server/README
 ## Fixup URL for EPEL
 %{?epel:sed -i -e s/product=Fedora/product=Fedora%20EPEL/ _doc_server/README}
 
-install -D -p -m 0644 %SOURCE100        $RPM_BUILD_ROOT%_unitdir/clamonacc.service
+## For compatibility with 0.102.2-7
+ln -s clamav-clamonacc.service      $RPM_BUILD_ROOT%_unitdir/clamonacc.service
 
-install -D -p -m 0644 %SOURCE530        $RPM_BUILD_ROOT%_unitdir/clamd@.service
+install -D -p -m 0644 %SOURCE530    $RPM_BUILD_ROOT%_unitdir/clamd@.service
 
 ## prepare the update-files
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
@@ -419,13 +428,13 @@ make check
 
 
 %post
-%systemd_post clamonacc.service
+%systemd_post clamav-clamonacc.service
 
 %preun
-%systemd_preun clamonacc.service
+%systemd_preun clamav-clamonacc.service
 
 %postun
-%systemd_postun_with_restart clamonacc.service
+%systemd_postun_with_restart clamav-clamonacc.service
 
 
 %pre filesystem
@@ -523,16 +532,19 @@ fi
 %_bindir/clamconf
 %_bindir/clamdscan
 %_bindir/clamdtop
-%if %{with clamonacc}
-%_bindir/clamonacc
-%endif
 %_bindir/clamscan
 %_bindir/clamsubmit
 %_bindir/sigtool
+%if %{with clamonacc}
+%_sbindir/clamonacc
+%endif
 %_mandir/man[15]/*
+%_mandir/man8/clamonacc.8*
 %exclude %_mandir/*/freshclam*
 %exclude %_mandir/man5/clamd.conf.5*
 %_unitdir/clamonacc.service
+%_unitdir/clamav-clamonacc.service
+%attr(0750,root,root) %dir %quarantinedir
 
 
 %files lib
@@ -617,6 +629,12 @@ fi
 
 
 %changelog
+* Thu Sep 17 2020 Orion Poplawski <orion@nwra.com> - 0.103.0-1
+- Update to 0.103.0
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.102.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Fri Jul 17 2020 Orion Poplawski <orion@nwra.com> - 0.102.4-1
 - Update to 0.102.4 (bz#1857867,1858262,1858263,1858265,1858266)
 - Security fixes CVE-2020-3327 CVE-2020-3350 CVE-2020-3481
