@@ -1,0 +1,38 @@
+From 2b46876dcccd95eeb329477ba6f413eb485703a8 Mon Sep 17 00:00:00 2001
+From: Emilio Pozuelo Monfort <pochu27@gmail.com>
+Date: Tue, 8 Dec 2020 22:49:11 -0800
+Subject: [PATCH] clamonacc: Fix stack buffer overflow with old curl
+
+curl_easy_getinfo expects a long for CURLINFO_ACTIVESOCKET, but
+curl_socket_t is an int, which was causing a stack buffer overflow
+and crash.
+---
+ clamonacc/client/communication.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/clamonacc/client/communication.c b/clamonacc/client/communication.c
+index 2af46aa15a..1d2e53c03e 100644
+--- a/clamonacc/client/communication.c
++++ b/clamonacc/client/communication.c
+@@ -87,7 +87,9 @@ int onas_sendln(CURL *curl, const void *line, size_t len, int64_t timeout)
+     curlcode = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+ #else
+     /* Use deprecated CURLINFO_LASTSOCKET option */
+-    curlcode = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockfd);
++    long long_sockfd;
++    curlcode = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &long_sockfd);
++    sockfd = (curl_socket_t) long_sockfd;
+ #endif
+ 
+     if (CURLE_OK != curlcode) {
+@@ -152,7 +154,9 @@ int onas_recvln(struct onas_rcvln *rcv_data, char **ret_bol, char **ret_eol, int
+     rcv_data->curlcode = curl_easy_getinfo(rcv_data->curl, CURLINFO_ACTIVESOCKET, &sockfd);
+ #else
+     /* Use deprecated CURLINFO_LASTSOCKET option */
+-    rcv_data->curlcode = curl_easy_getinfo(rcv_data->curl, CURLINFO_LASTSOCKET, &sockfd);
++    long long_sockfd;
++    rcv_data->curlcode = curl_easy_getinfo(rcv_data->curl, CURLINFO_LASTSOCKET, &long_sockfd);
++    sockfd = (curl_socket_t) long_sockfd;
+ #endif
+ 
+     if (CURLE_OK != rcv_data->curlcode) {

@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -93,6 +93,7 @@ Patch2:     clamav-0.99-private.patch
 Patch4:     clamav-check.patch
 # Modify clamav-clamonacc.service for Fedora compatibility
 Patch5:     clamav-clamonacc-service.patch
+Patch6:     https://github.com/Cisco-Talos/clamav-devel/commit/2b46876dcccd95eeb329477ba6f413eb485703a8.patch
 
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -260,6 +261,7 @@ This package contains files which are needed to run the clamav-milter.
 %patch2 -p1 -b .private
 %patch4 -p1 -b .check
 %patch5 -p1 -b .clamonacc-service
+%patch6 -p1 -b .clamonacc-el7
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -629,6 +631,9 @@ fi
 
 
 %changelog
+* Wed Jan 27 2021 Sérgio Basto <sergio@serjux.com> - 0.103.0-3
+- Add upstream patch clamonacc: Fix stack buffer overflow with old curl
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.103.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
