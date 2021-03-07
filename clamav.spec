@@ -634,6 +634,7 @@ fi
 %changelog
 * Sun Mar 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.1-3
 - clamav-freshclam.service: Standard output type syslog is obsolete (#1933977)
+- Quiet proxy on stdout (#1814698)
 
 * Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 0.103.1-2
 - Rebuilt for updated systemd-rpm-macros
