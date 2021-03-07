@@ -1,0 +1,10 @@
+--- ./freshclam/clamav-freshclam.service.in.orig	2021-02-01 20:49:25.000000000 +0000
++++ ./freshclam/clamav-freshclam.service.in	2021-03-07 22:59:34.476455890 +0000
+@@ -8,7 +8,6 @@ After=network-online.target
+ 
+ [Service]
+ ExecStart=@prefix@/bin/freshclam -d --foreground=true
+-StandardOutput=syslog
+ 
+ [Install]
+ WantedBy=multi-user.target

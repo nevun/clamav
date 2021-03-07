@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.1
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -93,6 +93,8 @@ Patch2:     clamav-0.99-private.patch
 Patch4:     clamav-check.patch
 # Modify clamav-clamonacc.service for Fedora compatibility
 Patch5:     clamav-clamonacc-service.patch
+
+Patch6:     clamav-freshclam.service.patch
 
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -260,6 +262,7 @@ This package contains files which are needed to run the clamav-milter.
 %patch2 -p1 -b .private
 %patch4 -p1 -b .check
 %patch5 -p1 -b .clamonacc-service
+%patch6 -p1 -b .freshclam-service
 
 install -p -m0644 %SOURCE300 clamav-milter/
 
@@ -629,6 +632,9 @@ fi
 
 
 %changelog
+* Sun Mar 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.1-3
+- clamav-freshclam.service: Standard output type syslog is obsolete (#1933977)
+
 * Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 0.103.1-2
 - Rebuilt for updated systemd-rpm-macros
   See https://pagure.io/fesco/issue/2583.
