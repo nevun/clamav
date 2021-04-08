@@ -41,8 +41,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.103.1
-Release:    3%{?dist}
+Version:    0.103.2
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -65,9 +65,9 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-59.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-26082.cvd
+Source11:   daily-26133.cvd
 #http://database.clamav.net/bytecode.cvd
-Source12:   bytecode-331.cvd
+Source12:   bytecode-333.cvd
 #for update
 Source200:  freshclam-sleep
 Source201:  freshclam.sysconfig
@@ -632,6 +632,9 @@ fi
 
 
 %changelog
+* Wed Apr 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.2-1
+- Update to 0.103.2
+
 * Sun Mar 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.1-3
 - clamav-freshclam.service: Standard output type syslog is obsolete (#1933977)
 - Quiet proxy on stdout (#1814698)
