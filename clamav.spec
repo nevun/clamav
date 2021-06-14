@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.2
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -632,6 +632,10 @@ fi
 
 
 %changelog
+* Mon Jun 14 2021 Sérgio Basto <sergio@serjux.com> - 0.103.2-2
+- Fix for rhbz #1969240, epel7 only, location of old freshclam update file is
+  /etc/cron.d/clamav-update, not /etc/cron.d/clamav-freshclam
+
 * Wed Apr 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.2-1
 - Update to 0.103.2
 

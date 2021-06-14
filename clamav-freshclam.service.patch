@@ -1,6 +1,13 @@
---- ./freshclam/clamav-freshclam.service.in.orig	2021-02-01 20:49:25.000000000 +0000
-+++ ./freshclam/clamav-freshclam.service.in	2021-03-07 22:59:34.476455890 +0000
-@@ -8,7 +8,6 @@ After=network-online.target
+--- ./freshclam/clamav-freshclam.service.in.orig	2021-06-14 10:36:39.029730737 +0100
++++ ./freshclam/clamav-freshclam.service.in	2021-06-14 10:37:53.621423748 +0100
+@@ -2,13 +2,12 @@
+ Description=ClamAV virus database updater
+ Documentation=man:freshclam(1) man:freshclam.conf(5) https://www.clamav.net/documents
+ # If user wants it run from cron, don't start the daemon.
+-ConditionPathExists=!/etc/cron.d/clamav-freshclam
++ConditionPathExists=!/etc/cron.d/clamav-update
+ Wants=network-online.target
+ After=network-online.target
  
  [Service]
  ExecStart=@prefix@/bin/freshclam -d --foreground=true
