@@ -1,4 +1,4 @@
-VERSION=0.103.2
+VERSION=0.103.3
 NAME=clamav
 TARBALL_CLEAN=${NAME}-${VERSION}-norar.tar.xz
 TARBALL=${NAME}-${VERSION}.tar.gz
@@ -8,7 +8,7 @@ wget https://www.clamav.net/downloads/production/${TARBALL}.sig
 gpg --verify ${TARBALL}.sig ${TARBALL}
 zcat ${TARBALL} | tar --delete -f - '*/libclamunrar/*' | xz -c > ${TARBALL_CLEAN}
 
-# WIP
+# WIP clouflare don't allow wget we need download with browser
 wget http://database.clamav.net/main.cvd
 wget http://database.clamav.net/daily.cvd
 wget http://database.clamav.net/bytecode.cvd
@@ -25,4 +25,5 @@ sed -i "s|^Source10: .*|Source10:   $main_ver|" clamav.spec
 sed -i "s|^Source11: .*|Source11:   $daily_ver|" clamav.spec
 sed -i "s|^Source12: .*|Source12:   $bytecode_ver|" clamav.spec
 
-fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
+echo fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
+
