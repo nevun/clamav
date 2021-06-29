@@ -25,5 +25,22 @@ sed -i "s|^Source10: .*|Source10:   $main_ver|" clamav.spec
 sed -i "s|^Source11: .*|Source11:   $daily_ver|" clamav.spec
 sed -i "s|^Source12: .*|Source12:   $bytecode_ver|" clamav.spec
 
+rpmdev-bumpspec -n 0.103.3 -c "Update to 0.103.3 (#1974601)" clamav.spec
+fkinit -u sergiomb
+fedpkg scratch-build --srpm
 echo fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
+fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
+fedpkg ci -c
+git push && fedpkg build
 
+git checkout f34 && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
+git checkout f33 && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
+git checkout epel8-playground && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
+git checkout epel8 && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
+git checkout epel7 && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
+
+/usr/bin/bodhi updates new --autokarma --autotime --type bugfix --severity medium --notes "https://blog.clamav.net/2021/06/clamav-01033-patch-release.html" --bugs 1974601 --request testing clamav-0.103.3-1.fc34
+/usr/bin/bodhi updates new --autokarma --autotime --type bugfix --severity medium --notes "https://blog.clamav.net/2021/06/clamav-01033-patch-release.html" --bugs 1974601 --request testing clamav-0.103.3-1.fc33
+/usr/bin/bodhi updates new --autokarma --autotime --type bugfix --severity medium --notes "https://blog.clamav.net/2021/06/clamav-01033-patch-release.html" --bugs 1974601 --request testing clamav-0.103.3-1.el8
+
+sha512sum --tag  ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver > sources
