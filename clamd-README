@@ -1,3 +1,5 @@
+Update 2021: Log to syslog is obsolete, journalctl superseded it
+
   By default, clamd provides a general "scan" service that requires minimal
 configuration.  To configure, edit /etc/clamd/scan.conf and:
 
