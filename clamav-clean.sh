@@ -17,9 +17,9 @@ main_ver=$(file main.cvd | sed -e 's/.*version /main-/;s/,.*/.cvd/')
 daily_ver=$(file daily.cvd | sed -e 's/.*version /daily-/;s/,.*/.cvd/')
 bytecode_ver=$(file bytecode.cvd | sed -e 's/.*version /bytecode-/;s/,.*/.cvd/')
 
-cp main.cvd $main_ver
-cp daily.cvd $daily_ver
-cp bytecode.cvd $bytecode_ver
+mv -f main.cvd $main_ver
+mv -f daily.cvd $daily_ver
+mv -f bytecode.cvd $bytecode_ver
 
 sed -i "s|^Source10: .*|Source10:   $main_ver|" clamav.spec
 sed -i "s|^Source11: .*|Source11:   $daily_ver|" clamav.spec

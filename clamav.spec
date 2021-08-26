@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.3
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -63,9 +63,9 @@ Source5:    clamd-README
 # Check the first line of the file for version or run file *cvd
 # Attention file < 5.33-7 have bugs see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 #http://database.clamav.net/main.cvd
-Source10:   main-59.cvd
+Source10:   main-61.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-26209.cvd
+Source11:   daily-26275.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-333.cvd
 #for update
@@ -608,6 +608,9 @@ test -e %freshclamlog || {
 
 
 %changelog
+* Thu Aug 26 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-5
+- Update clamav-data (#1998252)
+
 * Sat Aug 14 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-4
 - Rearrange tmpfiles following packaging guidelines
   https://docs.fedoraproject.org/en-US/packaging-guidelines/Tmpfiles.d/
