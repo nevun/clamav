@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.3
-Release:    5%{?dist}
+Release:    6%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -608,6 +608,9 @@ test -e %freshclamlog || {
 
 
 %changelog
+* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.103.3-6
+- Rebuilt with OpenSSL 3.0.0
+
 * Thu Aug 26 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-5
 - Update clamav-data (#1998252)
 
