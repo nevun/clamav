@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.3
-Release:    6%{?dist}
+Release:    7%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -63,9 +63,9 @@ Source5:    clamd-README
 # Check the first line of the file for version or run file *cvd
 # Attention file < 5.33-7 have bugs see https://bugzilla.redhat.com/show_bug.cgi?id=1539107
 #http://database.clamav.net/main.cvd
-Source10:   main-61.cvd
+Source10:   main-62.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-26275.cvd
+Source11:   daily-26299.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-333.cvd
 #for update
@@ -593,6 +593,7 @@ test -e %freshclamlog || {
 %_sbindir/clamd
 %_unitdir/clamd@.service
 %_tmpfilesdir/clamd.scan.conf
+%dir %attr(0710,%scanuser,virusgroup) %scanstatedir
 
 
 %files milter
@@ -605,9 +606,15 @@ test -e %freshclamlog || {
 # milterlog file is created in post
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 %_tmpfilesdir/clamav-milter.conf
+%dir %attr(0710,%milteruser,%milteruser) %milterstatedir
 
 
 %changelog
+* Wed Sep 22 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-7
+- (#2006490) follow the Fedora Packaging Guidelines by adding %%dir
+  %%attr(0710,%%scanuser,virusgroup) to %%files section, it is needed on epel7 on
+  initial installation without reboot.
+
 * Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.103.3-6
 - Rebuilt with OpenSSL 3.0.0
 
