@@ -312,8 +312,10 @@ rm -rf _doc*
 
 install -d -m 0755 \
     $RPM_BUILD_ROOT%_tmpfilesdir \
+    $RPM_BUILD_ROOT%milterstatedir \
     $RPM_BUILD_ROOT%homedir \
-    $RPM_BUILD_ROOT%quarantinedir
+    $RPM_BUILD_ROOT%quarantinedir \
+    $RPM_BUILD_ROOT%scanstatedir
 
 rm -f $RPM_BUILD_ROOT%_libdir/*.la
 
