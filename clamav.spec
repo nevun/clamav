@@ -42,7 +42,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.3
-Release:    7%{?dist}
+Release:    8%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -312,10 +312,8 @@ rm -rf _doc*
 
 install -d -m 0755 \
     $RPM_BUILD_ROOT%_tmpfilesdir \
-    $RPM_BUILD_ROOT%milterstatedir \
     $RPM_BUILD_ROOT%homedir \
-    $RPM_BUILD_ROOT%quarantinedir \
-    $RPM_BUILD_ROOT%scanstatedir
+    $RPM_BUILD_ROOT%quarantinedir
 
 rm -f $RPM_BUILD_ROOT%_libdir/*.la
 
@@ -453,6 +451,12 @@ exit 0
 [ -L /etc/systemd/system/multi-user.target.wants/clamd@scan.service ] &&
     ln -sf /usr/lib/systemd/system/clamd@.service /etc/systemd/system/multi-user.target.wants/clamd@scan.service || :
 %systemd_post clamd@scan.service
+%if 0%{?rhel}
+if [ $1 -eq 1 ] && [ -x /usr/bin/systemctl ]; then
+# Initial installation
+/bin/systemd-tmpfiles --create %_tmpfilesdir/clamd.scan.conf
+fi
+%endif
 
 %preun -n clamd
 %systemd_preun clamd@scan.service
@@ -482,6 +486,12 @@ test -e %milterlog || {
     ! test -x /sbin/restorecon || /sbin/restorecon %milterlog
 }
 %systemd_post clamav-milter.service
+%if 0%{?rhel}
+if [ $1 -eq 1 ] && [ -x /usr/bin/systemctl ]; then
+# Initial installation
+/bin/systemd-tmpfiles --create %_tmpfilesdir/clamav-milter.conf || :
+fi
+%endif
 
 %preun milter
 %systemd_preun clamav-milter.service
@@ -595,7 +605,6 @@ test -e %freshclamlog || {
 %_sbindir/clamd
 %_unitdir/clamd@.service
 %_tmpfilesdir/clamd.scan.conf
-%dir %attr(0710,%scanuser,virusgroup) %scanstatedir
 
 
 %files milter
@@ -608,10 +617,13 @@ test -e %freshclamlog || {
 # milterlog file is created in post
 %ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 %_tmpfilesdir/clamav-milter.conf
-%dir %attr(0710,%milteruser,%milteruser) %milterstatedir
 
 
 %changelog
+* Sat Oct 02 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-8
+- (#2006490) second try to fix epel7, revert previous commit and add on
+  initial installation (not in updates) run /bin/systemd-tmpfiles --create (...)
+
 * Wed Sep 22 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-7
 - (#2006490) follow the Fedora Packaging Guidelines by adding %%dir
   %%attr(0710,%%scanuser,virusgroup) to %%files section, it is needed on epel7 on
