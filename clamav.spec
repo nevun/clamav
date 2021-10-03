@@ -35,14 +35,13 @@
 %global quarantinedir   %_var/spool/quarantine
 %global milterstatedir  %_rundir/clamav-milter
 
-%global pkgdatadir  %_datadir/%name
 %global freshclamlog    %_var/log/freshclam.log
 %global milterlog   %_var/log/clamav-milter.log
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.3
-Release:    8%{?dist}
+Release:    9%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -335,7 +334,7 @@ chmod 600 $RPM_BUILD_ROOT%_sysconfdir/freshclam.conf
 %if %{with old_freshclam}
 install -d -m 0755 $RPM_BUILD_ROOT%_var/log
 install -d -m 0755 $RPM_BUILD_ROOT%_sysconfdir/logrotate.d
-install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
+install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%{_datadir}/%{name}/freshclam-sleep
 install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
@@ -353,11 +352,11 @@ function smartsubst() {
     done
 }
 smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
-        s!/usr/share/clamav!%pkgdatadir!g;
+        s!/usr/share/clamav!%{_datadir}/%{name}!g;
         s!/usr/bin!%_bindir!g;
             s!/usr/sbin!%_sbindir!g;' \
    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
-   $RPM_BUILD_ROOT%pkgdatadir/freshclam-sleep
+   $RPM_BUILD_ROOT%{_datadir}/%{name}/freshclam-sleep
 %endif
 
 ### The scanner stuff
@@ -585,7 +584,7 @@ test -e %freshclamlog || {
 %_unitdir/clamav-freshclam.service
 %config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
 %if %{with old_freshclam}
-%pkgdatadir/freshclam-sleep
+%{_datadir}/%{name}/freshclam-sleep
 %config(noreplace) %_sysconfdir/cron.d/clamav-update
 %config(noreplace) %_sysconfdir/sysconfig/freshclam
 %config(noreplace) %verify(not mtime)  %_sysconfdir/logrotate.d/*
@@ -620,6 +619,9 @@ test -e %freshclamlog || {
 
 
 %changelog
+* Sun Oct 03 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-9
+- Get rid of pkgdatadir variable %%{_datadir}/%%{name} is more informative
+
 * Sat Oct 02 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-8
 - (#2006490) second try to fix epel7, revert previous commit and add on
   initial installation (not in updates) run /bin/systemd-tmpfiles --create (...)
