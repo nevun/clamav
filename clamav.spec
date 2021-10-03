@@ -36,7 +36,6 @@
 %global milterstatedir  %_rundir/clamav-milter
 
 %global freshclamlog    %_var/log/freshclam.log
-%global milterlog   %_var/log/clamav-milter.log
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
@@ -396,8 +395,8 @@ sed -ri \
     -e 's!^#?(AllowSupplementaryGroups|LogSyslog) .*!\1 yes!g' \
     -e 's! /tmp/clamav-milter.socket! %milterstatedir/clamav-milter.socket!g' \
     -e 's! /var/run/clamav-milter.pid! %milterstatedir/clamav-milter.pid!g' \
-    -e 's! /var/run/clamd/clamd.socket! %scanstatedir/clamd.sock!g' \
-    -e 's! /tmp/clamav-milter.log! %milterlog!g' \
+    -e 's!:/var/run/clamd/clamd.socket!:%scanstatedir/clamd.sock!g' \
+    -e 's! /tmp/clamav-milter.log! %{_var}/log/clamav-milter.log!g' \
     $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf.sample
 
 install -d -m 0755 $RPM_BUILD_ROOT%_sysconfdir/mail
@@ -478,12 +477,6 @@ usermod %{milteruser} -a -G virusgroup
 exit 0
 
 %post milter
-test -e %milterlog || {
-    touch %milterlog
-    chmod 0620             %milterlog
-    chown root:%milteruser %milterlog
-    ! test -x /sbin/restorecon || /sbin/restorecon %milterlog
-}
 %systemd_post clamav-milter.service
 %if 0%{?rhel}
 if [ $1 -eq 1 ] && [ -x /usr/bin/systemctl ]; then
@@ -613,14 +606,16 @@ test -e %freshclamlog || {
 %_mandir/man8/clamav-milter*
 %dir %_sysconfdir/mail
 %config(noreplace) %_sysconfdir/mail/clamav-milter.conf
-# milterlog file is created in post
-%ghost %attr(0620,root,%milteruser) %verify(not size md5 mtime) %milterlog
 %_tmpfilesdir/clamav-milter.conf
 
 
 %changelog
 * Sun Oct 03 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-9
 - Get rid of pkgdatadir variable %%{_datadir}/%%{name} is more informative
+- Get rid og milterlog variable %%{_var}/log/clamav-milter.log is more readable
+- we can remove %%{_var}/log/clamav-milter.log because journalctl -u clamav-milter
+  supersede it
+- Fix substitution of /var/run/clamd/clamd.socket on file clamav-milter.conf
 
 * Sat Oct 02 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-8
 - (#2006490) second try to fix epel7, revert previous commit and add on
