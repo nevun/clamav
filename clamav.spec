@@ -332,25 +332,6 @@ install -D -p -m 0755 %SOURCE200    $RPM_BUILD_ROOT%{_datadir}/%{name}/freshclam
 install -D -p -m 0644 %SOURCE201    $RPM_BUILD_ROOT%_sysconfdir/sysconfig/freshclam
 install -D -p -m 0600 %SOURCE202    $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update
 install -D -m 0644 -p %SOURCE203    $RPM_BUILD_ROOT%_sysconfdir/logrotate.d/clamav-update
-
-function smartsubst() {
-    local tmp
-    local regexp=$1
-    shift
-
-    tmp=$(mktemp /tmp/%name-subst.XXXXXX)
-    for i; do
-        sed -e "$regexp" "$i" >$tmp
-        cmp -s $tmp "$i" || cat $tmp >"$i"
-        rm -f $tmp
-    done
-}
-smartsubst 's!webmaster,clamav!webmaster,%updateuser!g;
-        s!/usr/share/clamav!%{_datadir}/%{name}!g;
-        s!/usr/bin!%_bindir!g;
-            s!/usr/sbin!%_sbindir!g;' \
-   $RPM_BUILD_ROOT%_sysconfdir/cron.d/clamav-update \
-   $RPM_BUILD_ROOT%{_datadir}/%{name}/freshclam-sleep
 %endif
 
 ### The scanner stuff
@@ -612,6 +593,7 @@ test -e %freshclamlog || {
   supersede it
 - Fix substitution of /var/run/clamd/clamd.socket on file clamav-milter.conf
 - Get rid of scanstatedir and milterstatedir variables
+- smartsubst deleted since we notice does not replace anything
 
 * Sat Oct 02 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-8
 - (#2006490) second try to fix epel7, revert previous commit and add on
