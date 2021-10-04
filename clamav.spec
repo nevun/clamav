@@ -23,17 +23,12 @@
 %global have_ocaml  0
 %endif
 
-%{!?_rundir:%global _rundir /run}
-%{!?_unitdir:%global _unitdir /usr/lib/systemd/system}
-
 %global scanuser    clamscan
 %global updateuser  clamupdate
 %global milteruser  clamilt
 
 %global homedir         %_var/lib/clamav
-%global scanstatedir    %_rundir/clamd.scan
 %global quarantinedir   %_var/spool/quarantine
-%global milterstatedir  %_rundir/clamav-milter
 
 %global freshclamlog    %_var/log/freshclam.log
 
@@ -386,16 +381,16 @@ sed -e 's!<SERVICE>!scan!g;s!<USER>!%scanuser!g' \
 mv $RPM_BUILD_ROOT%_sysconfdir/clamd.conf.sample _doc_server/clamd.conf
 
 cat << EOF > $RPM_BUILD_ROOT%_tmpfilesdir/clamd.scan.conf
-d %scanstatedir 0710 %scanuser virusgroup
+d %{_rundir}/clamd.scan 0710 %scanuser virusgroup
 EOF
 
 ### The milter stuff
 sed -ri \
     -e 's!^#?(User).*!\1 %milteruser!g' \
     -e 's!^#?(AllowSupplementaryGroups|LogSyslog) .*!\1 yes!g' \
-    -e 's! /tmp/clamav-milter.socket! %milterstatedir/clamav-milter.socket!g' \
-    -e 's! /var/run/clamav-milter.pid! %milterstatedir/clamav-milter.pid!g' \
-    -e 's!:/var/run/clamd/clamd.socket!:%scanstatedir/clamd.sock!g' \
+    -e 's! /tmp/clamav-milter.socket! %{_rundir}/clamav-milter/clamav-milter.socket!g' \
+    -e 's! /var/run/clamav-milter.pid! %{_rundir}/clamav-milter/clamav-milter.pid!g' \
+    -e 's!:/var/run/clamd/clamd.socket!:%{_rundir}/clamd.scan/clamd.sock!g' \
     -e 's! /tmp/clamav-milter.log! %{_var}/log/clamav-milter.log!g' \
     $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf.sample
 
@@ -405,7 +400,7 @@ mv $RPM_BUILD_ROOT%_sysconfdir/clamav-milter.conf.sample $RPM_BUILD_ROOT%_syscon
 install -D -p -m 0644 %SOURCE330 $RPM_BUILD_ROOT%_unitdir/clamav-milter.service
 
 cat << EOF > $RPM_BUILD_ROOT%_tmpfilesdir/clamav-milter.conf
-d %milterstatedir 0710 %milteruser %milteruser
+d %{_rundir}/clamav-milter 0710 %milteruser %milteruser
 EOF
 
 # TODO: Evaluate using upstream's unit with clamav-daemon.socket
@@ -471,7 +466,7 @@ fi
 %pre milter
 getent group %{milteruser} >/dev/null || groupadd -r %{milteruser}
 getent passwd %{milteruser} >/dev/null || \
-    useradd -r -g %{milteruser} -d %{milterstatedir} -s /sbin/nologin \
+    useradd -r -g %{milteruser} -d %{_rundir}/clamav-milter -s /sbin/nologin \
     -c "Clamav Milter user" %{milteruser}
 usermod %{milteruser} -a -G virusgroup
 exit 0
@@ -616,6 +611,7 @@ test -e %freshclamlog || {
 - we can remove %%{_var}/log/clamav-milter.log because journalctl -u clamav-milter
   supersede it
 - Fix substitution of /var/run/clamd/clamd.socket on file clamav-milter.conf
+- Get rid of scanstatedir and milterstatedir variables
 
 * Sat Oct 02 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-8
 - (#2006490) second try to fix epel7, revert previous commit and add on
