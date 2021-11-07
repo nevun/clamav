@@ -2,7 +2,7 @@
 +++ ./freshclam/clamav-freshclam.service.in	2021-06-14 10:37:53.621423748 +0100
 @@ -2,13 +2,12 @@
  Description=ClamAV virus database updater
- Documentation=man:freshclam(1) man:freshclam.conf(5) https://www.clamav.net/documents
+ Documentation=man:freshclam(1) man:freshclam.conf(5) https://docs.clamav.net/
  # If user wants it run from cron, don't start the daemon.
 -ConditionPathExists=!/etc/cron.d/clamav-freshclam
 +# ConditionPathExists=!/etc/cron.d/clamav-update

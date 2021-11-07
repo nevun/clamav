@@ -33,8 +33,8 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.103.3
-Release:    9%{?dist}
+Version:    0.103.4
+Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -43,8 +43,7 @@ Source999:  https://www.clamav.net/downloads/production/%name-%version%{?prerele
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
-# tarball was created by
-#  make clean-sources NAME=clamav VERSION=<version> TARBALL=clamav-<version>.tar.gz TARBALL_CLEAN=clamav-<version>-norar.tar.xz
+# tarball was created with update_clamav.sh
 Source0:    %name-%version%{?prerelease}-norar.tar.xz
 %endif
 #for server
@@ -57,7 +56,7 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-62.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-26299.cvd
+Source11:   daily-26345.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-333.cvd
 #for update
@@ -579,6 +578,9 @@ test -e %{freshclamlog} || {
 
 
 %changelog
+* Sun Nov 07 2021 Sérgio Basto <sergio@serjux.com> - 0.103.4-1
+- Update to 0.103.4
+
 * Sun Oct 03 2021 Sérgio Basto <sergio@serjux.com> - 0.103.3-9
 - Get rid of pkgdatadir variable %%{_datadir}/%%{name} is more informative
 - Get rid og milterlog variable %%{_var}/log/clamav-milter.log is more readable
