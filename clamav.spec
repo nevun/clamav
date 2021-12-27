@@ -38,13 +38,13 @@ Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
-Source0:    https://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz
-Source999:  https://www.clamav.net/downloads/production/%name-%version%{?prerelease}.tar.gz.sig
+Source0:    https://www.clamav.net/downloads/production/%{name}-%{version}%{?prerelease}.tar.gz
+Source999:  https://www.clamav.net/downloads/production/%{name}-%{version}%{?prerelease}.tar.gz.sig
 %else
 # Unfortunately, clamav includes support for RAR v3, derived from GPL
 # incompatible unrar from RARlabs. We have to pull this code out.
 # tarball was created with update_clamav.sh
-Source0:    %name-%version%{?prerelease}-norar.tar.xz
+Source0:    %{name}-%{version}%{?prerelease}-norar.tar.xz
 %endif
 #for server
 Source3:    clamd.logrotate
@@ -92,6 +92,7 @@ BuildRequires:  automake
 BuildRequires:  gettext-devel
 BuildRequires:  libtool
 BuildRequires:  libtool-ltdl-devel
+BuildRequires:  make
 BuildRequires:  gcc-c++
 BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
@@ -100,7 +101,8 @@ BuildRequires:  json-c-devel
 BuildRequires:  libprelude-devel
 # libprelude-config --libs brings in gnutls, pcre
 # https://bugzilla.redhat.com/show_bug.cgi?id=1830473
-BuildRequires:  gnutls-devel pcre-devel
+BuildRequires:  gnutls-devel
+BuildRequires:  pcre-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  ncurses-devel
 BuildRequires:  openssl-devel
@@ -118,7 +120,6 @@ BuildRequires:  nc
 BuildRequires:  systemd-devel
 #for milter
 BuildRequires:  sendmail-devel
-BuildRequires: make
 
 Requires:   clamav-filesystem = %{version}-%{release}
 Requires:   clamav-lib = %{version}-%{release}
