@@ -1,17 +1,31 @@
-VERSION=0.103.4
+VERSION=0.103.5
+
+if [ -z "$1" ]
+then
+      stage=0
+else
+      stage=$1
+fi
+
 NAME=clamav
 TARBALL_CLEAN=${NAME}-${VERSION}-norar.tar.xz
 TARBALL=${NAME}-${VERSION}.tar.gz
 
+if test $stage -le 0
+then
+echo STAGE 0
 wget -c https://www.clamav.net/downloads/production/${TARBALL}
 wget -c https://www.clamav.net/downloads/production/${TARBALL}.sig
 gpg --verify ${TARBALL}.sig ${TARBALL}
 zcat ${TARBALL} | tar --delete -f - '*/libclamunrar/*' | xz -c > ${TARBALL_CLEAN}
+fi
 
+echo Press enter convert cvd into spec or n to skip ; read dummy;
+if [[ "$dummy" != "n" ]]; then
 # WIP clouflare don't allow wget we need download with browser
-#wget http://database.clamav.net/main.cvd
-#get http://database.clamav.net/daily.cvd
-#get http://database.clamav.net/bytecode.cvd
+#wget https://database.clamav.net/main.cvd
+#wget https://database.clamav.net/daily.cvd
+#wget https://database.clamav.net/bytecode.cvd
 
 main_ver=$(file main.cvd | sed -e 's/.*version /main-/;s/,.*/.cvd/')
 daily_ver=$(file daily.cvd | sed -e 's/.*version /daily-/;s/,.*/.cvd/')
@@ -24,6 +38,7 @@ cp -f bytecode.cvd $bytecode_ver
 sed -i "s|^Source10: .*|Source10:   $main_ver|" clamav.spec
 sed -i "s|^Source11: .*|Source11:   $daily_ver|" clamav.spec
 sed -i "s|^Source12: .*|Source12:   $bytecode_ver|" clamav.spec
+fi
 
 rpmdev-bumpspec -n $VERSION -c "Update to $VERSION" clamav.spec
 echo fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
@@ -33,13 +48,13 @@ if [[ "$dummy" != "n" ]]; then
 fedpkg scratch-build --srpm
 fi
 echo Press enter to upload sources and commit ; read dummy;
-fedpkg new-sources ${TARBALL_CLEAN} $main_ver $daily_ver $bytecode_ver
+fedpkg new-sources ${TARBALL_CLEAN} $(spectool -l clamav.spec | grep -P "Source10|Source11|Source12" | sed 's/.* //')
 fedpkg ci -c && git show
 
 echo Press enter to build rawhide; read dummy;
 git push && fedpkg build --nowait
 
-for repo in "f35 f34 f33 epel8-playground epel8 epel7" ; do
+for repo in "f35 f34 epel8 epel7" ; do
 echo Press enter to build on branch $repo; read dummy;
 git checkout $repo && git merge rawhide && fedpkg push && fedpkg build --nowait; git checkout rawhide
 done
