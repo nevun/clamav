@@ -34,7 +34,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.5
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -189,6 +189,7 @@ installation.
 %package update
 Summary:    Auto-updater for the Clam Antivirus scanner data-files
 Requires:   clamav-filesystem = %{version}-%{release}
+Requires:   clamav-lib        = %{version}-%{release}
 %if %{with old_freshclam}
 Requires:   crontabs
 Requires:   /etc/cron.d
@@ -579,6 +580,9 @@ test -e %{freshclamlog} || {
 
 
 %changelog
+* Tue Mar 01 2022 Sérgio Basto <sergio@serjux.com> - 0.103.5-3
+- Fix for dnf update clamav-update (#2059618)
+
 * Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.103.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
