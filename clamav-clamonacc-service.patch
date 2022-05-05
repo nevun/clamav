@@ -1,6 +1,5 @@
-diff -up clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service clamav-0.103.0/clamonacc/clamav-clamonacc.service.in
---- clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service	2020-09-12 18:27:09.000000000 -0600
-+++ clamav-0.103.0/clamonacc/clamav-clamonacc.service.in	2020-09-18 19:49:35.400152760 -0600
+--- ./clamonacc/clamav-clamonacc.service.in.clamonacc-service	2022-05-05 22:36:27.572671129 +0100
++++ ./clamonacc/clamav-clamonacc.service.in	2022-05-05 22:43:05.204324524 +0100
 @@ -4,14 +4,12 @@
  [Unit]
  Description=ClamAV On-Access Scanner
@@ -13,7 +12,7 @@ diff -up clamav-0.103.0/clamonacc/clamav-clamonacc.service.in.clamonacc-service 
  Type=simple
  User=root
 -ExecStartPre=/bin/bash -c "while [ ! -S /run/clamav/clamd.ctl ]; do sleep 1; done"
--ExecStart=@prefix@/sbin/clamonacc -F --config-file=@APP_CONFIG_DIRECTORY@/clamd.conf --log=/var/log/clamav/clamonacc.log --move=/root/quarantine
+-ExecStart=@prefix@/sbin/clamonacc -F --log=/var/log/clamav/clamonacc.log --move=/root/quarantine
 +ExecStart=@prefix@/sbin/clamonacc -F --config-file=/etc/clamd.d/scan.conf
  
  [Install]
