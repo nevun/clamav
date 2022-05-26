@@ -34,7 +34,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.7
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -181,6 +181,15 @@ database should be updated regularly; the 'clamav-update' package
 ships a corresponding cron-job. Use this package when you want a
 working (but perhaps outdated) virus scanner immediately after package
 installation.
+
+
+%package doc
+Summary:    Documentation for the Clam Antivirus scanner
+Requires:   clamav-filesystem = %{version}-%{release}
+BuildArch:  noarch
+
+%description doc
+This package contains the documentation for clamav.
 
 
 %package update
@@ -486,7 +495,7 @@ test -e %{freshclamlog} || {
 
 %files
 %license COPYING
-%doc NEWS.md README.md docs/html
+%doc NEWS.md README.md
 %{_bindir}/clambc
 %{_bindir}/clamconf
 %{_bindir}/clamdscan
@@ -536,6 +545,11 @@ test -e %{freshclamlog} || {
 %config %verify(not size md5 mtime) %{homedir}/*.cvd
 
 
+%files doc
+%license COPYING
+%doc docs/html
+
+
 %files update
 %{_bindir}/freshclam
 %{_libdir}/libfreshclam.so.2*
@@ -576,6 +590,9 @@ test -e %{freshclamlog} || {
 
 
 %changelog
+* Mon Aug 01 2022 Orion Poplawski <orion@nwra.com> - 0.103.7-2
+- Split out documentation into separate -doc sub-package
+
 * Thu Jul 28 2022 Sérgio Basto <sergio@serjux.com> - 0.103.7-1
 - Update to 0.103.7
 
