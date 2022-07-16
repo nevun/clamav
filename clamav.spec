@@ -550,10 +550,10 @@ test -e %{freshclamlog} || {
 # freshclamlog file is created in post
 %ghost %attr(0664,root,%{updateuser}) %verify(not size md5 mtime) %{freshclamlog}
 %endif
-%ghost %attr(0664,%{updateuser},%{updateuser}) %{homedir}/main.cvd
-%ghost %attr(0664,%{updateuser},%{updateuser}) %{homedir}/freshclam.dat
-%ghost %attr(0664,%{updateuser},%{updateuser}) %{homedir}/daily.cld
-%ghost %attr(0664,%{updateuser},%{updateuser}) %{homedir}/bytecode.cld
+%ghost %attr(0644,%{updateuser},%{updateuser}) %{homedir}/main.cvd
+%ghost %attr(0644,%{updateuser},%{updateuser}) %{homedir}/freshclam.dat
+%ghost %attr(0644,%{updateuser},%{updateuser}) %{homedir}/daily.cld
+%ghost %attr(0644,%{updateuser},%{updateuser}) %{homedir}/bytecode.cld
 
 
 %files -n clamd
