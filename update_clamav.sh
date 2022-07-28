@@ -1,5 +1,5 @@
-VERSION=0.103.6
-REPOS="f36 f35 f34 epel9 epel8 epel7"
+VERSION=0.103.7
+REPOS="f36 f35 epel9 epel8 epel7"
 
 if [ -z "$1" ]
 then
