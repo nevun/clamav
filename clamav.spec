@@ -115,6 +115,7 @@ BuildRequires:  graphviz
 BuildRequires:  nc
 %{?systemd_requires}
 BuildRequires:  systemd-devel
+BuildRequires:  systemd-rpm-macros
 #for milter
 BuildRequires:  sendmail-devel
 
