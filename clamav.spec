@@ -150,7 +150,6 @@ user-creation scripts required by clamav.
 
 %package lib
 Summary:    Dynamic libraries for the Clam Antivirus scanner
-Requires:   data(clamav)
 Provides:   bundled(libmspack) = 0.5-0.1.alpha.modified_by_clamav
 
 %description lib
