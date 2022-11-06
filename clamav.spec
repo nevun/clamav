@@ -301,7 +301,6 @@ autoreconf -i
 
 
 %install
-rm -rf _doc*
 %make_install
 
 install -d -m 0755 \
