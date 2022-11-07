@@ -34,7 +34,7 @@
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
 Version:    0.103.7
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
 %if %{with unrar}
@@ -590,6 +590,10 @@ test -e %{freshclamlog} || {
 
 
 %changelog
+* Mon Nov 07 2022 Sérgio Basto <sergio@serjux.com> - 0.103.7-4
+- (#2136977) not requires data(clamav) on clamav-libs
+- (#2023371) Add documentation to preserve user permissions of DatabaseOwner
+
 * Thu Sep 22 2022 Sérgio Basto <sergio@serjux.com> - 0.103.7-3
 - (#2128276) Please port your pcre dependency to pcre2
 - Explicit dependency on systemd since systemd-devel no longer has this dependency on F37+

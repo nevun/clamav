@@ -1,35 +1,20 @@
 Please note for Fedora and EPEL 7+ we use only systemd.
-upstart and sysvinit only apply to EPEL 6.
 
 A clamav-milter setup consists of the following three components:
 
 * the clamav-milter itself
-
-  --> this is provided by the 'clamav-milter' package plus (alternatively)
-      'clamav-milter-upstart' or 'clamav-milter-sysvinit'
 
   The main configuration is in /etc/mail/clamav-milter.conf and MUST
   be changed before first use.
 
   This can be enabled with: 'systemctl enable clamav-milter.service'
 
-  The -sysvinit package is managed by the traditional tools, but
-  -upstart requires modification of /etc/event.d/clamav-milter to
-  enable automatic startup.  See comments there for more details.
-
 * a clamav scanner daemon
-
-  --> this is in the clamd package (or on EL6:
-      'clamav-scanner-upstart' or 'clamav-scanner-sysvinit')
 
   The daemon is configured by /etc/clamd.d/scan.conf (which MUST be
   edited before first use).
 
   This can be enabled with: 'systemctl enable clamd@scan.service'
-
-  The -sysvinit package is managed by the traditional tools, but
-  -upstart requires modification of /etc/event.d/clamd.scan to enable
-  automatic startup.  See comments there for more details.
 
 * the MTA (sendmail/postfix)
 
@@ -42,6 +27,14 @@ A clamav-milter setup consists of the following three components:
     INPUT_MAIL_FILTER(`clamav', `S=local:/run/clamav-milter/clamav-milter.socket, F=, T=S:4m;R:4m')dnl
 
   to your sendmail.mc.
+
+* Changing permissions of directory /var/lib/clamav
+  Whenever ClamAV is upgraded by dnf, the permissions for the /var/lib/clamav directory change to user clamupdate
+  If for some reason you need DatabaseOwner be another user, you may copy /usr/lib/systemd/system/clamav-freshclam.service to /etc/systemd/system/
+  and add ExecStartPre=+/usr/bin/chown youruser:yourgroup /var/lib/clamav and updates won't break your configuration ...
+  Please add comments to https://bugzilla.redhat.com/show_bug.cgi?id=2023371 if not work for you or if you have any suggestion.
+  Note: =+ on systemd.service (man 5 systemd.service, Special executable prefixes)
+  If the executable path is prefixed with "+" then the process is executed with full privileges.
 
 
 EXAMPLE
