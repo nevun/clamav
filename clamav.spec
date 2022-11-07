@@ -593,6 +593,10 @@ test -e %{freshclamlog} || {
 * Fri Feb 17 2023 Orion Poplawski <orion@nwra.com> - 0.103.8-1
 - Update to 0.103.8
 
+* Mon Nov 07 2022 Sérgio Basto <sergio@serjux.com> - 0.103.7-4
+- (#2136977) not requires data(clamav) on clamav-libs
+- (#2023371) Add documentation to preserve user permissions of DatabaseOwner
+
 * Thu Sep 22 2022 Sérgio Basto <sergio@serjux.com> - 0.103.7-3
 - (#2128276) Please port your pcre dependency to pcre2
 - Explicit dependency on systemd since systemd-devel no longer has this dependency on F37+
