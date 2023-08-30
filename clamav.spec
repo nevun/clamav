@@ -33,7 +33,7 @@
 
 Summary:    End-user tools for the Clam Antivirus scanner
 Name:       clamav
-Version:    0.103.9
+Version:    0.103.10
 Release:    1%{?dist}
 License:    %{?with_unrar:proprietary}%{!?with_unrar:GPLv2}
 URL:        https://www.clamav.net/
@@ -56,7 +56,7 @@ Source5:    clamd-README
 #http://database.clamav.net/main.cvd
 Source10:   main-62.cvd
 #http://database.clamav.net/daily.cvd
-Source11:   daily-26894.cvd
+Source11:   daily-2701.cvd
 #http://database.clamav.net/bytecode.cvd
 Source12:   bytecode-334.cvd
 #for update
@@ -590,6 +590,9 @@ test -e %{freshclamlog} || {
 
 
 %changelog
+* Wed Aug 30 2023 Gabriel Kihlman <gk@sysctl.se> - 0.103.10-1
+- Update to 0.103.10 CVE-2023-40477
+
 * Fri Aug 18 2023 Orion Poplawski <orion@nwra.com> - 0.103.9-1
 - Update to 0.103.9 CVE-2023-20197 (bz#2232508)
 

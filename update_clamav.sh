@@ -1,4 +1,4 @@
-VERSION=0.103.9
+VERSION=0.103.10
 REPOS="epel8 epel7"
 
 if [ -z "$1" ]
